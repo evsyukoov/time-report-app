@@ -5,6 +5,8 @@ import api.service.DocGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
+
 @RestController
 public class MainController {
 
@@ -16,7 +18,7 @@ public class MainController {
     }
 
     @PostMapping(path = "/report/get-report")
-    public void getByName(@RequestBody FiltersDto requestDto) {
+    public void getByName(@RequestBody FiltersDto requestDto) throws Exception {
         docGenerator.generateXml(requestDto);
     }
 }
