@@ -50,6 +50,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             days = daysRepository.findReportDayByDateAfterAndDateBeforeAndEmployeeName(
                     dto.getDateStart(), dto.getDateEnd(), dto.getName());
         }
+        if (dto.getDepartment() != null) {
+            days = days.stream()
+                    .filter(reportDay -> Objects.equals(
+                            reportDay.getEmployee().getDepartment(), dto.getDepartment()))
+                    .collect(Collectors.toList());
+        }
         createDoc(days);
     }
 
