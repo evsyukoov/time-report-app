@@ -29,9 +29,31 @@ const sendHttpRequest = (method, url) => {
 
 const dep = () => {
     sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
-        departments = responseData;
-    });
-};
+        var departmentsDiv = document.getElementById("departments")
+        var ul = document.createElement('ul');
+        departmentsDiv.appendChild(ul)
+        for (let i = 0; i < responseData.length; i++) {
+            var li = document.createElement('li');
+            li.innerHTML = responseData[i];
+            ul.appendChild(li);
+        }
+        departmentsDiv.classList.toggle("show");
+
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropdown-content')) {
+
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    openDropdown.classList.remove('show');
+                    while (openDropdown.firstChild) {
+                        openDropdown.removeChild(openDropdown.firstChild);
+                    }
+                }
+            }
+        };
+    })
+}
 
 const empl = () => {
     sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
