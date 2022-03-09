@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 public class MainController {
 
     private DocGeneratorService docGenerator;

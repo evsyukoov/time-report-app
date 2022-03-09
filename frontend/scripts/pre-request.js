@@ -1,22 +1,47 @@
 var departments;
 var employees;
 
-fetch('http://localhost:8080/report/get-departments', {mode : 'cors'})
-    .then(function (response) {
-        return response.json()
-    })
-    .then(function (data) {
-        console.log('data', data)
-    })
+const sendHttpRequest = (method, url) => {
+    const promise = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
 
-fetch('http://localhost:8080/report/get-employees', {mode : 'no-cors'})
-    .then(function (response) {
-        return response.json()
-    })
-    .then(function (data) {
-        console.log('data', data)
-    })
+        xhr.responseType = 'json';
 
-console.log(departments)
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.onload = () => {
+            if (xhr.status >= 400) {
+                reject(xhr.response);
+            } else {
+                resolve(xhr.response);
+            }
+        };
+
+        xhr.onerror = () => {
+            reject('Something went wrong!');
+        };
+
+        xhr.send();
+    });
+    return promise;
+};
+
+const dep = () => {
+    sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
+        departments = responseData;
+    });
+};
+
+const empl = () => {
+    sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
+        employees = responseData;
+    });
+};
+
+dep()
+empl()
+
 console.log(employees)
+console.log(departments)
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Excel Report Helper</title>
+    <link rel="stylesheet" href="scripts/js-datepicker/cssworld.ru-xcal.css">
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<script src="scripts/pre-request.js"></script>
+<script src="scripts/js-datepicker/cssworld.ru-xcal-en.js"></script>
+<body>
+<div class="main-row">
+    <div class="dropdown">
+        <button onclick="dep()" class="dropbtn">Выбрать Отдел</button>
+        <div id="departments" class="dropdown-content">
+        </div>
+    </div>
+
+    <div class="dropdown">
+        <button onclick="empl()" class="dropbtn">Выбрать Сотрудника</button>
+        <div id="employees" class="dropdown-content">
+        </div>
+    </div>
+
+    <div class="calendar">
+        <input type="text" placeholder="Выберите дату начала отчета" value="" size="20" onClick="xCal(this)" onmouseenter="xCal(this)" onKeyUp="xCal()">
+    </div>
+
+    <div class="calendar">
+        <input type="text" placeholder="Выберите дату конца отчета" value="" size="20" onClick="xCal(this)" onmouseenter="xCal(this)" onKeyUp="xCal()">
+    </div>
+</div>
+<!--<div class="filters">-->
+<!--    <div class="form">-->
+<!--        <form name = "employee-form" action="backend/main.php" method="GET" class="employee-form"-->
+<!--              onsubmit="return validateForm()">-->
+<!--            <input type="text" placeholder="Your username from Intra42" name="login" value="" />-->
+<!--            &lt;!&ndash;            <input type="password" placeholder="password"/>&ndash;&gt;-->
+<!--            <script src = scrypt/scrypt.js></script>-->
+<!--            <button type = 'submit' class = 'validate'>Enter</button>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--</div>-->
+</body>
+</html>
