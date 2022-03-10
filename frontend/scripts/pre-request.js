@@ -30,40 +30,51 @@ const sendHttpRequest = (method, url) => {
 const dep = () => {
     sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
         var departmentsDiv = document.getElementById("departments")
-        var ul = document.createElement('ul');
-        departmentsDiv.appendChild(ul)
-        for (let i = 0; i < responseData.length; i++) {
-            var li = document.createElement('li');
-            li.innerHTML = responseData[i];
-            ul.appendChild(li);
-        }
-        departmentsDiv.classList.toggle("show");
-
-        window.onclick = function (event) {
-            if (!event.target.matches('.dropdown-content')) {
-
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    openDropdown.classList.remove('show');
-                    while (openDropdown.firstChild) {
-                        openDropdown.removeChild(openDropdown.firstChild);
-                    }
-                }
-            }
-        };
+        addElementsToUl(departmentsDiv, "dropdown-block", responseData)
     })
 }
 
 const empl = () => {
-    sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
-        employees = responseData;
-    });
-};
+    sendHttpRequest('GET', 'http://localhost:8080/report/get-employees').then(responseData => {
+        var employeesDiv = document.getElementById("employees")
+        addElementsToUl(employeesDiv, "dropdown-block", responseData)
+    })
+}
 
-dep()
-empl()
+function addElementsToUl(div, classElemName, responseData) {
+    var ul;
+    if (document.getElementById('ul-id') == null) {
+        ul = document.createElement('ul');
+        ul.id = 'ul-id'
+    } else {
+        ul = document.getElementById('ul-id')
+    }
+    div.appendChild(ul)
+    for (let i = 0; i < responseData.length; i++) {
+        var li = document.createElement('li');
+        li.innerHTML = responseData[i];
+        ul.appendChild(li);
+    }
 
-console.log(employees)
-console.log(departments)
+    window.onclick = function (event) {
+        let li = event.target;
+        console.log(li)
+        if (event.target.matches("li")) {
+            deleteUlExcept(li, classElemName)
+        } else {
+            //deleteUlExcept(null, classElemName)
+        }
+    };
+}
+
+function deleteUlExcept(liElem, classElemName) {
+    let ul = document.getElementById('ul-id')
+    console.log(ul.childNodes.length)
+    ul.childNodes.forEach(li => {
+        if (li.textContent !== liElem.innerHTML) {
+            li.remove()
+        }
+    })
+}
+
 
