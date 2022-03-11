@@ -30,51 +30,67 @@ const sendHttpRequest = (method, url) => {
 const dep = () => {
     sendHttpRequest('GET', 'http://localhost:8080/report/get-departments').then(responseData => {
         var departmentsDiv = document.getElementById("departments")
-        addElementsToUl(departmentsDiv, "dropdown-block", responseData)
+        addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData)
     })
 }
 
 const empl = () => {
     sendHttpRequest('GET', 'http://localhost:8080/report/get-employees').then(responseData => {
         var employeesDiv = document.getElementById("employees")
-        addElementsToUl(employeesDiv, "dropdown-block", responseData)
+        addElementsToUl(employeesDiv, "dropdown-block-empl", responseData)
     })
 }
 
 function addElementsToUl(div, classElemName, responseData) {
     var ul;
-    if (document.getElementById('ul-id') == null) {
-        ul = document.createElement('ul');
-        ul.id = 'ul-id'
+    if (document.getElementById('ul-id' + classElemName) == null) {
+        ul = createUl(classElemName)
     } else {
-        ul = document.getElementById('ul-id')
+        deleteUl(classElemName)
+        ul = createUl(classElemName)
     }
     div.appendChild(ul)
     for (let i = 0; i < responseData.length; i++) {
         var li = document.createElement('li');
+        li.className = classElemName
         li.innerHTML = responseData[i];
         ul.appendChild(li);
     }
 
     window.onclick = function (event) {
-        let li = event.target;
-        console.log(li)
-        if (event.target.matches("li")) {
-            deleteUlExcept(li, classElemName)
+        let elem = document.getElementById("ul-id" + classElemName)
+        let li = event.target
+        let ul = li.parentElement
+        if (elem !== ul) {
+            return;
+        }
+        if (li.matches("li"))  {
+            deleteUl(classElemName)
+            let ul = createUl(classElemName)
+            ul.appendChild(li)
+            div.appendChild(ul)
+        } else if (!event.target.matches(classElemName)) {
+            return
         } else {
-            //deleteUlExcept(null, classElemName)
+            deleteUl(classElemName)
         }
     };
 }
 
-function deleteUlExcept(liElem, classElemName) {
-    let ul = document.getElementById('ul-id')
-    console.log(ul.childNodes.length)
-    ul.childNodes.forEach(li => {
-        if (li.textContent !== liElem.innerHTML) {
-            li.remove()
+function deleteUl(classElemName) {
+    let dropdowns = document.getElementsByClassName(classElemName);
+    for (let i = 0; i < dropdowns.length; i++) {
+        let openDropdown = dropdowns[i];
+        while (openDropdown.firstChild) {
+            openDropdown.removeChild(openDropdown.firstChild);
         }
-    })
+    }
+}
+
+function createUl(classElemName) {
+    let ul = document.createElement('ul');
+    ul.id = 'ul-id' + classElemName
+    return ul;
 }
 
 

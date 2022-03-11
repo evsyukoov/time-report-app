@@ -1,4 +1,7 @@
 /* Dropdown Button */
+body {
+    height: 100%;
+}
 .dropbtn {
     background-color: #3498DB;
     color: white;
@@ -43,6 +46,7 @@
 .main-row {
     padding-left: 5%;
     padding-right: 5%;
+    padding-top: 20%;
     display: flex;
     justify-content: space-between;
     text-align: left;
@@ -56,11 +60,24 @@
 
 .drop {
     display: inline-block;
-    width: 30%;
+    width: 25%;
     height: 60px;
     position: relative;
     color: #fff;
 }
+
+.report-button {
+    display: inline-block;
+    height: 60px;
+    position: relative;
+    color: #fff;
+}
+
+.report-button button {
+    color: cornflowerblue;
+    position: relative;
+}
+
 
 .drop p {
     display: block;
