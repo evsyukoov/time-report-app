@@ -3,11 +3,16 @@ package api.controller;
 import api.dto.FiltersDto;
 import api.service.DocGeneratorService;
 import api.service.WebInfoService;
-import api.service.impl.WebInfoServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.FileNotFoundException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -24,9 +29,19 @@ public class MainController {
         this.webInfoService = webInfoService;
     }
 
-    @PostMapping(path = "/report/get-report")
-    public void getByName(@RequestBody FiltersDto requestDto) throws Exception {
-        docGenerator.generateXml(requestDto);
+    @PostMapping(path = "/report/get-report", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void getByName(@RequestBody FiltersDto requestDto, HttpServletResponse response) throws Exception {
+        System.out.println("op");
+        ByteArrayOutputStream baos = docGenerator.generateXml(requestDto);
+        response.setHeader("Content-disposition", "attachment;filename=report.xls");
+        response.setContentType("application/vnd.ms-excel");
+        if (baos.size() == 0) {
+            response.getOutputStream().write(new byte[0]);
+        } else {
+            response.getOutputStream().write(baos.toByteArray());
+        }
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
     }
 
     @GetMapping(path = "/report/get-employees")

@@ -3,8 +3,11 @@ package api.service;
 
 import api.dto.FiltersDto;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
 
 public interface DocGeneratorService {
 
-    void generateXml(FiltersDto dto) throws Exception;
+    ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception;
 }

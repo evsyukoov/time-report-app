@@ -12,7 +12,7 @@ const req = () => {
     if (ulDep != null) {
         dep = ulDep.children[0].firstChild.nodeValue
     }
-    alert(dep + " " + empl + " " + dateStart + " " + dateEnd)
+    //alert(dep + " " + empl + " " + dateStart + " " + dateEnd)
     var formData = new FormData()
     formData.append('name', empl)
     formData.append('department', dep)
@@ -21,6 +21,19 @@ const req = () => {
     xhr.open("POST", "http://localhost:8080/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     var data = JSON.stringify({ "name":
-        empl, "department": dep, "dateStart": dateStart, "dateEnd": dateEnd });
+        empl, "department": dep, "dateStart": Date.parse(dateStart), "dateEnd": Date.parse(dateEnd) });
+    xhr.responseType = 'blob'
+    xhr.onload = function(oEvent) {
+        let blob = new Blob([xhr.response], {type: 'application/vnd.ms-excel'});
+        if (blob.size === 0) {
+            alert('Отчетных дней не найдено. Смените фильтры поиска!')
+            return
+        }
+        let link = document.createElement('a');
+        link.download = 'Report.xls';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
     xhr.send(data)
 }

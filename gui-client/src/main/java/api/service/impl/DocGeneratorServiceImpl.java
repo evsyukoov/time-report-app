@@ -14,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import utils.DateTimeUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
@@ -41,14 +40,30 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     @Override
-    public void generateXml(FiltersDto dto) throws Exception {
+    public ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception {
         List<ReportDay> days;
         if (dto.getName() == null) {
-            days = daysRepository
-                    .findReportDayByDateAfterAndDateBefore(dto.getDateStart(), dto.getDateEnd());
+            if (dto.getDateStart() == null && dto.getDateEnd() == null) {
+                days = daysRepository.findAll();
+            } else if (dto.getDateStart() == null && dto.getDateEnd() != null) {
+                days = daysRepository.findReportDayByDateBefore(dto.getDateEnd());
+            } else if (dto.getDateStart() != null && dto.getDateEnd() == null) {
+                days = daysRepository.findReportDayByDateAfter(dto.getDateStart());
+            } else {
+                days = daysRepository
+                        .findReportDayByDateAfterAndDateBefore(dto.getDateStart(), dto.getDateEnd());
+            }
         } else {
-            days = daysRepository.findReportDayByDateAfterAndDateBeforeAndEmployeeName(
-                    dto.getDateStart(), dto.getDateEnd(), dto.getName());
+            if (dto.getDateStart() == null && dto.getDateEnd() == null) {
+                days = daysRepository.findReportDayByEmployeeName(dto.getName());
+            } else if (dto.getDateStart() == null && dto.getDateEnd() != null) {
+                days = daysRepository.findReportDayByDateBeforeAndEmployeeName(dto.getDateEnd(), dto.getName());
+            } else if (dto.getDateStart() != null && dto.getDateEnd() == null) {
+                days = daysRepository.findReportDayByDateAfterAndEmployeeName(dto.getDateStart(), dto.getName());
+            } else {
+                days = daysRepository.findReportDayByDateAfterAndDateBeforeAndEmployeeName(
+                        dto.getDateStart(), dto.getDateEnd(), dto.getName());
+            }
         }
         if (dto.getDepartment() != null) {
             days = days.stream()
@@ -56,12 +71,16 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                             reportDay.getEmployee().getDepartment(), dto.getDepartment()))
                     .collect(Collectors.toList());
         }
-        createDoc(days);
+        if (days.isEmpty()) {
+            return new ByteArrayOutputStream();
+        }
+        return createDoc(days);
     }
 
-    private void createDoc(List<ReportDay> days) throws Exception {
-        FileOutputStream fos = new FileOutputStream(
-                new File("./src/main/resources/Report.xls"));
+    private ByteArrayOutputStream createDoc(List<ReportDay> days) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        FileOutputStream fos = new FileOutputStream(
+//                new File("./src/main/resources/Report.xls"));
         Workbook workbook = new HSSFWorkbook();
         Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(days));
         for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
@@ -78,9 +97,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 e.printStackTrace();
             }
         }
-        workbook.write(fos);
+        workbook.write(baos);
         workbook.close();
-        fos.close();
+        baos.close();
+        return baos;
     }
 
     private CellStyle initBackColor(HSSFColor.HSSFColorPredefined color, Workbook workbook) {
