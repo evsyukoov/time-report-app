@@ -20,8 +20,9 @@ const req = () => {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "http://localhost:8082/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
     var data = JSON.stringify({ "name":
-        empl, "department": dep, "dateStart": Date.parse(dateStart), "dateEnd": Date.parse(dateEnd) });
+        empl, "department": dep, "dateStart": parseDate(dateStart), "dateEnd": parseDate(dateEnd) });
     xhr.responseType = 'blob'
     xhr.onload = function(oEvent) {
         let blob = new Blob([xhr.response], {type: 'application/vnd.ms-excel'});
@@ -36,4 +37,12 @@ const req = () => {
         URL.revokeObjectURL(link.href);
     };
     xhr.send(data)
+}
+
+function parseDate(dateStr) {
+    let arr = dateStr.split(".")
+    let day = arr[0];
+    let month = arr[1]
+    let year = arr[2]
+    return Date.UTC(year, month - 1, day);
 }
