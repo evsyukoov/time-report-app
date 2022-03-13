@@ -18,9 +18,9 @@ import java.util.logging.Logger;
 
 public class ReportingBot extends TelegramLongPollingBot {
 
-    final String token = "1961126898:AAFQ6NsIvVzeNsKJb40LAlJjvn7vmTAk8Z8";
+    final String token = "";
 
-    private final String botName = "TestEvsukovBot";
+    private final String botName = "";
 
     public ReportingBot() {
         MessageNotificator notificator = new MessageNotificator(this);
