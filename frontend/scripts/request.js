@@ -18,7 +18,7 @@ const req = () => {
     formData.append('department', dep)
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:8080/report/get-report");
+    xhr.open("POST", "http://localhost:8082/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     var data = JSON.stringify({ "name":
         empl, "department": dep, "dateStart": Date.parse(dateStart), "dateEnd": Date.parse(dateEnd) });
