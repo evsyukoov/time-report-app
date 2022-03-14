@@ -1,5 +1,4 @@
-var departments;
-var employees;
+let referer = document.referrer
 
 const sendHttpRequest = (method, url) => {
     const promise = new Promise((resolve, reject) => {
@@ -28,14 +27,14 @@ const sendHttpRequest = (method, url) => {
 };
 
 const dep = () => {
-    sendHttpRequest('GET', 'http://localhost:8082/report/get-departments').then(responseData => {
+    sendHttpRequest('GET', referer + '/report/get-departments').then(responseData => {
         var departmentsDiv = document.getElementById("departments")
         addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData)
     })
 }
 
 const empl = () => {
-    sendHttpRequest('GET', 'http://localhost:8082/report/get-employees').then(responseData => {
+    sendHttpRequest('GET', referer + '/report/get-employees').then(responseData => {
         var employeesDiv = document.getElementById("employees")
         addElementsToUl(employeesDiv, "dropdown-block-empl", responseData)
     })

@@ -1,3 +1,4 @@
+let referer = document.referrer
 
 const req = () => {
     let dateStart = document.getElementById("dateStart").value
@@ -18,7 +19,7 @@ const req = () => {
     formData.append('department', dep)
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:8082/report/get-report");
+    xhr.open("POST", referer + "/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
     var data = JSON.stringify({ "name":
