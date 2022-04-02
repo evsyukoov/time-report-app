@@ -46,22 +46,22 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             if (dto.getDateStart() == null && dto.getDateEnd() == null) {
                 days = daysRepository.findAll();
             } else if (dto.getDateStart() == null && dto.getDateEnd() != null) {
-                days = daysRepository.findReportDayByDateBefore(dto.getDateEnd());
+                days = daysRepository.findReportDayByDateLessThanEqual(dto.getDateEnd());
             } else if (dto.getDateStart() != null && dto.getDateEnd() == null) {
-                days = daysRepository.findReportDayByDateAfter(dto.getDateStart());
+                days = daysRepository.findReportDayByDateGreaterThanEqual(dto.getDateStart());
             } else {
                 days = daysRepository
-                        .findReportDayByDateAfterAndDateBefore(dto.getDateStart(), dto.getDateEnd());
+                        .findReportDayByDateGreaterThanEqualAndDateLessThanEqual(dto.getDateStart(), dto.getDateEnd());
             }
         } else {
             if (dto.getDateStart() == null && dto.getDateEnd() == null) {
                 days = daysRepository.findReportDayByEmployeeName(dto.getName());
             } else if (dto.getDateStart() == null && dto.getDateEnd() != null) {
-                days = daysRepository.findReportDayByDateBeforeAndEmployeeName(dto.getDateEnd(), dto.getName());
+                days = daysRepository.findReportDayByDateLessThanEqualAndEmployeeName(dto.getDateEnd(), dto.getName());
             } else if (dto.getDateStart() != null && dto.getDateEnd() == null) {
-                days = daysRepository.findReportDayByDateAfterAndEmployeeName(dto.getDateStart(), dto.getName());
+                days = daysRepository.findReportDayByDateGreaterThanEqualAndEmployeeName(dto.getDateStart(), dto.getName());
             } else {
-                days = daysRepository.findReportDayByDateAfterAndDateBeforeAndEmployeeName(
+                days = daysRepository.findReportDayByDateGreaterThanEqualAndDateLessThanEqualAndEmployeeName(
                         dto.getDateStart(), dto.getDateEnd(), dto.getName());
             }
         }
