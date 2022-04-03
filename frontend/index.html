@@ -11,6 +11,10 @@
 <script src="scripts/request.js"></script>
 
 <body>
+<div class="img">
+    <div class="img-overlay"></div>
+</div>
+<div class="page-name"><h2>Формирование отчетной ведомости ООО "ИнжГео"</h2></div>
 <div class="main">
     <div class="main-row">
         <div class="drop">
@@ -24,15 +28,19 @@
             <div id="employees" class="dropdown-block-empl">
             </div>
         </div>
-
-        <div class="calendar">
-            <input id="dateStart" type="text" placeholder="Выберите дату начала отчета" value="" size="20" onClick="xCal(this)"
-                   onmouseenter="xCal(this)" onKeyUp="xCal()">
         </div>
+        <div class="calendar-forms">
+            <div class="calendar">
+                <input id="dateStart" type="text" placeholder="Выберите дату начала отчета" value="" size="40"
+                       onClick="xCal(this)"
+                       onmouseenter="xCal(this)" onKeyUp="xCal()">
+            </div>
 
-        <div class="calendar">
-            <input id="dateEnd" type="text" placeholder="Выберите дату конца отчета" value="" size="20" onClick="xCal(this)"
-                   onmouseenter="xCal(this)" onKeyUp="xCal()">
+            <div class="calendar">
+                <input id="dateEnd" type="text" placeholder="Выберите дату конца отчета" value="" size="40"
+                       onClick="xCal(this)"
+                       onmouseenter="xCal(this)" onKeyUp="xCal()">
+            </div>
         </div>
 
         <div class="report-button">

@@ -42,38 +42,25 @@ const empl = () => {
 
 function addElementsToUl(div, classElemName, responseData) {
     var ul;
-    if (document.getElementById('ul-id' + classElemName) == null) {
+    if (document.getElementById('ul-id-' + classElemName) == null) {
         ul = createUl(classElemName)
     } else {
         deleteUl(classElemName)
-        ul = createUl(classElemName)
     }
     div.appendChild(ul)
     for (let i = 0; i < responseData.length; i++) {
         var li = document.createElement('li');
         li.className = classElemName
         li.innerHTML = responseData[i];
-        ul.appendChild(li);
-    }
-
-    window.onclick = function (event) {
-        let elem = document.getElementById("ul-id" + classElemName)
-        let li = event.target
-        let ul = li.parentElement
-        if (elem !== ul) {
-            return;
-        }
-        if (li.matches("li"))  {
+        li.addEventListener('click', function (event) {
+            let userChoiceLi = event.target;
             deleteUl(classElemName)
             let ul = createUl(classElemName)
-            ul.appendChild(li)
+            ul.appendChild(userChoiceLi)
             div.appendChild(ul)
-        } else if (!event.target.matches(classElemName)) {
-            return
-        } else {
-            deleteUl(classElemName)
-        }
-    };
+        })
+        ul.appendChild(li);
+    }
 }
 
 function deleteUl(classElemName) {
@@ -88,7 +75,7 @@ function deleteUl(classElemName) {
 
 function createUl(classElemName) {
     let ul = document.createElement('ul');
-    ul.id = 'ul-id' + classElemName
+    ul.id = 'ul-id-' + classElemName
     return ul;
 }
 

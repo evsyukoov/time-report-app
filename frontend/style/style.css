@@ -1,14 +1,18 @@
 /* Dropdown Button */
 body {
     height: 100%;
+    background: url(img/background.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));;
+    background-size: cover;
+    background-blend-mode: overlay;
 }
+
 .dropbtn {
     background-color: #3498DB;
     color: white;
-    padding: 30px;
-    font-size: 16px;
-    border: none;
+    font-size: 2em;
     cursor: pointer;
+    border: 3px solid #a99e9e;
+
 }
 
 /* Dropdown button on hover & focus */
@@ -18,17 +22,13 @@ body {
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
-    position: relative;
-    display: inline-block;
 }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
     display: none;
-    position: absolute;
     background-color: #f1f1f1;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 0px 0px rgba(0,0,0,0.2);
     z-index: 1;
 }
 
@@ -37,66 +37,60 @@ body {
     color: black;
     padding: 12px 16px;
     text-decoration: none;
-    display: block;
 }
 
 /* Change color of dropdown links on hover */
 .dropdown-content a:hover {background-color: #ddd}
 
+
 .main-row {
-    padding-left: 5%;
-    padding-right: 5%;
-    padding-top: 20%;
+    padding-bottom: 5%;
     display: flex;
-    justify-content: space-between;
-    text-align: left;
-    text-align-last: left;
+    flex-wrap: wrap;
+    height: 100%;
+    justify-content: center;
 }
-.dropdown {
-    display: inline-block;
+
+.calendar-forms {
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
+    justify-content: center;
 }
 
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
 
 .drop {
-    display: inline-block;
-    width: 25%;
-    height: 60px;
-    position: relative;
+    margin-top: 5%;
+    width: 400px;
     color: #fff;
+}
+
+.calendar {
+    border: 3px solid #a99e9e;
 }
 
 .report-button {
-    display: inline-block;
-    height: 60px;
-    position: relative;
     color: #fff;
+    margin-top: 10%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .report-button button {
-    color: cornflowerblue;
+    color: #3f3e3e;
     position: relative;
+    height: 40px;
+    font-size: 2em;
 }
 
-
 .drop p {
-    display: block;
-    width: 100%;
-    height: 30px;
     line-height: 30px;
     margin: 0;
     padding: 0 10px;
     box-sizing: border-box;
-    background: gray;
-}
-
-.drop .dropdown-block {
-    display: none;
-    width: 100%;
-    position: absolute;
-    top: 30px;
-    left: 0;
-    right: 0;
+    background: #3f3e3e;
 }
 
 .drop:hover .dropdown-block,
@@ -107,11 +101,11 @@ body {
 .drop ul {
     display: block;
     width: 100%;
-    background: gray;
+    background: #3f3e3e;
     padding: 0;
     margin: 10px 0 0;
     list-style: none;
-    max-height: 90px;
+    max-height: 150px;
     overflow: hidden auto;
 }
 
@@ -119,4 +113,105 @@ body {
 .drop li:hover {
     background: #555;
     cursor: pointer;
+}
+
+#dateStart {
+    height: 30px;
+}
+
+#dateEnd {
+    height: 30px;
+}
+
+.page-name {
+    padding: 20px 20px;
+    text-align: center;
+}
+.page-name h2 {
+    font-family: 'Righteous', cursive;
+    position: relative;
+    color: #3f3e3e;
+    display: inline-block;
+    border-top: 2px solid;
+    border-bottom: 2px solid;
+    font-size: 3em;
+    padding: 11px 60px;
+    margin: 0;
+    line-height: 1;
+}
+.page-name h2:before, .page-name h2:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 30px;
+    height: 100%;
+    border-left: 2px solid;
+    border-right: 2px solid;
+    background: repeating-linear-gradient(180deg, transparent, transparent 2px, #3f3e3e 2px, #3f3e3e 4px);
+}
+.page-name h2:before {left: 0;}
+.page-name h2:after {right: 0;}
+
+@media screen and (max-width: 992px) {
+    body {
+        height: 100%;
+        background: url(img/background.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));
+        background-size: auto;
+    }
+
+    .dropbtn {
+        color: #fff;
+        vertical-align: middle;
+        align-items: center;
+        text-align: center;
+        height: 100px;
+        font-size: 3em;
+    }
+
+    .drop {
+        padding-top: 10%;
+        width: 700px;
+    }
+
+    .main-row {
+        display: flex;
+        align-content: center;
+        flex-direction: column;
+    }
+
+    #ul-id-dropdown-block-dep li {
+        font-size: 3em;
+    }
+
+    #ul-id-dropdown-block-empl li {
+        font-size: 3em;
+    }
+
+    .drop ul {
+        max-height: 300px;
+    }
+
+    #dateStart {
+        font-size: 2em;
+        height: 60px;
+    }
+
+    #dateEnd {
+        font-size: 2em;
+        height: 60px;
+    }
+
+    .calendar-forms {
+        flex-direction: column;
+        align-content: center;
+        justify-content: space-between;
+        height: 200px;
+    }
+
+    .report-button button {
+        color: #3f3e3e;
+        position: relative;
+        height: 60px;
+        font-size: 3em;
+    }
 }

@@ -1,7 +1,7 @@
-.xcalend{position:absolute;z-index:999;width:150px;line-height:1.2em;font-size:15px;text-align:center;background:#fff;border:2px solid #ddd}
+.xcalend{position:absolute;z-index:999;width:150px;line-height:1.2em;font-size:35px;text-align:center;background:#fff;border:2px solid #ddd}
 .xcalend td{cursor:pointer;padding:6px}
 .xcalend thead td{color:#333}
-.xcalend thead tr:last-child td{font-size:12px;background:#fff;color:#555;cursor:default}
+.xcalend thead tr:last-child td{font-size:35px;background:#fff;color:#555;cursor:default}
 .xcalend tbody td{color:#025}
 .xcalend tfoot td{color:#333}
 .xcalend tbody td.tday{background:#eee;font-weight:bold}

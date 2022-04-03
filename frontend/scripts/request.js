@@ -1,15 +1,13 @@
-let referer = document.referrer
-
 const req = () => {
     let dateStart = document.getElementById("dateStart").value
     let dateEnd = document.getElementById("dateEnd").value
     let empl
     let dep
-    let ulEmpl = document.getElementById("ul-iddropdown-block-empl")
+    let ulEmpl = document.getElementById("ul-id-dropdown-block-empl")
     if (ulEmpl != null) {
         empl = ulEmpl.children[0].firstChild.nodeValue
     }
-    let ulDep = document.getElementById("ul-iddropdown-block-dep")
+    let ulDep = document.getElementById("ul-id-dropdown-block-dep")
     if (ulDep != null) {
         dep = ulDep.children[0].firstChild.nodeValue
     }
