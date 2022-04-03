@@ -31,7 +31,6 @@ public class MainController {
 
     @PostMapping(path = "/report/get-report", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void getByName(@RequestBody FiltersDto requestDto, HttpServletResponse response) throws Exception {
-        System.out.println("op");
         ByteArrayOutputStream baos = docGenerator.generateXml(requestDto);
         response.setHeader("Content-disposition", "attachment;filename=report.xls");
         response.setContentType("application/vnd.ms-excel");
