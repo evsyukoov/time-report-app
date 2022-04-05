@@ -1,5 +1,6 @@
 package api.service.impl;
 
+import api.builders.CellStyleBuilder;
 import api.dto.FiltersDto;
 import api.repository.ReportDayRepository;
 import api.service.DocGeneratorService;
@@ -103,46 +104,31 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return baos;
     }
 
-    private CellStyle initBackColor(HSSFColor.HSSFColorPredefined color, Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        cellStyle.setFillForegroundColor(color.getColor().getIndex());
-        setBorders(cellStyle);
-        return cellStyle;
-    }
-
-    private void setBorders(CellStyle cellStyle) {
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderTop(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-    }
-
-    private CellStyle initBordersStyle(Workbook workbook) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        setBorders(cellStyle);
-        return cellStyle;
-    }
-
     private void fillHeader(Map<String, List<ReportDay>> reportList, Sheet sheet) {
         Row row = sheet.createRow(0);
         Cell cell = row.createCell(0, CellType.STRING);
         cell.setCellValue("Фамилия");
-        cell.setCellStyle(initBackColor(HSSFColor.HSSFColorPredefined.CORAL, sheet.getWorkbook()));
+        cell.setCellStyle(CellStyleBuilder.builder()
+                        .initCellStyle(sheet.getWorkbook(), cell)
+                        .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
+                        .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                        .allBorders(BorderStyle.THIN)
+                .build());
+
         LocalDate localDate = getFirstDate(reportList);
         int lenOfMonth = localDate.lengthOfMonth();
         int year = localDate.getYear();
         for (int i = 1; i <= lenOfMonth; i++) {
             Cell dateCell = row.createCell(i, CellType.STRING);
-            CellStyle cellStyle = cell.getCellStyle();
-            setBorders(cellStyle);
-
-            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-            cellStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.CORAL.getColor().getIndex());
             DataFormat df = sheet.getWorkbook().createDataFormat();
-            cellStyle.setDataFormat(df.getFormat("yyyy-MM-dd"));
-            dateCell.setCellStyle(cellStyle);
+
+            dateCell.setCellStyle(CellStyleBuilder.builder()
+                            .initCellStyle(sheet.getWorkbook(), dateCell)
+                            .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                            .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
+                            .dataFormat(df.getFormat("yyyy-MM-dd"))
+                    .build());
+
             LocalDate nextDay = LocalDate.of(year, localDate.getMonth(), i);
             dateCell.setCellValue(nextDay);
         }
@@ -176,12 +162,16 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         for (int i = 0; i < column; i++) {
             sheet.setColumnWidth(i, columnWidthMap.get(i) * 150);
             if (i != 0 && DateTimeUtils.isWeekend(LocalDate.of(year, month, i))) {
-                sheet.setDefaultColumnStyle(i,
-                        initBackColor(HSSFColor.HSSFColorPredefined.GREY_25_PERCENT, sheet.getWorkbook()));
+                sheet.setDefaultColumnStyle(i, CellStyleBuilder.builder().initCellStyle(sheet.getWorkbook())
+                        .allBorders(BorderStyle.THIN)
+                                .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                                .foregroundColor(HSSFColor.HSSFColorPredefined.GREY_25_PERCENT.getIndex())
+                        .build());
             } else {
-                CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
-                setBorders(cellStyle);
-                sheet.setDefaultColumnStyle(i, cellStyle);
+                sheet.setDefaultColumnStyle(i, CellStyleBuilder.builder()
+                                .initCellStyle(sheet.getWorkbook())
+                                .allBorders(BorderStyle.THIN)
+                        .build());
             }
         }
     }
@@ -203,19 +193,6 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         .getDate());
     }
 
-    private CellStyle initBoldAndBordersStyle(Workbook workbook) {
-        CellStyle style = workbook.createCellStyle();
-        return initBoldAndBordersStyle(style, workbook);
-    }
-
-    private CellStyle initBoldAndBordersStyle(CellStyle style, Workbook workbook) {
-        Font fontHeader = workbook.createFont();
-        fontHeader.setBold(true);
-        style.setFont(fontHeader);
-        setBorders(style);
-        return style;
-    }
-
     private void fillList(Map<String, List<ReportDay>> reportList, Sheet sheet) {
         fillHeader(reportList, sheet);
         //по отделам
@@ -224,11 +201,24 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             String department = entry.getKey();
             List<ReportDay> days = entry.getValue();
             Row depRow = sheet.createRow(i++);
-            CellStyle cellStyle = initBackColor(HSSFColor.HSSFColorPredefined.LIGHT_GREEN, sheet.getWorkbook());
+
+            CellStyle cellStyle = CellStyleBuilder.builder()
+                    .initCellStyle(sheet.getWorkbook())
+                    .foregroundColor(HSSFColor.HSSFColorPredefined.LIGHT_GREEN.getIndex())
+                    .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                    .allBorders(BorderStyle.THIN)
+                    .build();
+
             depRow.setRowStyle(cellStyle);
             Cell depCell = depRow.createCell(0);
             depCell.setCellValue(String.format("Отдел: %s", department));
-            depCell.setCellStyle(initBoldAndBordersStyle(cellStyle, sheet.getWorkbook()));
+
+            depCell.setCellStyle(CellStyleBuilder.builder()
+                    .initCellStyle(sheet.getWorkbook(), depCell)
+                    .boldFont(sheet.getWorkbook().createFont())
+                    .allBorders(BorderStyle.THIN)
+                    .build());
+
             Map<Employee, List<ReportDay>> reportDaysOfEmployee = days.stream().collect(
                     Collectors.groupingBy(ReportDay::getEmployee,
                             Collectors.mapping(reportDay -> reportDay,
@@ -241,7 +231,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 Cell cell = rows[0].createCell(0, CellType.STRING);
                 fillEmployeeReport(reportDays, rows, sheet);
                 cell.setCellValue(employee.getName());
-                cell.setCellStyle(initBoldAndBordersStyle(sheet.getWorkbook()));
+                cell.setCellStyle(CellStyleBuilder.builder()
+                                .initCellStyle(sheet.getWorkbook(), cell)
+                                .allBorders(BorderStyle.THIN)
+                                .boldFont(sheet.getWorkbook().createFont())
+                        .build());
                 i += NUM_OF_ROWS;
             }
         }
@@ -265,7 +259,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             for (int i = 0; i < projects.length; i++) {
                 Cell cell = rows[i].createCell(column, CellType.STRING);
                 cell.setCellValue(projects[i]);
-                cell.setCellStyle(initBoldAndBordersStyle(sheet.getWorkbook()));
+                cell.setCellStyle(CellStyleBuilder.builder()
+                        .initCellStyle(sheet.getWorkbook(), cell)
+                                .allBorders(BorderStyle.THIN)
+                                .boldFont(sheet.getWorkbook().createFont())
+                        .build());
             }
         }
     }
