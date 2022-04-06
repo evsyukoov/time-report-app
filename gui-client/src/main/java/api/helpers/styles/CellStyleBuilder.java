@@ -1,4 +1,4 @@
-package api.builders;
+package api.helpers.styles;
 
 import org.apache.poi.ss.usermodel.*;
 
@@ -14,15 +14,6 @@ public class CellStyleBuilder {
 
         public Builder initCellStyle(Workbook workbook) {
             cellStyle = workbook.createCellStyle();
-            return this;
-        }
-
-        public Builder initCellStyle(Workbook workbook, Cell cell) {
-            if (cell.getCellStyle() == null) {
-                cellStyle = workbook.createCellStyle();
-            } else {
-                cellStyle = cell.getCellStyle();
-            }
             return this;
         }
 

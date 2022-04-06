@@ -1,24 +1,21 @@
 package api.service.impl;
 
-import api.builders.CellStyleBuilder;
 import api.dto.FiltersDto;
+import api.helpers.styles.CellStyleHelper;
+import api.helpers.styles.CellStyleType;
 import api.repository.ReportDayRepository;
 import api.service.DocGeneratorService;
 import hibernate.entities.Employee;
 import hibernate.entities.ReportDay;
 import messages.Message;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.tomcat.jni.Local;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import utils.DateTimeUtils;
 
 import java.io.*;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,8 +31,8 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     public static int K_WIDTH = 200;
 
+    private Map<CellStyleType, CellStyle> predefinedCellStyles;
 
-    @Autowired
     public DocGeneratorServiceImpl(ReportDayRepository daysRepository) {
         this.daysRepository = daysRepository;
     }
@@ -80,9 +77,8 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private ByteArrayOutputStream createDoc(List<ReportDay> days) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        FileOutputStream fos = new FileOutputStream(
-//                new File("./src/main/resources/Report.xls"));
-        Workbook workbook = new HSSFWorkbook();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
         Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(days));
         for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
             Month month = entry.getKey();
@@ -108,26 +104,14 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         Row row = sheet.createRow(0);
         Cell cell = row.createCell(0, CellType.STRING);
         cell.setCellValue("Фамилия");
-        cell.setCellStyle(CellStyleBuilder.builder()
-                        .initCellStyle(sheet.getWorkbook(), cell)
-                        .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
-                        .fillPattern(FillPatternType.SOLID_FOREGROUND)
-                        .allBorders(BorderStyle.THIN)
-                .build());
+        cell.setCellStyle(predefinedCellStyles.get(CellStyleType.SURNAME));
 
         LocalDate localDate = getFirstDate(reportList);
         int lenOfMonth = localDate.lengthOfMonth();
         int year = localDate.getYear();
         for (int i = 1; i <= lenOfMonth; i++) {
             Cell dateCell = row.createCell(i, CellType.STRING);
-            DataFormat df = sheet.getWorkbook().createDataFormat();
-
-            dateCell.setCellStyle(CellStyleBuilder.builder()
-                            .initCellStyle(sheet.getWorkbook(), dateCell)
-                            .fillPattern(FillPatternType.SOLID_FOREGROUND)
-                            .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
-                            .dataFormat(df.getFormat("yyyy-MM-dd"))
-                    .build());
+            dateCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DATE));
 
             LocalDate nextDay = LocalDate.of(year, localDate.getMonth(), i);
             dateCell.setCellValue(nextDay);
@@ -162,16 +146,9 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         for (int i = 0; i < column; i++) {
             sheet.setColumnWidth(i, columnWidthMap.get(i) * 150);
             if (i != 0 && DateTimeUtils.isWeekend(LocalDate.of(year, month, i))) {
-                sheet.setDefaultColumnStyle(i, CellStyleBuilder.builder().initCellStyle(sheet.getWorkbook())
-                        .allBorders(BorderStyle.THIN)
-                                .fillPattern(FillPatternType.SOLID_FOREGROUND)
-                                .foregroundColor(HSSFColor.HSSFColorPredefined.GREY_25_PERCENT.getIndex())
-                        .build());
+                sheet.setDefaultColumnStyle(i, predefinedCellStyles.get(CellStyleType.WEEKEND_COLUMN));
             } else {
-                sheet.setDefaultColumnStyle(i, CellStyleBuilder.builder()
-                                .initCellStyle(sheet.getWorkbook())
-                                .allBorders(BorderStyle.THIN)
-                        .build());
+                sheet.setDefaultColumnStyle(i, predefinedCellStyles.get(CellStyleType.DEFAULT_COLUMN));
             }
         }
     }
@@ -201,23 +178,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             String department = entry.getKey();
             List<ReportDay> days = entry.getValue();
             Row depRow = sheet.createRow(i++);
+            depRow.setRowStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
 
-            CellStyle cellStyle = CellStyleBuilder.builder()
-                    .initCellStyle(sheet.getWorkbook())
-                    .foregroundColor(HSSFColor.HSSFColorPredefined.LIGHT_GREEN.getIndex())
-                    .fillPattern(FillPatternType.SOLID_FOREGROUND)
-                    .allBorders(BorderStyle.THIN)
-                    .build();
-
-            depRow.setRowStyle(cellStyle);
             Cell depCell = depRow.createCell(0);
             depCell.setCellValue(String.format("Отдел: %s", department));
-
-            depCell.setCellStyle(CellStyleBuilder.builder()
-                    .initCellStyle(sheet.getWorkbook(), depCell)
-                    .boldFont(sheet.getWorkbook().createFont())
-                    .allBorders(BorderStyle.THIN)
-                    .build());
+            depCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
 
             Map<Employee, List<ReportDay>> reportDaysOfEmployee = days.stream().collect(
                     Collectors.groupingBy(ReportDay::getEmployee,
@@ -228,16 +193,21 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 Employee employee = employeeListEntry.getKey();
                 List<ReportDay> reportDays = employeeListEntry.getValue();
                 Row[] rows = createRowsForReportDays(sheet, i);
+                rows[0].setRowStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
                 Cell cell = rows[0].createCell(0, CellType.STRING);
                 fillEmployeeReport(reportDays, rows, sheet);
                 cell.setCellValue(employee.getName());
-                cell.setCellStyle(CellStyleBuilder.builder()
-                                .initCellStyle(sheet.getWorkbook(), cell)
-                                .allBorders(BorderStyle.THIN)
-                                .boldFont(sheet.getWorkbook().createFont())
-                        .build());
+                cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
                 i += NUM_OF_ROWS;
             }
+        }
+    }
+
+    private void setRowStyleCustom(Date date, Row row) {
+        LocalDate localDate = DateTimeUtils.toLocalDate(date);
+        for (int i = 0; i <= localDate.lengthOfMonth(); i++) {
+            Cell cell = row.createCell(i, CellType.STRING);
+            cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
         }
     }
 
@@ -259,11 +229,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             for (int i = 0; i < projects.length; i++) {
                 Cell cell = rows[i].createCell(column, CellType.STRING);
                 cell.setCellValue(projects[i]);
-                cell.setCellStyle(CellStyleBuilder.builder()
-                        .initCellStyle(sheet.getWorkbook(), cell)
-                                .allBorders(BorderStyle.THIN)
-                                .boldFont(sheet.getWorkbook().createFont())
-                        .build());
+                if (i == 0) {
+                    cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
+                } else {
+                    cell.setCellStyle(predefinedCellStyles.get(CellStyleType.PROJECT_CELL));
+                }
             }
         }
     }
