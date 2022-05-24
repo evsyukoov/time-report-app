@@ -1,8 +1,10 @@
 package api.service.impl;
 
 import api.dto.FiltersDto;
+import api.helpers.common.TextUtil;
 import api.helpers.styles.CellStyleHelper;
 import api.helpers.styles.CellStyleType;
+import api.repository.ProjectsRepository;
 import api.repository.ReportDayRepository;
 import api.service.DocGeneratorService;
 import hibernate.entities.Employee;
@@ -25,6 +27,8 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private final ReportDayRepository daysRepository;
 
+    private final ProjectsRepository projectsRepository;
+
     public static int NUM_OF_ROWS = 4;
 
     public static int DEFAULT_WIDTH_DATE_COLUMN = 20;
@@ -33,8 +37,9 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private Map<CellStyleType, CellStyle> predefinedCellStyles;
 
-    public DocGeneratorServiceImpl(ReportDayRepository daysRepository) {
+    public DocGeneratorServiceImpl(ReportDayRepository daysRepository, ProjectsRepository projectsRepository) {
         this.daysRepository = daysRepository;
+        this.projectsRepository = projectsRepository;
     }
 
     @Override
@@ -72,10 +77,28 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         if (days.isEmpty()) {
             return new ByteArrayOutputStream();
         }
-        return createDoc(days);
+        return createDoc(days, dto.getName());
     }
 
-    private ByteArrayOutputStream createDoc(List<ReportDay> days) throws Exception {
+    private void createEmployeePercentReport(List<ReportDay> days, Sheet sheet) {
+        createProjectsColumn(sheet);
+        Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
+        Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
+        // TODO логика заполнения листа
+    }
+
+    private void createProjectsColumn(Sheet sheet) {
+        List<String> projects = projectsRepository.getAllProjectsName();
+        String maxStr = projects.stream().max(Comparator.comparingInt(String::length)).get();
+        sheet.setColumnWidth(0, maxStr.getBytes().length * 150);
+        for (int i = 0; i < projects.size(); i++) {
+            Row depRow = sheet.createRow(i + 1);
+            Cell projectCell = depRow.createCell(0);
+            projectCell.setCellValue(projects.get(i));
+        }
+    }
+
+    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
         predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
@@ -93,6 +116,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        // формирование листа с детализацией работы по конкретному сотруднику
+        if (employeeName != null) {
+            createEmployeePercentReport(days, workbook.createSheet(
+                    TextUtil.getShortName(employeeName) + "%"));
         }
         workbook.write(baos);
         workbook.close();
@@ -203,14 +231,6 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         }
     }
 
-    private void setRowStyleCustom(Date date, Row row) {
-        LocalDate localDate = DateTimeUtils.toLocalDate(date);
-        for (int i = 0; i <= localDate.lengthOfMonth(); i++) {
-            Cell cell = row.createCell(i, CellType.STRING);
-            cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
-        }
-    }
-
     private Row[] createRowsForReportDays(Sheet sheet, int rowNum) {
         Row[] rows = new Row[4];
         for (int i = 0; i < 4; i++) {
@@ -255,5 +275,13 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 .collect(Collectors.groupingBy(reportDay -> reportDay.getEmployee().getDepartment(),
                         Collectors.mapping(reportDay -> reportDay, Collectors.toList())));
 
+    }
+
+    // для одного сотрудника, разбивка его дней по месяцам (для кейса отчет по 1 сотруднику)
+    private Map<Month, List<ReportDay>> getExcelMonthDaysStructure(List<ReportDay> days) {
+        return new TreeMap<>(days.stream()
+                .collect(Collectors
+                        .groupingBy(day -> DateTimeUtils.toLocalDate(day.getDate()).getMonth(),
+                                Collectors.mapping(reportDay -> reportDay, Collectors.toList()))));
     }
 }

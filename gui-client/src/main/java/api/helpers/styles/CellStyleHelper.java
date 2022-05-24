@@ -1,14 +1,17 @@
 package api.helpers.styles;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 
+import java.time.Month;
 import java.util.EnumMap;
 import java.util.Map;
 
 public class CellStyleHelper {
 
     public static Map<CellStyleType, CellStyle> predefineCellStyles(Workbook workbook) {
+
         Map<CellStyleType, CellStyle> map = new EnumMap<>(CellStyleType.class);
         map.put(CellStyleType.SURNAME, CellStyleBuilder.builder()
                 .initCellStyle(workbook)
@@ -58,5 +61,33 @@ public class CellStyleHelper {
                 .build());
 
         return map;
+    }
+
+    public static Map<Month, CellStyle> predefineMonthColumnsStyle(Workbook workbook) {
+        Map<Month, CellStyle> map = new EnumMap<>(Month.class);
+
+        map.put(Month.JANUARY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.AQUA, workbook));
+        map.put(Month.FEBRUARY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_BLUE, workbook));
+        map.put(Month.MARCH, initCellStyleColumn(HSSFColor.HSSFColorPredefined.VIOLET, workbook));
+        map.put(Month.APRIL, initCellStyleColumn(HSSFColor.HSSFColorPredefined.VIOLET, workbook));
+        map.put(Month.MAY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.PINK, workbook));
+        map.put(Month.JUNE, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_YELLOW, workbook));
+        map.put(Month.JULY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_GREEN, workbook));
+        map.put(Month.AUGUST, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LAVENDER, workbook));
+        map.put(Month.SEPTEMBER, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_TURQUOISE, workbook));
+        map.put(Month.OCTOBER, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_ORANGE, workbook));
+        map.put(Month.NOVEMBER, initCellStyleColumn(HSSFColor.HSSFColorPredefined.SEA_GREEN, workbook));
+        map.put(Month.DECEMBER, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIME, workbook));
+        return map;
+    }
+    
+    private static CellStyle initCellStyleColumn(HSSFColor.HSSFColorPredefined color, Workbook workbook) {
+        return CellStyleBuilder.builder()
+                .initCellStyle(workbook)
+                .foregroundColor(color.getIndex())
+                .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                .allBorders(BorderStyle.THIN)
+                .boldFont(workbook.createFont())
+                .build();
     }
 }
