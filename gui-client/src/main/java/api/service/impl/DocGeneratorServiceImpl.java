@@ -19,6 +19,7 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,21 +82,82 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createEmployeePercentReport(List<ReportDay> days, Sheet sheet) {
-        createProjectsColumn(sheet);
+        List<String> projects = projectsRepository.getAllProjectsName();
+        List<Row> rows = createProjectsColumn(sheet, projects);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
+        Map<CellStyleType, CellStyle> styleMap = CellStyleHelper.predefineCellStyles(sheet.getWorkbook());
         Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
+        Row firstMonthsRow = sheet.createRow(0);
+        Row lastRow = sheet.createRow(projects.size() + 1);
         // TODO логика заполнения листа
+        reportMap.forEach((month, reports) -> {
+            CellStyle cellStyle = colorMap.get(month);
+            sheet.setDefaultColumnStyle(month.getValue(), cellStyle);
+            firstMonthsRow.createCell(month.getValue(), CellType.STRING)
+                    .setCellValue(getMonthName(month));
+
+            int currentMonthDays = reports.size();
+            HashMap<String, Double> percentMap = new HashMap<>();
+            reports.forEach(reportDay -> {
+                List<String> currentDayProjects = List.of(reportDay.getProjects().split(Message.DELIMETR));
+                int currentDayProjectsCount = currentDayProjects.size();
+                currentDayProjects.forEach(project -> percentMap.put(project,
+                        percentMap.containsKey(project) ? (percentMap.get(project) + 100.0 / currentDayProjectsCount / currentMonthDays)
+                                : 100.0 / currentDayProjectsCount / currentMonthDays));
+            });
+
+            percentMap.forEach((proj, percent) -> {
+                int rowNumber = findProjectIndex(proj, projects);
+                Row row = rows.get(rowNumber);
+                row.createCell(month.getValue(), CellType.NUMERIC).setCellValue(percent);
+            });
+            normalizeColumn(projects.size(), month.getValue(), sheet, lastRow);
+        });
     }
 
-    private void createProjectsColumn(Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsName();
+    private void normalizeColumn(int projectsCount, int columnNumber, Sheet sheet, Row lastRow) {
+        double checkResult = 0;
+        for (int i = 1; i < projectsCount + 1; i++) {
+            Cell cell = sheet.getRow(i).getCell(columnNumber, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            if (cell.getCellType() == CellType.BLANK) {
+                cell.setCellType(CellType.NUMERIC);
+                cell.setCellValue(0);
+            } else {
+                checkResult += cell.getNumericCellValue();
+            }
+        }
+        if (checkResult != 100) {
+            // TODO добавить логирование
+        }
+        lastRow.createCell(columnNumber, CellType.NUMERIC).setCellValue(checkResult);
+    }
+
+    private String getMonthName(Month month) {
+        return month.getDisplayName(
+                TextStyle.FULL_STANDALONE , new Locale("ru"));
+    }
+
+    // находим порядковый номер строки
+    private int findProjectIndex(String project, List<String> projects) {
+        for (int i = 0; i < projects.size(); i++) {
+            if (projects.get(i).equals(project)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private List<Row> createProjectsColumn(Sheet sheet, List<String> projects) {
+        List<Row> rows = new ArrayList<>();
         String maxStr = projects.stream().max(Comparator.comparingInt(String::length)).get();
         sheet.setColumnWidth(0, maxStr.getBytes().length * 150);
         for (int i = 0; i < projects.size(); i++) {
             Row depRow = sheet.createRow(i + 1);
+            rows.add(depRow);
             Cell projectCell = depRow.createCell(0);
             projectCell.setCellValue(projects.get(i));
         }
+        return rows;
     }
 
     private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName) throws Exception {
