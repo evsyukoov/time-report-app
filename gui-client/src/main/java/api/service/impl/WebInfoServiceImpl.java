@@ -40,7 +40,7 @@ public class WebInfoServiceImpl implements WebInfoService {
     public int dbUpdate() {
         List<Employee> empls = employeeRepository.findAll();
         AtomicInteger i = new AtomicInteger();
-        empls.stream().forEach(empl -> {
+        empls.forEach(empl -> {
             if (empl.getDepartmentShort() != null) {
                 return ;
             }

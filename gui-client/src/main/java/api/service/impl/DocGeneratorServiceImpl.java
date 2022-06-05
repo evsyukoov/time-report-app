@@ -4,6 +4,7 @@ import api.dto.FiltersDto;
 import api.helpers.common.TextUtil;
 import api.helpers.styles.CellStyleHelper;
 import api.helpers.styles.CellStyleType;
+import api.repository.EmployeeRepository;
 import api.repository.ProjectsRepository;
 import api.repository.ReportDayRepository;
 import api.service.DocGeneratorService;
@@ -12,6 +13,7 @@ import hibernate.entities.ReportDay;
 import messages.Message;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.stereotype.Service;
 import utils.DateTimeUtils;
 
@@ -21,6 +23,7 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +33,8 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private final ProjectsRepository projectsRepository;
 
+    private final EmployeeRepository employeeRepository;
+
     public static int NUM_OF_ROWS = 4;
 
     public static int DEFAULT_WIDTH_DATE_COLUMN = 20;
@@ -38,9 +43,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private Map<CellStyleType, CellStyle> predefinedCellStyles;
 
-    public DocGeneratorServiceImpl(ReportDayRepository daysRepository, ProjectsRepository projectsRepository) {
+    public DocGeneratorServiceImpl(ReportDayRepository daysRepository, ProjectsRepository projectsRepository, EmployeeRepository employeeRepository) {
         this.daysRepository = daysRepository;
         this.projectsRepository = projectsRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -78,46 +84,109 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         if (days.isEmpty()) {
             return new ByteArrayOutputStream();
         }
-        return createDoc(days, dto.getName());
+        return createDoc(days, dto.getName(), true);
+    }
+
+    private void createDepartmentPercentReport(List<ReportDay> days, Sheet sheet) {
+        try {
+            List<String> projects = projectsRepository.getAllProjectsName();
+            List<Row> rows = createProjectsColumn(sheet, projects, 2);
+            Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
+            Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
+            Row firstRow = sheet.createRow(0);
+            Row secondRow = sheet.createRow(1);
+            Row lastRow = sheet.createRow(projects.size() + 2);
+            List<String> departments = getUniqueDepartments();
+            AtomicInteger colNumber = new AtomicInteger(1);
+            reportMap.forEach(((month, reportDays) -> {
+                Map<String, Map<String, Double>> projs = mappingToDepartmentReportDays(reportDays);
+                int interval = colNumber.get() + departments.size() - 1;
+                for (int i = colNumber.get() ; i <= interval; i++) {
+                    firstRow.createCell(i, CellType.STRING).setCellValue(getMonthName(month));
+                    Cell cell = secondRow.createCell(i, CellType.STRING);
+                    String shortNameDepartment = departments.get(i - colNumber.get());
+                    cell.setCellValue(shortNameDepartment);
+                    Map<String, Double> entry = projs.get(shortNameDepartment);
+                    sheet.setDefaultColumnStyle(i, colorMap.get(month));
+                    if (entry != null) {
+                        for (Map.Entry<String, Double> stringLoEntry : entry.entrySet()) {
+                            int rowIndex = findProjectIndex(stringLoEntry.getKey(), projects);
+                            Row row = rows.get(rowIndex);
+                            row.createCell(i, CellType.STRING).setCellValue(stringLoEntry.getValue());
+                        }
+                    }
+                    normalizeColumn(2, projects.size(), i, sheet, lastRow);
+                }
+                CellRangeAddress addresses = new CellRangeAddress(firstRow.getRowNum(), firstRow.getRowNum(), colNumber.get(), interval);
+                sheet.addMergedRegion(addresses);
+                colNumber.addAndGet(departments.size());
+            }));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private Map<String, Map<String, Double>> mappingToDepartmentReportDays(List<ReportDay> days) {
+        Map<String, List<ReportDay>> map = days.stream().collect(Collectors
+                .groupingBy(rd -> rd.getEmployee().getDepartmentShort(), Collectors.toList()));
+
+        Map<String, Map<String, Double>> projects = new HashMap<>();
+        map.forEach((dep, reports) -> {
+            projects.put(dep, initPercentMap(reports));
+        });
+        return projects;
+    }
+
+    private List<String> getUniqueDepartments() {
+        return employeeRepository.findAll().stream()
+                .map(Employee::getDepartmentShort)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Double> initPercentMap(List<ReportDay> days) {
+        int currentMonthLong = days.size();
+        HashMap<String, Double> percentMap = new HashMap<>();
+        days.forEach(reportDay -> {
+            List<String> currentDayProjects = List.of(reportDay.getProjects().split(Message.DELIMETR));
+            int currentDayProjectsCount = currentDayProjects.size();
+            currentDayProjects.forEach(project -> percentMap.put(project,
+                    percentMap.containsKey(project) ? (percentMap.get(project) + 100.0 / currentDayProjectsCount / currentMonthLong)
+                            : 100.0 / currentDayProjectsCount / currentMonthLong));
+        });
+        return percentMap;
     }
 
     private void createEmployeePercentReport(List<ReportDay> days, Sheet sheet) {
         List<String> projects = projectsRepository.getAllProjectsName();
-        List<Row> rows = createProjectsColumn(sheet, projects);
+        List<Row> rows = createProjectsColumn(sheet, projects, 1);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<CellStyleType, CellStyle> styleMap = CellStyleHelper.predefineCellStyles(sheet.getWorkbook());
         Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
         Row firstMonthsRow = sheet.createRow(0);
         Row lastRow = sheet.createRow(projects.size() + 1);
-        // TODO логика заполнения листа
         reportMap.forEach((month, reports) -> {
             CellStyle cellStyle = colorMap.get(month);
             sheet.setDefaultColumnStyle(month.getValue(), cellStyle);
             firstMonthsRow.createCell(month.getValue(), CellType.STRING)
                     .setCellValue(getMonthName(month));
 
-            int currentMonthDays = reports.size();
-            HashMap<String, Double> percentMap = new HashMap<>();
-            reports.forEach(reportDay -> {
-                List<String> currentDayProjects = List.of(reportDay.getProjects().split(Message.DELIMETR));
-                int currentDayProjectsCount = currentDayProjects.size();
-                currentDayProjects.forEach(project -> percentMap.put(project,
-                        percentMap.containsKey(project) ? (percentMap.get(project) + 100.0 / currentDayProjectsCount / currentMonthDays)
-                                : 100.0 / currentDayProjectsCount / currentMonthDays));
-            });
+            Map<String, Double> percentMap = initPercentMap(reports);
 
             percentMap.forEach((proj, percent) -> {
                 int rowNumber = findProjectIndex(proj, projects);
                 Row row = rows.get(rowNumber);
                 row.createCell(month.getValue(), CellType.NUMERIC).setCellValue(percent);
             });
-            normalizeColumn(projects.size(), month.getValue(), sheet, lastRow);
+            normalizeColumn(1, projects.size(), month.getValue(), sheet, lastRow);
         });
     }
 
-    private void normalizeColumn(int projectsCount, int columnNumber, Sheet sheet, Row lastRow) {
+    private void normalizeColumn(int startRow, int projectsCount, int columnNumber, Sheet sheet, Row lastRow) {
         double checkResult = 0;
-        for (int i = 1; i < projectsCount + 1; i++) {
+        for (int i = startRow; i < projectsCount + startRow; i++) {
             Cell cell = sheet.getRow(i).getCell(columnNumber, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
             if (cell.getCellType() == CellType.BLANK) {
                 cell.setCellType(CellType.NUMERIC);
@@ -147,12 +216,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return -1;
     }
 
-    private List<Row> createProjectsColumn(Sheet sheet, List<String> projects) {
+    private List<Row> createProjectsColumn(Sheet sheet, List<String> projects, int firstRow) {
         List<Row> rows = new ArrayList<>();
         String maxStr = projects.stream().max(Comparator.comparingInt(String::length)).get();
         sheet.setColumnWidth(0, maxStr.getBytes().length * 150);
         for (int i = 0; i < projects.size(); i++) {
-            Row depRow = sheet.createRow(i + 1);
+            Row depRow = sheet.createRow(i + firstRow);
             rows.add(depRow);
             Cell projectCell = depRow.createCell(0);
             projectCell.setCellValue(projects.get(i));
@@ -160,7 +229,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return rows;
     }
 
-    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName) throws Exception {
+    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName, boolean waitForDepartmentsReport) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
         predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
@@ -183,6 +252,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         if (employeeName != null) {
             createEmployeePercentReport(days, workbook.createSheet(
                     TextUtil.getShortName(employeeName) + "%"));
+        }
+        if (waitForDepartmentsReport) {
+            createDepartmentPercentReport(days, workbook.createSheet(
+                    "По отделам, %"));
         }
         workbook.write(baos);
         workbook.close();
