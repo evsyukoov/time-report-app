@@ -5,6 +5,7 @@ import api.service.DocGeneratorService;
 import api.service.WebInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -51,5 +52,11 @@ public class MainController {
     @GetMapping(path = "/report/get-departments")
     public List<String> getDepartments() throws Exception {
         return webInfoService.getDepartments();
+    }
+
+    @GetMapping(path="/dbUpdate")
+    public ResponseEntity<String> dbUpdate() {
+        int count = webInfoService.dbUpdate();
+        return ResponseEntity.ok(String.format("\"count\":\"%d\"", count));
     }
 }

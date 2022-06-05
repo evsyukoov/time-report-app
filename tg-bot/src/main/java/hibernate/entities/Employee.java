@@ -20,6 +20,9 @@ public class Employee {
     @Column(name = "department")
     private String department;
 
+    @Column(name="department_short")
+    private String departmentShort;
+
     public String getName() {
         return name;
     }
@@ -50,5 +53,13 @@ public class Employee {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public String getDepartmentShort() {
+        return departmentShort;
+    }
+
+    public void setDepartmentShort(String departmentShort) {
+        this.departmentShort = departmentShort;
     }
 }

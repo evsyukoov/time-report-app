@@ -7,4 +7,6 @@ public interface WebInfoService {
     List<String> getEmployeesNames();
 
     List<String> getDepartments();
+
+    int dbUpdate();
 }
