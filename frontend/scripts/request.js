@@ -4,6 +4,8 @@ const req = () => {
     let empl
     let dep
     let ulEmpl = document.getElementById("ul-id-dropdown-block-empl")
+    let empChBox = document.getElementById("empl-report")
+    let depChBox = document.getElementById("department-report")
     if (ulEmpl != null) {
         empl = ulEmpl.children[0].firstChild.nodeValue
     }
@@ -16,12 +18,15 @@ const req = () => {
     formData.append('name', empl)
     formData.append('department', dep)
 
+    // alert(depChBox.checked)
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", referer + "/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
     var data = JSON.stringify({ "name":
-        empl, "department": dep, "dateStart": parseDate(dateStart), "dateEnd": parseDate(dateEnd) });
+        empl, "department": dep, "dateStart": parseDate(dateStart), "dateEnd": parseDate(dateEnd), "waitForEmployeeReport" : empChBox.checked,
+        "waitForDepartmentsReport" : depChBox.checked });
     xhr.responseType = 'blob'
     xhr.onload = function(oEvent) {
         let blob = new Blob([xhr.response], {type: 'application/vnd.ms-excel'});

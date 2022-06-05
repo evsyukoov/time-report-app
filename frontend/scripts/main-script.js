@@ -28,6 +28,7 @@ const sendHttpRequest = (method, url) => {
 
 const dep = () => {
     sendHttpRequest('GET', referer + '/report/get-departments').then(responseData => {
+        startConditionCheckboxes()
         var departmentsDiv = document.getElementById("departments")
         addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData)
     })
@@ -35,9 +36,15 @@ const dep = () => {
 
 const empl = () => {
     sendHttpRequest('GET', referer + '/report/get-employees').then(responseData => {
+        startConditionCheckboxes()
         var employeesDiv = document.getElementById("employees")
         addElementsToUl(employeesDiv, "dropdown-block-empl", responseData)
     })
+}
+
+function startConditionCheckboxes() {
+    document.getElementById("empl-report").setAttribute("disabled", "disabled");
+    document.getElementById("empl-report").checked = false
 }
 
 function addElementsToUl(div, classElemName, responseData) {
@@ -58,6 +65,11 @@ function addElementsToUl(div, classElemName, responseData) {
             let ul = createUl(classElemName)
             ul.appendChild(userChoiceLi)
             div.appendChild(ul)
+            if (classElemName === "dropdown-block-empl") {
+                document.getElementById("empl-report").removeAttribute("disabled")
+                document.getElementById("empl-report").checked = false
+            }
+
         })
         ul.appendChild(li);
     }

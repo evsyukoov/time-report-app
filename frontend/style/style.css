@@ -1,7 +1,7 @@
 /* Dropdown Button */
 body {
     height: 100%;
-    background: url(img/background.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));;
+    background: url(img/background2.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));;
     background-size: cover;
     background-blend-mode: overlay;
 }
@@ -152,10 +152,44 @@ body {
 .page-name h2:before {left: 0;}
 .page-name h2:after {right: 0;}
 
+.checkbox-empl {
+    color: #fff;
+    display: flex;
+    margin-top: 3%;
+    justify-content: center;
+}
+
+.checkbox-department {
+    color: #fff;
+    display: flex;
+    margin-top: 3%;
+    justify-content: center;
+}
+
+.label1 {
+    color: #3f3e3e;
+    font-size: 1.5em;
+}
+
+.label2 {
+    color: #3f3e3e;
+    font-size: 1.5em;
+}
+
 @media screen and (max-width: 992px) {
+    .label1 {
+        color: black;
+        font-size: 2em;
+    }
+
+    .label2 {
+        color: black;
+        font-size: 2em;
+    }
+
     body {
         height: 100%;
-        background: url(img/background.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));
+        background: url(img/background2.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));
         background-size: auto;
     }
 

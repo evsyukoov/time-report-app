@@ -28,25 +28,35 @@
             <div id="employees" class="dropdown-block-empl">
             </div>
         </div>
-        </div>
-        <div class="calendar-forms">
-            <div class="calendar">
-                <input id="dateStart" type="text" placeholder="Выберите дату начала отчета" value="" size="40"
-                       onClick="xCal(this)"
-                       onmouseenter="xCal(this)" onKeyUp="xCal()">
-            </div>
-
-            <div class="calendar">
-                <input id="dateEnd" type="text" placeholder="Выберите дату конца отчета" value="" size="40"
-                       onClick="xCal(this)"
-                       onmouseenter="xCal(this)" onKeyUp="xCal()">
-            </div>
+    </div>
+    <div class="calendar-forms">
+        <div class="calendar">
+            <input id="dateStart" type="text" placeholder="Выберите дату начала отчета" value="" size="40"
+                   onClick="xCal(this)"
+                   onmouseenter="xCal(this)" onKeyUp="xCal()">
         </div>
 
-        <div class="report-button">
-            <button type="submit" onclick="req()">Получить отчет</button>
+        <div class="calendar">
+            <input id="dateEnd" type="text" placeholder="Выберите дату конца отчета" value="" size="40"
+                   onClick="xCal(this)"
+                   onmouseenter="xCal(this)" onKeyUp="xCal()">
         </div>
     </div>
+
+    <div class="checkbox-empl" tabindex="0">
+        <input type="checkbox" class="custom-checkbox" id="empl-report" name="empl-report" value="no" disabled="disabled">
+        <label class="label1" for="empl-report">Процентовка по сотруднику</label>
+    </div>
+
+    <div class="checkbox-department">
+        <input type="checkbox" class="custom-checkbox" id="department-report" name="empl-report" value="no" content="Сформировать лист с процентовкой по всем отделам">
+        <label class="label2" for="empl-report">Процентовка по отделам</label>
+    </div>
+
+    <div class="report-button">
+        <button type="submit" onclick="req()">Получить отчет</button>
+    </div>
+</div>
 </div>
 
 </body>

@@ -1,6 +1,5 @@
 package api.helpers.styles;
 
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 
@@ -68,8 +67,8 @@ public class CellStyleHelper {
 
         map.put(Month.JANUARY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.AQUA, workbook));
         map.put(Month.FEBRUARY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_BLUE, workbook));
-        map.put(Month.MARCH, initCellStyleColumn(HSSFColor.HSSFColorPredefined.VIOLET, workbook));
-        map.put(Month.APRIL, initCellStyleColumn(HSSFColor.HSSFColorPredefined.VIOLET, workbook));
+        map.put(Month.MARCH, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_CORNFLOWER_BLUE, workbook));
+        map.put(Month.APRIL, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_TURQUOISE, workbook));
         map.put(Month.MAY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.PINK, workbook));
         map.put(Month.JUNE, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_YELLOW, workbook));
         map.put(Month.JULY, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_GREEN, workbook));

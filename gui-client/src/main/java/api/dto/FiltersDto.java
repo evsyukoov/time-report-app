@@ -12,6 +12,10 @@ public class FiltersDto {
 
     private String department;
 
+    private boolean waitForEmployeeReport;
+
+    private boolean waitForDepartmentsReport;
+
     public String getName() {
         return name;
     }
@@ -42,5 +46,21 @@ public class FiltersDto {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public boolean isWaitForEmployeeReport() {
+        return waitForEmployeeReport;
+    }
+
+    public void setWaitForEmployeeReport(boolean waitForEmployeeReport) {
+        this.waitForEmployeeReport = waitForEmployeeReport;
+    }
+
+    public boolean isWaitForDepartmentsReport() {
+        return waitForDepartmentsReport;
+    }
+
+    public void setWaitForDepartmentsReport(boolean waitForDepartmentsReport) {
+        this.waitForDepartmentsReport = waitForDepartmentsReport;
     }
 }
