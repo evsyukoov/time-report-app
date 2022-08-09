@@ -8,6 +8,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmployeeDao {
 
@@ -26,7 +27,7 @@ public class EmployeeDao {
             result = session.createQuery("SELECT name From Employee", String.class).list();
             session.getTransaction().commit();
         }
-        return result;
+        return result.stream().sorted().collect(Collectors.toList());
     }
 
     public static Employee getEmployeeByName(String name) {
