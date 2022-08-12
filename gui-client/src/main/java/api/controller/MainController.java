@@ -4,6 +4,7 @@ import api.dto.FiltersDto;
 import api.service.DocGeneratorService;
 import api.service.WebInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,7 +63,12 @@ public class MainController {
 
     @GetMapping(path="/report/fixDb")
     public ResponseEntity<String> fixDb() {
-        webInfoService.fixDbTestData();
-        return ResponseEntity.ok("ok");
+        try {
+            webInfoService.fixDbTestData();
+            return ResponseEntity.ok("ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
