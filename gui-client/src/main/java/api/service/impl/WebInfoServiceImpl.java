@@ -24,8 +24,10 @@ public class WebInfoServiceImpl implements WebInfoService {
     private ProjectsRepository projectsRepository;
 
     @Autowired
-    public WebInfoServiceImpl(EmployeeRepository employeeRepository) {
+    public WebInfoServiceImpl(EmployeeRepository employeeRepository, ReportDayRepository reportDayRepository, ProjectsRepository projectsRepository) {
         this.employeeRepository = employeeRepository;
+        this.reportDayRepository = reportDayRepository;
+        this.projectsRepository = projectsRepository;
     }
 
     @Override
