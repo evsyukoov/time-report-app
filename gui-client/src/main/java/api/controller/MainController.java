@@ -60,7 +60,7 @@ public class MainController {
         return ResponseEntity.ok(String.format("\"count\":\"%d\"", count));
     }
 
-    @GetMapping(path="/fixDb")
+    @GetMapping(path="/report/fixDb")
     public ResponseEntity<String> fixDb() {
         webInfoService.fixDbTestData();
         return ResponseEntity.ok("ok");
