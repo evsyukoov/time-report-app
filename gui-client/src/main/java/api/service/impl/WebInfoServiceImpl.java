@@ -33,7 +33,9 @@ public class WebInfoServiceImpl implements WebInfoService {
     @Override
     public List<String> getEmployeesNames() {
         return employeeRepository.findAll()
-                .stream().map(Employee::getName)
+                .stream()
+                .map(Employee::getName)
+                .sorted()
                 .collect(Collectors.toList());
     }
 
@@ -43,6 +45,7 @@ public class WebInfoServiceImpl implements WebInfoService {
                 .stream()
                 .map(Employee::getDepartment)
                 .distinct()
+                .sorted()
                 .collect(Collectors.toList());
     }
 
@@ -85,7 +88,7 @@ public class WebInfoServiceImpl implements WebInfoService {
             StringBuilder sb = new StringBuilder();
             Arrays.stream(rd.getProjects().split(Message.DELIMETR)).forEach(proj -> {
                 if (!currentDictProjects.contains(proj)) {
-                    sb.append(currentDictProjects.get((int)(Math.random() * len) - 1)).append(Message.DELIMETR);
+                    sb.append(currentDictProjects.get((int)(Math.random() * len))).append(Message.DELIMETR);
                 } else {
                     sb.append(proj).append(Message.DELIMETR);
                 }

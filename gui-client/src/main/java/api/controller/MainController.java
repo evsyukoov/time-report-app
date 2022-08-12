@@ -55,20 +55,20 @@ public class MainController {
         return webInfoService.getDepartments();
     }
 
-    @GetMapping(path="/dbUpdate")
-    public ResponseEntity<String> dbUpdate() {
-        int count = webInfoService.dbUpdate();
-        return ResponseEntity.ok(String.format("\"count\":\"%d\"", count));
-    }
+//    @GetMapping(path="/dbUpdate")
+//    public ResponseEntity<String> dbUpdate() {
+//        int count = webInfoService.dbUpdate();
+//        return ResponseEntity.ok(String.format("\"count\":\"%d\"", count));
+//    }
 
-    @GetMapping(path="/report/fixDb")
-    public ResponseEntity<String> fixDb() {
-        try {
-            webInfoService.fixDbTestData();
-            return ResponseEntity.ok("ok");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+//    @GetMapping(path="/report/fixDb")
+//    public ResponseEntity<String> fixDb() {
+//        try {
+//            webInfoService.fixDbTestData();
+//            return ResponseEntity.ok("ok");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//    }
 }
