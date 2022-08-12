@@ -32,17 +32,21 @@ public class MainController {
     }
 
     @PostMapping(path = "/report/get-report", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void getByName(@RequestBody FiltersDto requestDto, HttpServletResponse response) throws Exception {
-        ByteArrayOutputStream baos = docGenerator.generateXml(requestDto);
-        response.setHeader("Content-disposition", "attachment;filename=report.xls");
-        response.setContentType("application/vnd.ms-excel");
-        if (baos.size() == 0) {
-            response.getOutputStream().write(new byte[0]);
-        } else {
-            response.getOutputStream().write(baos.toByteArray());
+    public void getByName(@RequestBody FiltersDto requestDto, HttpServletResponse response) {
+        try {
+            ByteArrayOutputStream baos = docGenerator.generateXml(requestDto);
+            response.setHeader("Content-disposition", "attachment;filename=report.xls");
+            response.setContentType("application/vnd.ms-excel");
+            if (baos.size() == 0) {
+                response.getOutputStream().write(new byte[0]);
+            } else {
+                response.getOutputStream().write(baos.toByteArray());
+            }
+            response.getOutputStream().flush();
+            response.getOutputStream().close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
     }
 
     @GetMapping(path = "/report/get-employees")
