@@ -59,4 +59,10 @@ public class MainController {
         int count = webInfoService.dbUpdate();
         return ResponseEntity.ok(String.format("\"count\":\"%d\"", count));
     }
+
+    @GetMapping(path="/fixDb")
+    public ResponseEntity<String> fixDb() {
+        webInfoService.fixDbTestData();
+        return ResponseEntity.ok("ok");
+    }
 }

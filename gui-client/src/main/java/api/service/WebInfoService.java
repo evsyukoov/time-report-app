@@ -9,4 +9,6 @@ public interface WebInfoService {
     List<String> getDepartments();
 
     int dbUpdate();
+
+    void fixDbTestData();
 }

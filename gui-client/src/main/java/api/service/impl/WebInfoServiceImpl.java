@@ -1,12 +1,16 @@
 package api.service.impl;
 
 import api.repository.EmployeeRepository;
+import api.repository.ProjectsRepository;
+import api.repository.ReportDayRepository;
 import api.service.WebInfoService;
 import hibernate.entities.Employee;
+import hibernate.entities.ReportDay;
+import messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -14,6 +18,10 @@ import java.util.stream.Collectors;
 public class WebInfoServiceImpl implements WebInfoService {
 
     private EmployeeRepository employeeRepository;
+
+    private ReportDayRepository reportDayRepository;
+
+    private ProjectsRepository projectsRepository;
 
     @Autowired
     public WebInfoServiceImpl(EmployeeRepository employeeRepository) {
@@ -64,4 +72,27 @@ public class WebInfoServiceImpl implements WebInfoService {
         employeeRepository.saveAll(empls);
         return i.get();
     }
+
+    @Override
+    public void fixDbTestData() {
+        List<String> currentDictProjects = projectsRepository.getAllProjectsName();
+        int len = currentDictProjects.size();
+
+        List<ReportDay> reportDays = reportDayRepository.findAll();
+        reportDays.forEach(rd -> {
+            StringBuilder sb = new StringBuilder();
+            Arrays.stream(rd.getProjects().split(Message.DELIMETR)).forEach(proj -> {
+                if (!currentDictProjects.contains(proj)) {
+                    sb.append(currentDictProjects.get((int)(Math.random() * len) - 1)).append(Message.DELIMETR);
+                } else {
+                    sb.append(proj).append(Message.DELIMETR);
+                }
+            });
+            rd.setProjects(sb.substring(0, sb.length() - 1));
+        });
+        List<ReportDay> copy = new ArrayList<>(reportDays);
+        reportDayRepository.deleteAll();
+        reportDayRepository.saveAll(copy);
+    }
+
 }
