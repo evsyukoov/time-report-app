@@ -2,6 +2,7 @@ package stateMachine;
 
 public enum State {
     REGISTER_NAME,
+    CHECK_NAME,
     MENU,
     MENU_CHOICE,
     VACATION,

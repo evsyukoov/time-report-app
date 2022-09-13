@@ -81,7 +81,7 @@ public class NewMessageHandler {
                     SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
                     sm.setText(Message.MENU);
                 } else {
-                    ClientDao.updateState(client, State.MENU.ordinal());
+                    ClientDao.updateState(client, State.CHECK_NAME.ordinal());
                     SendHelper.setInlineKeyboardOneColumn(sm, EmployeeDao.getEmployeeNames(), null);
                     sm.setText(Message.REGISTER_NAME);
                 }

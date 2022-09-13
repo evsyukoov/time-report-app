@@ -17,7 +17,7 @@ public class RegisterName extends AbstractBotState {
 
     @Override
     public void handleMessage() {
-        ClientDao.updateState(context.getClient(), State.MENU.ordinal());
+        ClientDao.updateState(context.getClient(), State.CHECK_NAME.ordinal());
         sm.setText(Message.REGISTER_NAME);
         SendHelper.setInlineKeyboardOneColumn(sm,
                 EmployeeDao.getEmployeeNames(),null);

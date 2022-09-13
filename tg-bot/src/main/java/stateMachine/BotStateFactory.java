@@ -9,6 +9,8 @@ public class BotStateFactory {
     public static AbstractBotState createBotState(State state, BotContext context) {
         if (state == REGISTER_NAME) {
             return new RegisterName(context);
+        } else if (state == CHECK_NAME) {
+            return new CheckName(context);
         } else if (state == MENU) {
             return new Menu(context);
         } else if (state == MENU_CHOICE) {

@@ -108,4 +108,8 @@ public class Message {
 
     public static final String TOO_LONG_INTERVAL = "Выбран период отпуска, превышающий 30 дней";
 
+    public static String NAME_CHOSEN = "Вы собираетесь зарегистрироваться в системе под именем %s\nУбедитесь, что вы не ошиблись";
+
+    public static String WRONG_NAME_CHOSEN = "Пользователь под таким именем уже зарегистрирован в системе!\nВыберите другое имя";
+
 }
