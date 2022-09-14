@@ -1,14 +1,12 @@
 package stateMachine;
 
 import bot.BotContext;
+import handlers.MainCommandsHandler;
 import hibernate.access.ClientDao;
-import hibernate.access.EmployeeDao;
 import messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import utils.SendHelper;
 import utils.Utils;
-
-import java.util.List;
 
 public class Menu extends AbstractBotState {
 
@@ -22,20 +20,16 @@ public class Menu extends AbstractBotState {
         if (!context.isCallBackQuery()) {
             return;
         }
-        List<String> expected = EmployeeDao.getEmployeeNames();
-        String receive = context.getMessage().replace(Message.EMPTY_SYMBOL, "");
-        if (!expected.contains(receive)) {
-            return;
-        }
-        if (!context.getClient().isRegistered()) {
-            sm.setText(Utils.generateResultMessage(Message.REGISTER_IS_FINISHED, Message.MENU));
+        MainCommandsHandler backButtonHandler = new MainCommandsHandler(context, State.CHECK_NAME, Message.REGISTER_NAME);
+        if ((sm = backButtonHandler.handleBackButton()) != null && !ClientDao.getClient(context.getClient().getUid()).isRegistered()) {
+            question();
         } else {
-            sm.setText(Message.MENU);
+            sm = new SendMessage();
+            sm.setText((Utils.generateResultMessage(Message.REGISTER_IS_FINISHED, Message.MENU)));
+            SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
+            ClientDao.updateName(context.getClient(), State.MENU_CHOICE.ordinal(), context.getClient().getName(), true);
+            question();
         }
-        SendHelper.refreshInlineKeyboard(context);
-        SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
-        question();
-        ClientDao.updateName(context.getClient(), State.MENU_CHOICE.ordinal(), receive);
     }
 
 }

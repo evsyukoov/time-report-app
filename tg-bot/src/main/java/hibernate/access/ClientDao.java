@@ -34,6 +34,17 @@ public class ClientDao {
         return result;
     }
 
+    public static List<Client> getAllClients() {
+        List<Client> clients;
+        try (Session session = factory.getCurrentSession()) {
+            session.beginTransaction();
+            Query<Client> clientQuery = session.createQuery("FROM Client", Client.class);
+            clients = clientQuery.getResultList();
+            session.getTransaction().commit();
+        }
+        return clients;
+    }
+
     public static Client createClient(final long id, final State state) {
         Client client;
         try(Session session = factory.getCurrentSession()) {
@@ -77,12 +88,12 @@ public class ClientDao {
     }
 
     public static void updateName(Client client,
-                                  final int current, final String name) {
+                                  final int current, final String name, boolean isRegistered) {
         try(Session session = factory.getCurrentSession()) {
             session.beginTransaction();
             client.setState(current);
             client.setName(name);
-            client.setRegistered(true);
+            client.setRegistered(isRegistered);
             session.update(client);
             session.getTransaction().commit();
         }

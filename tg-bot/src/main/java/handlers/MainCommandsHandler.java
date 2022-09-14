@@ -4,10 +4,7 @@ import bot.BotContext;
 import exceptions.DateAfterTodayException;
 import exceptions.TooLongIntervalException;
 import exceptions.ValidationException;
-import hibernate.access.ClientDao;
-import hibernate.access.NotificationDao;
-import hibernate.access.ProjectsDao;
-import hibernate.access.ReportDaysDao;
+import hibernate.access.*;
 import hibernate.entities.Project;
 import messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -49,7 +46,9 @@ public class MainCommandsHandler {
         if (command.equals(Message.BACK)) {
             SendMessage sm = new SendMessage();
             ClientDao.updateState(context.getClient(), newState.ordinal());
-            if (message.equals(Message.MENU)) {
+            if (message.equals(Message.REGISTER_NAME)) {
+                SendHelper.setInlineKeyboardOneColumn(sm, EmployeeDao.getEmployeeNames(), null);
+            } else if (message.equals(Message.MENU)) {
               SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
             } else if (message.equals(Message.SELECT_PROJECT)) {
                 SendHelper.setInlineKeyboardProjects(sm, ProjectsDao.getProjects());

@@ -3,8 +3,6 @@ package stateMachine;
 import bot.BotContext;
 import handlers.MainCommandsHandler;
 import messages.Message;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import utils.SendHelper;
 
 public class ChooseDay extends AbstractBotState {
 

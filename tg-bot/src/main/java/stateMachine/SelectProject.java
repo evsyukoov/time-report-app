@@ -33,8 +33,9 @@ public class SelectProject extends AbstractBotState {
             handler = new MainCommandsHandler(context,
                     State.PARSE_DATE, Message.SELECT_DATE);
         }
-        if ((sm = handler.handleBackButton()) != null
-                || (sm = handler.handleProjectsChoice()) != null) {
+        if ((sm = handler.handleBackButton()) != null) {
+            question();
+        } else if ((sm = handler.handleProjectsChoice()) != null) {
             ClientDao.updateState(context.getClient(), State.MENU_CHOICE.ordinal());
             ReportDaysDao.saveOrUpdate(context.getClient(), context.getMessage());
             NotificationDao.updateFireTime(context.getClient().getUid());
