@@ -377,7 +377,7 @@ public class MainCommandsHandler {
         }
 
         boolean isModified = false;
-        // главных объектов 1, дополнительных 3
+        // главных объектов 1, дополнительных 7
         if (countFilledBoxes(Message.CONFIRM_SYMBOL, markup) == 0) {
             pressedButton.setText(pressedButton.getText().replace(Message.EMPTY_SYMBOL, Message.CONFIRM_SYMBOL));
             isModified = true;
@@ -389,7 +389,7 @@ public class MainCommandsHandler {
                 if (pressedButton.getText().contains(Message.EXTRA_CONFIRM_SYMBOL)) {
                     pressedButton.setText(pressedButton.getText().replace(Message.EXTRA_CONFIRM_SYMBOL, Message.EMPTY_SYMBOL));
                     isModified = true;
-                } else if (countFilledBoxes(Message.EXTRA_CONFIRM_SYMBOL, markup) < 3){
+                } else if (countFilledBoxes(Message.EXTRA_CONFIRM_SYMBOL, markup) < 7){
                     pressedButton.setText(pressedButton.getText().replace(Message.EMPTY_SYMBOL, Message.EXTRA_CONFIRM_SYMBOL));
                     isModified = true;
                 }

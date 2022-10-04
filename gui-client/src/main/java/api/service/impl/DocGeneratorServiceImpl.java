@@ -37,7 +37,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private final EmployeeRepository employeeRepository;
 
-    public static int NUM_OF_ROWS = 4;
+    public static int NUM_OF_ROWS = 8;
 
     public static int DEFAULT_WIDTH_DATE_COLUMN = 20;
 
@@ -367,8 +367,8 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private Row[] createRowsForReportDays(Sheet sheet, int rowNum) {
-        Row[] rows = new Row[4];
-        for (int i = 0; i < 4; i++) {
+        Row[] rows = new Row[NUM_OF_ROWS];
+        for (int i = 0; i < NUM_OF_ROWS; i++) {
             rows[i] = sheet.createRow(rowNum++);
         }
         return rows;
