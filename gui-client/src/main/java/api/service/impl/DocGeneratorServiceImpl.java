@@ -4,10 +4,10 @@ import api.dto.FiltersDto;
 import api.helpers.common.TextUtil;
 import api.helpers.styles.CellStyleHelper;
 import api.helpers.styles.CellStyleType;
-import api.repository.EmployeeRepository;
-import api.repository.ProjectsRepository;
-import api.repository.ReportDayRepository;
 import api.service.DocGeneratorService;
+import data.repository.EmployeeRepository;
+import data.repository.ProjectsRepository;
+import data.repository.ReportDayRepository;
 import hibernate.entities.Employee;
 import hibernate.entities.ReportDay;
 import messages.Message;
@@ -93,7 +93,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createDepartmentPercentReport(List<ReportDay> days, Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsName();
+        List<String> projects = projectsRepository.getAllProjectsNameSorted();
         List<Row> rows = createProjectsColumn(sheet, projects, 2);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
@@ -160,7 +160,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createEmployeePercentReport(List<ReportDay> days, Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsName();
+        List<String> projects = projectsRepository.getAllProjectsNameSorted();
         List<Row> rows = createProjectsColumn(sheet, projects, 1);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<CellStyleType, CellStyle> styleMap = CellStyleHelper.predefineCellStyles(sheet.getWorkbook());

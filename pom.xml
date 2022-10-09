@@ -4,7 +4,7 @@
     <groupId>ru.evsyukoov</groupId>
     <artifactId>time-report-app</artifactId>
     <packaging>pom</packaging>
-    <version>1</version>
+    <version>${tg-bot-version}</version>
     <url>http://maven.apache.org</url>
     <properties>
         <tg-bot-version>1.0-SNAPSHOT</tg-bot-version>
@@ -19,6 +19,7 @@
     <modules>
         <module>tg-bot</module>
         <module>gui-client</module>
+        <module>bot-data</module>
     </modules>
 
     <dependencies>

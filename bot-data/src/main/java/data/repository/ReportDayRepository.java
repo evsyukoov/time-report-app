@@ -1,10 +1,7 @@
-package api.repository;
+package data.repository;
 
 import hibernate.entities.ReportDay;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -28,5 +25,7 @@ public interface ReportDayRepository extends JpaRepository<ReportDay, Long> {
     List<ReportDay> findReportDayByDateGreaterThanEqualAndEmployeeName(Date start, String name);
 
     List<ReportDay> findReportDayByDateLessThanEqualAndEmployeeName(Date end, String name);
+
+    List<ReportDay> findReportDayByUidAndDateBetween(long uid, Date start, Date end);
 
 }

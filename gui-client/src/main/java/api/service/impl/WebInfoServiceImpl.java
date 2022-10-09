@@ -1,9 +1,9 @@
 package api.service.impl;
 
-import api.repository.EmployeeRepository;
-import api.repository.ProjectsRepository;
-import api.repository.ReportDayRepository;
 import api.service.WebInfoService;
+import data.repository.EmployeeRepository;
+import data.repository.ProjectsRepository;
+import data.repository.ReportDayRepository;
 import hibernate.entities.Employee;
 import hibernate.entities.ReportDay;
 import messages.Message;
@@ -80,7 +80,7 @@ public class WebInfoServiceImpl implements WebInfoService {
 
     @Override
     public void fixDbTestData() {
-        List<String> currentDictProjects = projectsRepository.getAllProjectsName();
+        List<String> currentDictProjects = projectsRepository.getAllProjectsNameSorted();
         int len = currentDictProjects.size();
 
         List<ReportDay> reportDays = reportDayRepository.findAll();
