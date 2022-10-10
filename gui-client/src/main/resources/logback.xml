@@ -31,7 +31,7 @@
         </encoder>
     </appender>
 
-    <logger name="ggsbot" level="INFO" >
+    <logger name="ru.evsyukov.app.api" level="INFO" >
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE_ROLLING" />
     </logger>
