@@ -11,10 +11,10 @@
 
     <appender name="FILE_ROLLING"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>gui-client/app/gui-client-journal.log</file>
+        <file>tg-bot/app/tg-bot-journal</file>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>gui-client-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>tg-bot-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>10</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
         </rollingPolicy>
@@ -23,7 +23,7 @@
         </encoder>
     </appender>
 
-    <logger name="ru.evsyukov.app.api" level="INFO" >
+    <logger name="ru.evsyukov.polling" level="INFO" >
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE_ROLLING" />
     </logger>

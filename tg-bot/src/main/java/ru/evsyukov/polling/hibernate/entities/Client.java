@@ -1,4 +1,4 @@
-package ru.evsyukov.app.data.entity;
+package ru.evsyukov.polling.hibernate.entities;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

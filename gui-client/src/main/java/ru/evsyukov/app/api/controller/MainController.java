@@ -1,5 +1,7 @@
 package ru.evsyukov.app.api.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import ru.evsyukov.app.api.dto.FiltersDto;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.api.service.WebInfoService;
@@ -13,21 +15,28 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
+@Slf4j
 public class MainController {
 
-    private DocGeneratorService docGenerator;
+    private final DocGeneratorService docGenerator;
 
-    private WebInfoService webInfoService;
+    private final WebInfoService webInfoService;
+
+    private final ObjectMapper om;
 
     @Autowired
-    public MainController(DocGeneratorService docGenerator, WebInfoService webInfoService) {
+    public MainController(DocGeneratorService docGenerator,
+                          WebInfoService webInfoService,
+                          ObjectMapper objectMapper) {
         this.docGenerator = docGenerator;
         this.webInfoService = webInfoService;
+        this.om = objectMapper;
     }
 
     @PostMapping(path = "/report/get-report", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void getByName(@RequestBody FiltersDto requestDto, HttpServletResponse response) {
         try {
+            log.info("POST request /report/get-report, body: {}", om.writeValueAsString(requestDto));
             ByteArrayOutputStream baos = docGenerator.generateXml(requestDto);
             response.setHeader("Content-disposition", "attachment;filename=report.xls");
             response.setContentType("application/vnd.ms-excel");
@@ -38,18 +47,21 @@ public class MainController {
             }
             response.getOutputStream().flush();
             response.getOutputStream().close();
+            log.info("Successfully return response to front page");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Request failed with error: ", e);
         }
     }
 
     @GetMapping(path = "/report/get-employees")
-    public List<String> getEmployesNames() throws Exception {
+    public List<String> getEmployesNames() {
+        log.info("GET request /report/get-employees");
         return webInfoService.getEmployeesNames();
     }
 
     @GetMapping(path = "/report/get-departments")
-    public List<String> getDepartments() throws Exception {
+    public List<String> getDepartments() {
+        log.info("GET request /report/get-departments");
         return webInfoService.getDepartments();
     }
 

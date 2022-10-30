@@ -1,4 +1,4 @@
-package ru.evsyukov.app.data.entity;
+package ru.evsyukov.polling.hibernate.entities;
 
 import javax.persistence.*;
 
@@ -61,13 +61,5 @@ public class Employee {
 
     public void setDepartmentShort(String departmentShort) {
         this.departmentShort = departmentShort;
-    }
-
-    @Override
-    public String toString() {
-        return "Employee{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
     }
 }

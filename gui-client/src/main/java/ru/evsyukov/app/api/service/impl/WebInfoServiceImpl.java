@@ -6,7 +6,7 @@ import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
 import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.ReportDay;
-import messages.Message;
+import ru.evsyukov.polling.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

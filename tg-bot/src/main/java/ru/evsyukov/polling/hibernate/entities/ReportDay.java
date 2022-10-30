@@ -1,18 +1,11 @@
-package ru.evsyukov.app.data.entity;
+package ru.evsyukov.polling.hibernate.entities;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
 @Table(name = "report_days")
 public class ReportDay {
-
-    private static final SimpleDateFormat sdf;
-
-    static {
-        sdf = new SimpleDateFormat("yyyy-MM-dd");
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,16 +63,5 @@ public class ReportDay {
 
     public void setProjects(String projects) {
         this.projects = projects;
-    }
-
-    @Override
-    public String toString() {
-        return "ReportDay{" +
-                "id=" + id +
-                ", employee=" + employee +
-                ", date=" + sdf.format(date) +
-                ", uid=" + uid +
-                ", projects='" + projects + '\'' +
-                '}';
     }
 }

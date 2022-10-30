@@ -1,5 +1,6 @@
 package ru.evsyukov.app.api.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.evsyukov.app.api.dto.FiltersDto;
 import ru.evsyukov.app.api.helpers.common.TextUtil;
 import ru.evsyukov.app.api.helpers.styles.CellStyleHelper;
@@ -10,15 +11,14 @@ import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
-import messages.Message;
+import ru.evsyukov.polling.messages.Message;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import utils.DateTimeUtils;
-
+import ru.evsyukov.polling.utils.DateTimeUtils;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.Month;
@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class DocGeneratorServiceImpl implements DocGeneratorService {
 
     private final ReportDayRepository daysRepository;
@@ -55,7 +56,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     @Override
-    public ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception {
+    public ByteArrayOutputStream generateXml(FiltersDto dto) {
         List<ReportDay> days;
         if (dto.getName() == null) {
             if (dto.getDateStart() == null && dto.getDateEnd() == null) {
@@ -87,8 +88,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                     .collect(Collectors.toList());
         }
         if (days.isEmpty()) {
+            log.info("No report days at Database");
             return new ByteArrayOutputStream();
         }
+        log.info("Successfully get report days from Database {}", days);
         return createDoc(days, dto.getName(), dto.isWaitForDepartmentsReport(), dto.isWaitForEmployeeReport());
     }
 
@@ -196,7 +199,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             }
         }
         if (checkResult != 100) {
-            LOGGER.warn("Something wrong with Excel Data");
+            log.warn("Something wrong with Excel Data.");
         }
         lastRow.createCell(columnNumber, CellType.NUMERIC).setCellValue(checkResult);
     }
@@ -229,7 +232,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return rows;
     }
 
-    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName, boolean waitForDepartmentsReport, boolean waitForEmployeeReport) throws Exception {
+    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName, boolean waitForDepartmentsReport, boolean waitForEmployeeReport) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
         predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
@@ -246,10 +249,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 normilizeColumns(sheet, date);
             }
             if (waitForEmployeeReport && employeeName != null) {
+                log.info("Start generate employee percent report");
                 createEmployeePercentReport(days, workbook.createSheet(
                         TextUtil.getShortName(employeeName) + "%"));
             }
             if (waitForDepartmentsReport) {
+                log.info("Start generate department percent report");
                 createDepartmentPercentReport(days, workbook.createSheet(
                         "По отделам, %"));
             }
@@ -257,8 +262,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             workbook.close();
             baos.close();
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("Error when make Excel: ", e);
+            log.error("Fatal error when generate report", e);
         }
         return baos;
     }
