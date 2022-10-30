@@ -17,6 +17,7 @@ import ru.evsyukov.polling.stateMachine.BotState;
 import ru.evsyukov.polling.stateMachine.BotStateFactory;
 import ru.evsyukov.polling.stateMachine.State;
 import ru.evsyukov.polling.utils.SendHelper;
+import ru.evsyukov.polling.utils.Utils;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class NewMessageHandler {
 
     public Client getClient(Update update) {
         State current;
-        Chat chat = getCurrentChat(update);
+        Chat chat = Utils.getCurrentChat(update);
         Optional<Client> clientOpt = clientRepository.findById(chat.getId());
         Client client;
         if (clientOpt.isEmpty()) {
@@ -64,16 +65,8 @@ public class NewMessageHandler {
         return client;
     }
 
-    private boolean isCallBackMessage(Update update) {
-        return update.getMessage() == null;
-    }
-
-    private Chat getCurrentChat(Update update) {
-        return isCallBackMessage(update) ? update.getCallbackQuery().getMessage().getChat() : update.getMessage().getChat();
-    }
-
     public BotContext initBotContext(Client client, Update update, ReportingBot bot) {
-        boolean isCallBack = isCallBackMessage(update);
+        boolean isCallBack = Utils.isCallBackMessage(update);
         return new BotContext(bot, update, client, isCallBack, isCallBack ? update.getCallbackQuery().getData():
                 update.getMessage().getText());
     }

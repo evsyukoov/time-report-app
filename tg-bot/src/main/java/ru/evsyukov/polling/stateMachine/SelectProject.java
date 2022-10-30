@@ -63,6 +63,7 @@ public class SelectProject implements BotState {
 
     @Override
     public void handleMessage(BotContext context) {
+        log.info("State {} with client {} start", getState().name(), context.getClient());
         Client client = context.getClient();
         SendMessage sm;
         // приходим на этот стейт с разных мест, по наличию даты понимаем откуда пришли

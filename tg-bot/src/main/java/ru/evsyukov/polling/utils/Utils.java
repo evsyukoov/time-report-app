@@ -1,5 +1,7 @@
 package ru.evsyukov.polling.utils;
 
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
@@ -55,6 +57,14 @@ public class Utils {
             e.printStackTrace();
         }
         return properties;
+    }
+
+    public static boolean isCallBackMessage(Update update) {
+        return update.getMessage() == null;
+    }
+
+    public static Chat getCurrentChat(Update update) {
+        return isCallBackMessage(update) ? update.getCallbackQuery().getMessage().getChat() : update.getMessage().getChat();
     }
 
     public static LocalDateTime parseDate(String dateText) throws ParseException, DateAfterTodayException {

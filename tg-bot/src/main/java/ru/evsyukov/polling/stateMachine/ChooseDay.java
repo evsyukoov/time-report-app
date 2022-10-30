@@ -1,5 +1,6 @@
 package ru.evsyukov.polling.stateMachine;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.bot.BotContext;
@@ -8,6 +9,7 @@ import ru.evsyukov.polling.messages.Message;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class ChooseDay implements BotState {
 
     private final MainCommandsHandler mainHandler;
@@ -24,6 +26,7 @@ public class ChooseDay implements BotState {
 
     @Override
     public void handleMessage(BotContext context) {
+        log.info("State {} with client {} start", getState().name(), context.getClient());
         SendMessage sm;
         if ((sm = mainHandler.handleBackButton(context, Message.MENU, State.MENU_CHOICE)) != null
         || (sm = mainHandler.handleReportChoice(context)) != null)

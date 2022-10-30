@@ -20,7 +20,7 @@ public class ReportDay {
     private long id;
 
     @JoinColumn(name = "employee_id", referencedColumnName = "id")
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     private Employee employee;
 
     @Column(name = "date")

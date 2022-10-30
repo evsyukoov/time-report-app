@@ -37,6 +37,7 @@ public class Menu implements BotState {
 
     @Override
     public void handleMessage(BotContext context) {
+        log.info("State {} with client {} start", getState().name(), context.getClient());
         SendMessage sm;
         if (!context.isCallBackQuery()) {
             return;

@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.evsyukov.polling.stateMachine.BotState;
 import ru.evsyukov.polling.utils.SendHelper;
+import ru.evsyukov.polling.utils.Utils;
 
 import javax.annotation.PostConstruct;
 
@@ -45,7 +46,7 @@ public class ReportingBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
-            log.info("Received request by polling");
+            log.info("Received request by polling with client-id: {}", Utils.getCurrentChat(update).getId());
             Client client = newMessageHandler.getClient(update);
             BotContext context = newMessageHandler.initBotContext(client, update, this);
             BotState botState = newMessageHandler.getBotState(context);
