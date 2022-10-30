@@ -16,6 +16,7 @@ import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
 
 import javax.annotation.PostConstruct;
+import java.util.TimeZone;
 
 
 @Component
@@ -72,6 +73,7 @@ public class ReportingBot extends TelegramLongPollingBot {
 
     @PostConstruct
     public void startPollingTelegram() throws Exception {
+        TimeZone.setDefault(TimeZone.getTimeZone("Etc/UTC"));
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(this);
     }

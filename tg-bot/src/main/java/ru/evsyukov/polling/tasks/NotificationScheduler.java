@@ -66,7 +66,7 @@ public class NotificationScheduler {
     @Scheduled(fixedRate = PERIOD)
     public void notificate() {
         List<Client> clients =
-                notificationRepository.getAllByNextFireTimeBefore(LocalDateTime.now())
+                notificationRepository.getAllByNextFireTimeBefore(LocalDateTime.now().plusHours(3))
                         .stream().map(Notification::getClient)
                         .collect(Collectors.toList());
         for (Client client : clients) {
