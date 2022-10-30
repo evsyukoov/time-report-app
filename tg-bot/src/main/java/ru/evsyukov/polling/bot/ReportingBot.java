@@ -46,18 +46,22 @@ public class ReportingBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
-            log.info("Received request by polling with client-id: {}", Utils.getCurrentChat(update).getId());
-            Client client = newMessageHandler.getClient(update);
-            BotContext context = newMessageHandler.initBotContext(client, update, this);
-            BotState botState = newMessageHandler.getBotState(context);
-            SendMessage sendMessage = newMessageHandler.getSendMessage(context);
-            if (sendMessage != null) {
-                log.info("Send response to client {}", context.getClient());
-                SendHelper.sendMessage(sendMessage, context);
-                return;
+        try {
+            if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
+                log.info("Received request by polling with client-id: {}", Utils.getCurrentChat(update).getId());
+                Client client = newMessageHandler.getClient(update);
+                BotContext context = newMessageHandler.initBotContext(client, update, this);
+                BotState botState = newMessageHandler.getBotState(context);
+                SendMessage sendMessage = newMessageHandler.getSendMessage(context);
+                if (sendMessage != null) {
+                    log.info("Send response to client {}", context.getClient());
+                    SendHelper.sendMessage(sendMessage, context);
+                    return;
+                }
+                botState.handleMessage(context);
             }
-            botState.handleMessage(context);
+        } catch (Exception e) {
+            log.error("Fatal error: ", e);
         }
     }
 
