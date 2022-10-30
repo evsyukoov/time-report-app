@@ -1,24 +1,6 @@
 package ru.evsyukov.polling.messages;
 
-import ru.evsyukov.polling.utils.Utils;
-
-import java.util.List;
-
 public class Message {
-
-    public static final List<String> departments;
-
-    public static final List<String> days;
-
-    public static final List<String> actionsMenu;
-
-    static {
-        departments = Utils.getMessagesFromProps("./src/main/resources/property/job_departments.properties");
-
-        days = Utils.getMessagesFromProps("./src/main/resources/property/days_choice.properties");
-
-        actionsMenu = Utils.getMessagesFromProps("./src/main/resources/property/menu_actions.properties");
-    }
 
     public static final String EMPTY_SYMBOL = "🔳 ";
 

@@ -4,6 +4,8 @@ import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
 import ru.evsyukov.polling.messages.Message;
+import ru.evsyukov.polling.stateMachine.BotState;
+import ru.evsyukov.polling.stateMachine.State;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -16,9 +18,8 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    public static void validateDepartment(String text) throws ValidationException {
-        if (!Message.departments.contains(text))
-            throw new ValidationException(Message.ERROR_DEPARTMENT);
+    public static State getState(int state) {
+        return State.values()[state];
     }
 
     public static void validateFio(String text) throws ValidationException {
@@ -54,29 +55,6 @@ public class Utils {
             e.printStackTrace();
         }
         return properties;
-    }
-
-    public static List<String> getMessagesFromProps(String path) {
-        Properties props = Utils.getProperties(path);
-        return  props
-                .entrySet()
-                .stream()
-                .sorted(Comparator.comparing(s -> ((String) s.getKey())))
-                .map(Map.Entry::getValue)
-                .map(String.class::cast)
-                .map(Message.EMPTY_SYMBOL::concat)
-                .collect(Collectors.toList());
-    }
-
-    public static List<Long> getUidsFromProps(String path) {
-        Properties props = Utils.getProperties(path);
-        return  props
-                .values()
-                .stream()
-                .map(String.class::cast)
-                .map(Long::parseLong)
-                .sorted()
-                .collect(Collectors.toList());
     }
 
     public static LocalDateTime parseDate(String dateText) throws ParseException, DateAfterTodayException {

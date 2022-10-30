@@ -1,87 +1,121 @@
 package ru.evsyukov.polling.handlers;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.repository.ClientRepository;
+import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.bot.ReportingBot;
-import ru.evsyukov.polling.hibernate.access.ClientDao;
-import ru.evsyukov.polling.hibernate.access.EmployeeDao;
-import ru.evsyukov.polling.hibernate.entities.Client;
 import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.evsyukov.polling.stateMachine.AbstractBotState;
+import ru.evsyukov.polling.properties.ButtonsProperties;
+import ru.evsyukov.polling.stateMachine.BotState;
 import ru.evsyukov.polling.stateMachine.BotStateFactory;
 import ru.evsyukov.polling.stateMachine.State;
 import ru.evsyukov.polling.utils.SendHelper;
 
 import java.util.Collections;
+import java.util.Optional;
 
+@Slf4j
+@Service
 public class NewMessageHandler {
 
-    private final Update update;
+    private final ClientRepository clientRepository;
 
-    private final ReportingBot bot;
+    private final MainCommandsHandler mainHandler;
 
-    private SendMessage sendMessage;
+    private final EmployeeRepository employeeRepository;
 
-    private BotContext context;
+    private final ButtonsProperties buttonsProperties;
 
-    public SendMessage getSendMessage() {
-        return sendMessage;
+    @Autowired
+    public NewMessageHandler(ClientRepository clientRepository,
+                             MainCommandsHandler mainHandler,
+                             EmployeeRepository employeeRepository,
+                             ButtonsProperties buttonsProperties) {
+        this.clientRepository = clientRepository;
+        this.mainHandler = mainHandler;
+        this.employeeRepository = employeeRepository;
+        this.buttonsProperties = buttonsProperties;
     }
 
-    public NewMessageHandler(Update update, ReportingBot bot) {
-        this.update = update;
-        this.bot = bot;
-    }
-
-    public BotContext getContext() {
-        return context;
-    }
-
-    public AbstractBotState getBotState() {
+    public Client getClient(Update update) {
         State current;
-        boolean callBack = update.getMessage() == null;
-        Chat chat = callBack ?
-                 update.getCallbackQuery().getMessage().getChat() : update.getMessage().getChat();
-        String newMsg = (callBack ? update.getCallbackQuery().getData():
-                update.getMessage().getText());
-        long id = chat.getId();
-        Client client = ClientDao.getClient(id);
-
-        if (client == null) {
+        Chat chat = getCurrentChat(update);
+        Optional<Client> clientOpt = clientRepository.findById(chat.getId());
+        Client client;
+        if (clientOpt.isEmpty()) {
+            client = new Client();
             current = State.REGISTER_NAME;
-            client = ClientDao.createClient(id, current);
-        } else {
-            current = State.values()[client.getState()];
+            client.setState(current.ordinal());
+            client.setUid(chat.getId());
+            clientRepository.save(client);
+            log.info("Create client with id {}", client);
         }
-        context = new BotContext(bot, update, client, callBack, newMsg);
-        //хендлим старт и стоп сразу для всех, в логику каждого стейта заходить не нужно
-        if ((sendMessage = handleStartStop()) != null) {
-            return null;
+        else {
+            client = clientOpt.get();
+            log.info("Find client with id {}", client);
         }
-        //vacationMode также хенлим сразу
-        if (client.isOnVacation()) {
-            sendMessage = new MainCommandsHandler(context).handleClearVacation();
-            return null;
-        }
-        return BotStateFactory.createBotState(current, new BotContext(bot, update, client, callBack, newMsg));
+        return client;
     }
 
-    private SendMessage handleStartStop() {
+    private boolean isCallBackMessage(Update update) {
+        return update.getMessage() == null;
+    }
+
+    private Chat getCurrentChat(Update update) {
+        return isCallBackMessage(update) ? update.getCallbackQuery().getMessage().getChat() : update.getMessage().getChat();
+    }
+
+    public BotContext initBotContext(Client client, Update update, ReportingBot bot) {
+        boolean isCallBack = isCallBackMessage(update);
+        return new BotContext(bot, update, client, isCallBack, isCallBack ? update.getCallbackQuery().getData():
+                update.getMessage().getText());
+    }
+
+    public SendMessage getSendMessage(BotContext context) {
+        SendMessage sendMessage;
+        if ((sendMessage = handleStartStop(context)) != null) {
+            return sendMessage;
+        }
+        //vacationMode также хендлим сразу
+        if (context.getClient().isOnVacation()) {
+            sendMessage = mainHandler.handleClearVacation(context);
+            return sendMessage;
+        }
+        return null;
+    }
+
+    public BotState getBotState(BotContext context) {
+        return BotStateFactory.createBotState(context.getClient().getState());
+    }
+
+    private SendMessage handleStartStop(BotContext context) {
         String command = context.getMessage();
         SendMessage sm = null;
         if (command.equals(Message.START) || command.equals(Message.STOP)) {
+            log.info("Received START or STOP command from client {}", context.getClient());
             sm = new SendMessage();
             Client client = context.getClient();
             if (!client.isOnVacation()) {
                 if (client.isRegistered()) {
-                    ClientDao.updateState(client, State.MENU_CHOICE.ordinal());
-                    SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
+                    client.setState(State.MENU_CHOICE.ordinal());
+                    clientRepository.save(client);
+                    log.info("Update client id {} to state {}", client.getUid(), client.getState());
+
+                    SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
                     sm.setText(Message.MENU);
                 } else {
-                    ClientDao.updateState(client, State.CHECK_NAME.ordinal());
-                    SendHelper.setInlineKeyboardOneColumn(sm, EmployeeDao.getEmployeeNames(), null);
+                    client.setState(State.CHECK_NAME.ordinal());
+                    clientRepository.save(client);
+                    log.info("Update client id {} to state {}", client.getUid(), client.getState());
+
+                    SendHelper.setInlineKeyboardOneColumn(sm, employeeRepository.getAllEmployeeNames(), null);
                     sm.setText(Message.REGISTER_NAME);
                 }
             } else {

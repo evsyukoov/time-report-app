@@ -1,30 +1,28 @@
 package ru.evsyukov.polling.utils;
 
+import lombok.extern.slf4j.Slf4j;
+import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.polling.bot.BotContext;
-import ru.evsyukov.polling.hibernate.entities.Project;
 import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.evsyukov.polling.stateMachine.RegisterName;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicBoolean;;
 
+@Slf4j
 public class SendHelper {
-
-    private static final Logger logger = Logger.getLogger(RegisterName.class.getName());
 
     public static void sendMessage(SendMessage sendMessage, BotContext context){
         sendMessage.setChatId(String.valueOf(context.getClient().getUid()));
         try {
             context.getBot().execute(sendMessage);
         } catch (TelegramApiException e) {
-            logger.severe(e.getCause() != null ? e.getCause().getMessage() : Message.ERROR_SEND_MESSAGE);
+            log.error("Problem with sending message to client {}", context.getClient());
         }
     }
 

@@ -1,5 +1,8 @@
 package ru.evsyukov.polling.bot;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.polling.handlers.NewMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +11,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.evsyukov.polling.stateMachine.AbstractBotState;
+import ru.evsyukov.polling.stateMachine.BotState;
 import ru.evsyukov.polling.utils.SendHelper;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +24,13 @@ public class ReportingBot extends TelegramLongPollingBot {
     private String token;
 
     private String botName;
+
+    private final NewMessageHandler newMessageHandler;
+
+    @Autowired
+    public ReportingBot(NewMessageHandler newMessageHandler) {
+        this.newMessageHandler = newMessageHandler;
+    }
 
     @Value("${polling-bot.token}")
     public void setToken(String token) {
@@ -35,15 +45,17 @@ public class ReportingBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
-            NewMessageHandler handler = new NewMessageHandler(update, this);
-            AbstractBotState botState = handler.getBotState();
-            if (botState == null) {
-                if (handler.getSendMessage() != null) {
-                    SendHelper.sendMessage(handler.getSendMessage(), handler.getContext());
-                }
+            log.info("Received request by polling");
+            Client client = newMessageHandler.getClient(update);
+            BotContext context = newMessageHandler.initBotContext(client, update, this);
+            BotState botState = newMessageHandler.getBotState(context);
+            SendMessage sendMessage = newMessageHandler.getSendMessage(context);
+            if (sendMessage != null) {
+                log.info("Send response to client {}", context.getClient());
+                SendHelper.sendMessage(sendMessage, context);
                 return;
             }
-            botState.handleMessage();
+            botState.handleMessage(context);
         }
     }
 

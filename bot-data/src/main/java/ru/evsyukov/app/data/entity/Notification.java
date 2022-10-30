@@ -2,6 +2,7 @@ package ru.evsyukov.app.data.entity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "notification")
@@ -40,5 +41,13 @@ public class Notification {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "uid=" + uid +
+                ", nextFireTime=" + nextFireTime.format(DateTimeFormatter.ISO_DATE) +
+                '}';
     }
 }

@@ -1,21 +1,28 @@
 package ru.evsyukov.polling.handlers;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.entity.Notification;
+import ru.evsyukov.app.data.entity.Project;
+import ru.evsyukov.app.data.entity.ReportDay;
+import ru.evsyukov.app.data.repository.ClientRepository;
+import ru.evsyukov.app.data.repository.EmployeeRepository;
+import ru.evsyukov.app.data.repository.NotificationRepository;
+import ru.evsyukov.app.data.repository.ProjectsRepository;
+import ru.evsyukov.app.data.repository.ReportDayRepository;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
-import ru.evsyukov.polling.hibernate.access.ClientDao;
-import ru.evsyukov.polling.hibernate.access.EmployeeDao;
-import ru.evsyukov.polling.hibernate.access.NotificationDao;
-import ru.evsyukov.polling.hibernate.access.ProjectsDao;
-import ru.evsyukov.polling.hibernate.access.ReportDaysDao;
-import ru.evsyukov.polling.hibernate.entities.Project;
 import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.evsyukov.polling.properties.ButtonsProperties;
 import ru.evsyukov.polling.stateMachine.EnumTranslators;
 import ru.evsyukov.polling.stateMachine.State;
 import ru.evsyukov.polling.utils.DateTimeUtils;
@@ -27,37 +34,52 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Service
 public class MainCommandsHandler {
-    BotContext context;
 
-    State newState;
+    private final ClientRepository clientRepository;
 
-    String message;
+    private final NotificationRepository notificationRepository;
 
-    public MainCommandsHandler(BotContext context,
-                               State newState, String message) {
-        this.context = context;
-        this.newState = newState;
-        this.message = message;
+    private final ReportDayRepository reportDayRepository;
+
+    private final EmployeeRepository employeeRepository;
+
+    private final ProjectsRepository projectsRepository;
+
+    private final ButtonsProperties buttonsProperties;
+
+    @Autowired
+    public MainCommandsHandler(ClientRepository clientRepository,
+                               NotificationRepository notificationRepository,
+                               ReportDayRepository reportDayRepository,
+                               EmployeeRepository employeeRepository,
+                               ProjectsRepository projectsRepository,
+                               ButtonsProperties buttonsProperties) {
+        this.clientRepository = clientRepository;
+        this.notificationRepository = notificationRepository;
+        this.reportDayRepository = reportDayRepository;
+        this.employeeRepository = employeeRepository;
+        this.projectsRepository = projectsRepository;
+        this.buttonsProperties = buttonsProperties;
     }
 
-    public MainCommandsHandler(BotContext context) {
-        this.context = context;
-    }
-
-    public SendMessage handleBackButton() {
+    public SendMessage handleBackButton(BotContext context, String message, State newState) {
         String command = context.getMessage();
         if (command.equals(Message.BACK)) {
             SendMessage sm = new SendMessage();
-            ClientDao.updateState(context.getClient(), newState.ordinal());
+
+            updateClientState(context.getClient(), newState);
+
             if (message.equals(Message.REGISTER_NAME)) {
-                SendHelper.setInlineKeyboardOneColumn(sm, EmployeeDao.getEmployeeNames(), null);
+                SendHelper.setInlineKeyboardOneColumn(sm, employeeRepository.getAllEmployeeNames(), null);
             } else if (message.equals(Message.MENU)) {
-              SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
+              SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
             } else if (message.equals(Message.SELECT_PROJECT)) {
-                SendHelper.setInlineKeyboardProjects(sm, ProjectsDao.getProjects());
+                SendHelper.setInlineKeyboardProjects(sm, projectsRepository.findByOrderByProjectNameAsc());
             } else if (message.equals(Message.CHOOSE_REPORT_TYPE)) {
-                SendHelper.setInlineKeyboard(sm, Message.days, Message.BACK, 2);
+                SendHelper.setInlineKeyboard(sm, buttonsProperties.getDays(), Message.BACK, 2);
             } else if (message.equals(Message.SELECT_DATE)) {
                 SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.BACK, 2);
             }
@@ -67,23 +89,42 @@ public class MainCommandsHandler {
         return null;
     }
 
-    public SendMessage handleClearVacation() {
+    public SendMessage handleClearVacation(BotContext context) {
         SendMessage sm = new SendMessage();
         if (context.isCallBackQuery() && context.getMessage().equals(Message.CLEAR_VACATION)) {
             sm.setText(Message.VACATION_IS_CLEAR);
-            ClientDao.updateClientVacationInfo(context.getClient(),
-                    State.MENU_CHOICE.ordinal(), null, null, false);
-            SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
+            clearClientVacation(context.getClient());
+            SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
             return sm;
         }
         return null;
     }
 
-    public SendMessage handleVacationsDate() {
+    private void updateClientState(Client client, State state) {
+        client.setState(state.ordinal());
+        clientRepository.save(client);
+        log.info("Update client state {}", client);
+    }
+
+    private void setClientVacation(Client client, State state, Date start, Date end, boolean isOnVacation) {
+        client.setState(state.ordinal());
+        client.setStartVacation(start);
+        client.setEndVacation(end);
+        client.setOnVacation(isOnVacation);
+        clientRepository.save(client);
+        log.info("Set vacation on client {}", client);
+    }
+
+    private void clearClientVacation(Client client) {
+        log.info("Clear vacation on client {}", client);
+        setClientVacation(client, State.MENU_CHOICE, null, null, false);
+    }
+
+    public SendMessage handleVacationsDate(BotContext context) {
         String command = context.getMessage();
         Date[] res;
         SendMessage sm;
-        if ((sm = handleClearVacation()) != null) {
+        if ((sm = handleClearVacation(context)) != null) {
             return sm;
         }
         sm = new SendMessage();
@@ -118,32 +159,32 @@ public class MainCommandsHandler {
             return sm;
         }
         boolean onVacation = DateTimeUtils.isBetweenStrict(res[0], res[1], new Date());
-        ClientDao.updateClientVacationInfo(context.getClient(), State.MENU_CHOICE.ordinal(), res[0], res[1], onVacation);
+        setClientVacation(context.getClient(), State.MENU_CHOICE, res[0], res[1], onVacation);
         sm.setText(Message.VACATION_DATES_SET);
         if (onVacation) {
             sm.setText(Message.YOU_ARE_IN_VACATION_MODE);
             SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.CLEAR_VACATION, 1);
         } else {
-            SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
+            SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
         }
         return sm;
     }
 
-    public SendMessage handleMenuChoice() {
+    public SendMessage handleMenuChoice(BotContext context) {
         String command = context.getMessage();
         SendMessage sm = new SendMessage();
-        if (command.equals(Message.actionsMenu.get(0))) {
-            ClientDao.updateState(context.getClient(), State.CHOOSE_DAY.ordinal());
-            SendHelper.setInlineKeyboard(sm, Message.days, Message.BACK, 2);
+        if (command.equals(buttonsProperties.getActionsMenu().get(0))) {
+            updateClientState(context.getClient(), State.CHOOSE_DAY);
+            SendHelper.setInlineKeyboard(sm, buttonsProperties.getDays(), Message.BACK, 2);
             sm.setText(Message.CHOOSE_REPORT_TYPE);
             return sm;
-        } else if (command.equals(Message.actionsMenu.get(1))) {
-            ClientDao.updateState(context.getClient(), State.NOTIFICATION_CHOICE.ordinal());
+        } else if (command.equals(buttonsProperties.getActionsMenu().get(1))) {
+            updateClientState(context.getClient(), State.NOTIFICATION_CHOICE);
             SendHelper.setDateTimeInlineQuery(sm);
             sm.setText(Message.NOTIFICATION_CHOICE);
             return sm;
-        } else if (command.equals(Message.actionsMenu.get(2))) {
-            ClientDao.updateState(context.getClient(), State.VACATION.ordinal());
+        } else if (command.equals(buttonsProperties.getActionsMenu().get(2))) {
+            updateClientState(context.getClient(), State.VACATION);
             ArrayList<String> actionButtons = new ArrayList<>();
             actionButtons.add(Message.BACK);
             if (context.getClient().getStartVacation() != null
@@ -157,7 +198,7 @@ public class MainCommandsHandler {
         return null;
     }
 
-    public SendMessage handleTimeChoice() {
+    public SendMessage handleTimeChoice(BotContext context) {
         String command = context.getMessage();
         LocalDateTime resultTime;
         SendMessage sm = null;
@@ -165,28 +206,38 @@ public class MainCommandsHandler {
             return null;
         }
         if (command.split(" ")[0].matches("\\d+")) {
-            refreshTimeBox(command);
+            refreshTimeBox(context, command);
         } else if (command.equals(Message.DISCHARGE_NOTIFICATION)) {
             sm = new SendMessage();
-            NotificationDao.saveClientOption(null, context.getClient().getUid());
+            updateNotification(context.getClient(), null);
             sm.setText(Utils.generateResultMessage(Message.DISCHARGE_ACTION_ENABLED, Message.MENU));
-            SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
-            ClientDao.updateState(context.getClient(), State.MENU_CHOICE.ordinal());
+            SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
+            updateClientState(context.getClient(), State.MENU_CHOICE);
             return sm;
         } else if (command.equals(Message.APPROVE_NOTIFICATION) &&
-                (resultTime = getTimeFromClientChoice()) != null) {
+                (resultTime = getTimeFromClientChoice(context)) != null) {
             sm = new SendMessage();
-            NotificationDao.saveClientOption(resultTime, context.getClient().getUid());
+
+            updateNotification(context.getClient(), resultTime);
             sm.setText(Utils.generateResultMessage(
                     String.format(Message.APPROVE_NOTIFICATION_ENABLED, getTimeStringFromDate(resultTime)),
                     Message.MENU));
 
-            SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
-            ClientDao.updateState(context.getClient(), State.MENU_CHOICE.ordinal());
+            SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
+            updateClientState(context.getClient(), State.MENU_CHOICE);
             return sm;
         }
         return null;
     }
+
+    private void updateNotification(Client client, LocalDateTime time) {
+        Notification notification = new Notification();
+        notification.setUid(client.getUid());
+        notification.setNextFireTime(time);
+        notificationRepository.save(notification);
+        log.info("Update client notification {}", notification);
+    }
+
 
     private String getTimeStringFromDate(LocalDateTime dateTime) {
         return String.format("%s:%s по МСК", dateTime.getHour() < 10 ? "0".concat(String.valueOf(dateTime.getHour()))
@@ -205,7 +256,7 @@ public class MainCommandsHandler {
                 .orElse(null);
     }
 
-    private LocalDateTime getTimeFromClientChoice() {
+    private LocalDateTime getTimeFromClientChoice(BotContext context) {
         InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
                 getMessage().getReplyMarkup();
         InlineKeyboardButton pressedHour = findPressedButton("час." , markup);
@@ -216,14 +267,19 @@ public class MainCommandsHandler {
         Integer hour = Integer.parseInt(pressedHour.getCallbackData().split(" ")[0]);
         Integer minutes = Integer.parseInt(pressedMinutes.getCallbackData().split(" ")[0]);
         LocalDateTime nextFireTime = LocalDateTime.now();
-        if (ReportDaysDao.isReportToday(context.getClient())) {
+        if (isReportToday(context.getClient())) {
             nextFireTime = nextFireTime.plusHours(24);
         }
         return LocalDateTime.of(nextFireTime.getYear(), nextFireTime.getMonth(), nextFireTime.getDayOfMonth(),
                 hour, minutes);
     }
 
-    public SendMessage parseDate() {
+    private boolean isReportToday(Client client) {
+        ReportDay reportDay = reportDayRepository.findReportDayByUidAndDate(client.getUid(), new Date());
+        return reportDay != null;
+    }
+
+    public SendMessage parseDate(BotContext context) {
         String command = context.getMessage();
         SendMessage sm = new SendMessage();
         LocalDateTime date;
@@ -239,35 +295,42 @@ public class MainCommandsHandler {
             SendHelper.setInlineKeyboard(sm,Collections.emptyList(), Message.BACK, 2);
             return sm;
         }
-        ClientDao.updateDate(context.getClient(), State.SELECT_PROJECT.ordinal(), date);
-        List<Project> projects = ProjectsDao.getProjects();
+        updateClientDateAndState(context.getClient(), State.SELECT_PROJECT, date);
+        List<Project> projects = projectsRepository.findByOrderByProjectNameAsc();
         SendHelper.setInlineKeyboardProjects(sm, projects);
         sm.setText(Message.SELECT_PROJECT);
         return sm;
     }
 
-    public SendMessage handleReportChoice() {
+    private void updateClientDateAndState(Client client, State state, LocalDateTime date) {
+        client.setState(state.ordinal());
+        client.setDateTime(date);
+        clientRepository.save(client);
+        log.info("Update client state and date {}", client);
+    }
+
+    public SendMessage handleReportChoice(BotContext context) {
         String command = context.getMessage();
         SendMessage message = new SendMessage();
-        if (command.equals(Message.days.get(0))) {
-            List<Project> projects = ProjectsDao.getProjects();
+        if (command.equals(buttonsProperties.getDays().get(0))) {
+            List<Project> projects = projectsRepository.findByOrderByProjectNameAsc();
             message.setText(EnumTranslators.translate(State.SELECT_PROJECT.ordinal()));
             SendHelper.refreshInlineKeyboard(context);
             SendHelper.setInlineKeyboardProjects(message, projects);
-            ClientDao.updateStates(context.getClient(), State.SELECT_PROJECT.ordinal());
+            updateClientState(context.getClient(), State.SELECT_PROJECT);
             return message;
         }
-        else if (command.equals(Message.days.get(1))) {
+        else if (command.equals(buttonsProperties.getDays().get(1))) {
             message.setText(EnumTranslators.translate(State.PARSE_DATE.ordinal()));
             SendHelper.refreshInlineKeyboard(context);
             SendHelper.setInlineKeyboard(message, Collections.emptyList(), Message.BACK, 2);
-            ClientDao.updateStates(context.getClient(), State.PARSE_DATE.ordinal());
+            updateClientState(context.getClient(), State.PARSE_DATE);
             return message;
         }
         return null;
     }
 
-    private boolean isValidTimeBoxChoice(String currentPress) {
+    private boolean isValidTimeBoxChoice(BotContext context, String currentPress) {
         InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
                 getMessage().getReplyMarkup();
         if (currentPress.contains("час.")) {
@@ -290,10 +353,10 @@ public class MainCommandsHandler {
         return true;
     }
 
-    private void refreshTimeBox(String command) {
+    private void refreshTimeBox(BotContext context, String command) {
         InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
                 getMessage().getReplyMarkup();
-        if (isValidTimeBoxChoice(command)) {
+        if (isValidTimeBoxChoice(context, command)) {
             SendHelper.refreshInlineKeyboard(context);
         }
     }
@@ -305,31 +368,41 @@ public class MainCommandsHandler {
                 .count();
     }
 
-    public SendMessage handleProjectsChoice() {
+    public SendMessage handleProjectsChoice(BotContext context) {
         if (!context.isCallBackQuery()) {
             return null;
         } else {
             if (!context.getMessage().equals(Message.APPROVE)) {
-                handleProjectBox();
+                handleProjectBox(context);
                 return null;
             } else {
-                List<String> result = collectProjectChoice();
+                List<String> result = collectProjectChoice(context);
                 if (result.isEmpty()) {
                     return null;
                 } else {
-                    ClientDao.updateProject(context.getClient(), State.FINISH.ordinal(), result,
-                            context.getClient().getDateTime() == null ? LocalDateTime.now() :
-                            context.getClient().getDateTime());
+                    updateClientProjects(context.getClient(), State.FINISH, result);
                 }
             }
         }
         SendMessage sm = new SendMessage();
         sm.setText(Utils.generateResultMessage(Message.FINISH, Message.MENU));
-        SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);;
+        SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);;
         return sm;
     }
 
-    private List<String> collectProjectChoice() {
+    private void updateClientProjects(Client client, State state, List<String> projects) {
+        client.setState(state.ordinal());
+        client.setDateTime(client.getDateTime() == null ? LocalDateTime.now() : client.getDateTime());
+        client.setProject(projects.get(0));
+        if (projects.size() > 1) {
+            client.setExtraProjects(String.join(Message.DELIMETR,
+                    projects.subList(1, projects.size())));
+        }
+        clientRepository.save(client);
+        log.info("Update client projects {}, proj: {}", client, projects);
+    }
+
+    private List<String> collectProjectChoice(BotContext context) {
         InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
                 getMessage().getReplyMarkup();
         List<String> projects = new ArrayList<>();
@@ -369,7 +442,7 @@ public class MainCommandsHandler {
                 .orElse(null);
     }
 
-    private void handleProjectBox() {
+    private void handleProjectBox(BotContext context) {
         String command = context.getMessage();
         InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
                 getMessage().getReplyMarkup();
@@ -408,7 +481,7 @@ public class MainCommandsHandler {
             try {
                 context.getBot().execute(editMessageReplyMarkup);
             } catch (TelegramApiException e) {
-                e.printStackTrace();
+                log.error("Error while edit reply markup: ", e);
             }
         }
     }

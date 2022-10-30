@@ -4,21 +4,15 @@ import ru.evsyukov.polling.bot.BotContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.utils.SendHelper;
 
-public abstract class AbstractBotState {
+public interface BotState {
 
-    protected SendMessage sm;
-
-    protected BotContext context;
-
-    public AbstractBotState(BotContext context) {
-        this.context = context;
-    }
-
+    State getState();
     // хендлим ответ на вопрос
-    public abstract void handleMessage();
+
+    void handleMessage(BotContext context);
 
     //задаем новый вопрос
-    public void question() {
+    default void question(SendMessage sm, BotContext context) {
         SendHelper.sendMessage(sm, context);
     }
 

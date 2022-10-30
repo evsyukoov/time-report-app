@@ -43,6 +43,10 @@ public class Client {
     @Temporal(TemporalType.TIMESTAMP)
     private Date endVacation;
 
+    @OneToOne
+    @PrimaryKeyJoinColumn(name = "uid", referencedColumnName = "uid")
+    private Notification notification;
+
     public boolean isOnVacation() {
         return onVacation;
     }
@@ -124,6 +128,14 @@ public class Client {
 
     public void setRegistered(boolean registered) {
         this.registered = registered;
+    }
+
+    public Notification getNotification() {
+        return notification;
+    }
+
+    public void setNotification(Notification notification) {
+        this.notification = notification;
     }
 
     @Override

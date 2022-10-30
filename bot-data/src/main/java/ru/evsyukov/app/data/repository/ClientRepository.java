@@ -9,8 +9,6 @@ import java.util.List;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    Client findClientByUid(long uid);
-
     List<Client> findAll();
 
     List<Client> getAllByStartVacationIsNotNullAndEndVacationIsNotNull();

@@ -1,24 +1,31 @@
 package ru.evsyukov.polling.stateMachine;
 
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
 import ru.evsyukov.polling.messages.Message;
-import org.jvnet.hk2.annotations.Service;
 
 @Service
-public class Vacation extends AbstractBotState {
+public class Vacation implements BotState {
 
-    public Vacation(BotContext context) {
-        super(context);
+    private final MainCommandsHandler mainHandler;
+
+    public Vacation(MainCommandsHandler mainHandler) {
+        this.mainHandler = mainHandler;
     }
 
     @Override
-    public void handleMessage() {
-        MainCommandsHandler handler = new MainCommandsHandler(context,
-                State.MENU_CHOICE, Message.MENU);
-        if ((super.sm = handler.handleBackButton()) == null) {
-            sm = handler.handleVacationsDate();
+    public State getState() {
+        return State.VACATION;
+    }
+
+    @Override
+    public void handleMessage(BotContext context) {
+        SendMessage sm;
+        if ((sm = mainHandler.handleBackButton(context, Message.MENU, State.MENU_CHOICE)) == null) {
+            sm = mainHandler.handleVacationsDate(context);
         }
-        question();
+        question(sm, context);
     }
 }

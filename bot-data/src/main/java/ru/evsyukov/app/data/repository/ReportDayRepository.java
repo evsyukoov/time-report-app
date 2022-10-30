@@ -12,7 +12,11 @@ public interface ReportDayRepository extends JpaRepository<ReportDay, Long> {
 
     List<ReportDay> findAll();
 
+    List<ReportDay> findReportDayByDateGreaterThanEqualAndDateLessThanEqualAndUidEquals(Date start, Date end, Long clientUid);
+
     List<ReportDay> findReportDayByEmployeeName(String name);
+
+    ReportDay findReportDayByUidAndDate(Long uid, Date date);
 
     List<ReportDay> findReportDayByDateGreaterThanEqualAndDateLessThanEqual(Date start, Date end);
 

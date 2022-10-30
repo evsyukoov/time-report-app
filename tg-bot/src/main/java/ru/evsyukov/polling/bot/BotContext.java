@@ -1,7 +1,7 @@
 package ru.evsyukov.polling.bot;
 
-import ru.evsyukov.polling.hibernate.entities.Client;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.evsyukov.app.data.entity.Client;
 
 public class BotContext {
     private final ReportingBot bot;
@@ -9,7 +9,6 @@ public class BotContext {
     private final Client client;
     private final boolean callBackQuery;
     private final String message;
-
 
     public BotContext(ReportingBot bot, Update update,
                       Client client, boolean callBackQuery,

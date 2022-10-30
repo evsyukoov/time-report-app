@@ -1,24 +1,32 @@
 package ru.evsyukov.polling.stateMachine;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
 import ru.evsyukov.polling.messages.Message;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ChooseDay extends AbstractBotState {
+public class ChooseDay implements BotState {
 
-    public ChooseDay(BotContext context) {
-        super(context);
+    private final MainCommandsHandler mainHandler;
+
+    @Autowired
+    public ChooseDay(MainCommandsHandler mainHandler) {
+        this.mainHandler = mainHandler;
     }
 
     @Override
-    public void handleMessage() {
+    public State getState() {
+        return State.CHOOSE_DAY;
+    }
 
-        MainCommandsHandler handler = new MainCommandsHandler(context,
-                State.MENU_CHOICE, Message.MENU);
-        if ((sm = handler.handleBackButton()) != null
-        || (sm = handler.handleReportChoice()) != null)
-            question();
+    @Override
+    public void handleMessage(BotContext context) {
+        SendMessage sm;
+        if ((sm = mainHandler.handleBackButton(context, Message.MENU, State.MENU_CHOICE)) != null
+        || (sm = mainHandler.handleReportChoice(context)) != null)
+            question(sm, context);
     }
 }

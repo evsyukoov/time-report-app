@@ -8,6 +8,11 @@
     <url>http://maven.apache.org</url>
     <properties>
         <tg-bot.version>1.0-SNAPSHOT</tg-bot.version>
+        <encoding.type>UTF-8</encoding.type>
+
+        <project.build.sourceEncoding>${encoding.type}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${encoding.type</project.reporting.outputEncoding>
+        <file.encoding>${encoding.type}</file.encoding>
     </properties>
 
     <parent>

@@ -1,21 +1,29 @@
 package ru.evsyukov.polling.stateMachine;
 
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
-import org.jvnet.hk2.annotations.Service;
 
 @Service
-public class NotificationChoice extends AbstractBotState{
+public class NotificationChoice implements BotState {
 
-    public NotificationChoice(BotContext context) {
-        super(context);
+    private final MainCommandsHandler mainHandler;
+
+    public NotificationChoice(MainCommandsHandler mainHandler) {
+        this.mainHandler = mainHandler;
     }
 
     @Override
-    public void handleMessage() {
-        MainCommandsHandler handler = new MainCommandsHandler(context);
-        if ((sm = handler.handleTimeChoice()) != null) {
-            question();
+    public State getState() {
+        return State.NOTIFICATION_CHOICE;
+    }
+
+    @Override
+    public void handleMessage(BotContext context) {
+        SendMessage sm;
+        if ((sm = mainHandler.handleTimeChoice(context)) != null) {
+            question(sm, context);
         }
     }
 

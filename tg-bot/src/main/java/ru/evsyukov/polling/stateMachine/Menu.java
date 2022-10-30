@@ -1,36 +1,62 @@
 package ru.evsyukov.polling.stateMachine;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.repository.ClientRepository;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
-import ru.evsyukov.polling.hibernate.access.ClientDao;
 import ru.evsyukov.polling.messages.Message;
-import org.jvnet.hk2.annotations.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import ru.evsyukov.polling.properties.ButtonsProperties;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
 
 @Service
-public class Menu extends AbstractBotState {
+@Slf4j
+public class Menu implements BotState {
 
-    public Menu(BotContext context) {
-        super(context);
-        sm = new SendMessage();
+    private final ClientRepository clientRepository;
+
+    private final MainCommandsHandler mainHandler;
+
+    private final ButtonsProperties buttonsProperties;
+
+    @Autowired
+    public Menu(ClientRepository clientRepository, MainCommandsHandler mainHandler, ButtonsProperties buttonsProperties) {
+        this.clientRepository = clientRepository;
+        this.mainHandler = mainHandler;
+        this.buttonsProperties = buttonsProperties;
     }
 
     @Override
-    public void handleMessage() {
+    public State getState() {
+        return State.MENU;
+    }
+
+    @Override
+    public void handleMessage(BotContext context) {
+        SendMessage sm;
         if (!context.isCallBackQuery()) {
             return;
         }
-        MainCommandsHandler backButtonHandler = new MainCommandsHandler(context, State.CHECK_NAME, Message.REGISTER_NAME);
-        if ((sm = backButtonHandler.handleBackButton()) != null && !ClientDao.getClient(context.getClient().getUid()).isRegistered()) {
-            question();
+        if ((sm = mainHandler.handleBackButton(context, Message.REGISTER_NAME, State.CHECK_NAME)) != null
+                && !clientRepository.findById(context.getClient().getUid()).get().isRegistered()) {
+            question(sm, context);
         } else {
             sm = new SendMessage();
             sm.setText((Utils.generateResultMessage(Message.REGISTER_IS_FINISHED, Message.MENU)));
-            SendHelper.setInlineKeyboard(sm, Message.actionsMenu, null, 3);
-            ClientDao.updateName(context.getClient(), State.MENU_CHOICE.ordinal(), context.getClient().getName(), true);
-            question();
+            SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
+
+            Client client = context.getClient();
+            client.setState(State.MENU_CHOICE.ordinal());
+            client.setName(context.getClient().getName());
+            client.setRegistered(true);
+            clientRepository.save(client);
+            log.info("Successfully update client {} at database", client);
+
+            question(sm, context);
         }
     }
 
