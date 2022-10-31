@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import ru.evsyukov.polling.utils.DateTimeUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -40,6 +41,12 @@ public class SelectProject implements BotState {
     private ProjectsRepository projectsRepository;
 
     private MainCommandsHandler mainHandler;
+
+    private static final DateTimeFormatter dtf;
+
+    static {
+        dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    }
 
     @Autowired
     public SelectProject(ClientRepository clientRepository,
@@ -68,8 +75,10 @@ public class SelectProject implements BotState {
         SendMessage sm;
         // приходим на этот стейт с разных мест, по наличию даты понимаем откуда пришли
         if (client.getDateTime() == null) {
+            log.info("Client {} want to report for today", context.getClient());
             sm = mainHandler.handleBackButton(context, Message.CHOOSE_REPORT_TYPE, State.CHOOSE_DAY);
         } else {
+            log.info("Client {} want to report for day {}", context.getClient(), dtf.format(client.getDateTime()));
             sm = mainHandler.handleBackButton(context, Message.SELECT_DATE, State.PARSE_DATE);
         }
         if ((sm != null)) {
@@ -141,7 +150,7 @@ public class SelectProject implements BotState {
         LocalDateTime nextFireTime = notification.getNextFireTime();
         if (nextFireTime == null || nextFireTime.toLocalDate().
                 isAfter(LocalDateTime.now().toLocalDate())) {
-            log.info("Not nesseccary to send notification to client {}", client);
+            log.info("Not nesseccary to update notification time to client {}", client);
             return;
         }
         notification.setNextFireTime(nextFireTime.plusHours(24));

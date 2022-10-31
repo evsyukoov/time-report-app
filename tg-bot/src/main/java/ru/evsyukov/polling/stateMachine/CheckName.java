@@ -39,11 +39,13 @@ public class CheckName implements BotState {
         log.info("State {} with client {} start", getState().name(), context.getClient());
         SendMessage sm = new SendMessage();
         if (!context.isCallBackQuery()) {
+            log.warn("Callback expected, client {}", context.getClient());
             return;
         }
         List<String> expected = employeeRepository.getAllEmployeeNames();
         String receive = context.getMessage().replace(Message.EMPTY_SYMBOL, "");
         if (!expected.contains(receive)) {
+            log.warn("No such client, wrong text received by {}", context.getClient());
             return;
         }
         List<String> allRegisteredClientsNames = clientRepository.findAll()
@@ -53,8 +55,9 @@ public class CheckName implements BotState {
                 .collect(Collectors.toList());
 
         if (allRegisteredClientsNames.contains(receive)) {
+            log.warn("Already has such client at database {}", receive);
             sm.setText(Message.WRONG_NAME_CHOSEN);
-            SendHelper.setInlineKeyboardOneColumn(sm,employeeRepository.getAllEmployeeNames(), null);
+            SendHelper.setInlineKeyboardOneColumn(sm, employeeRepository.getAllEmployeeNames(), null);
         } else {
             updateClient(context.getClient(), State.MENU, receive);
             sm.setText(String.format(Message.NAME_CHOSEN, context.getMessage()));

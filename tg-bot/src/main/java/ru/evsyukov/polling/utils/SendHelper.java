@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;;
@@ -131,17 +132,29 @@ public class SendHelper {
         }
     }
 
-    public static synchronized void setDateTimeInlineQuery(SendMessage sm) {
+    public static synchronized void setDateTimeInlineQuery(SendMessage sm, LocalDateTime chosenTime) {
         InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> row = null;
+        int hour, minute;
+        if (chosenTime != null) {
+            hour = chosenTime.getHour();
+            minute = chosenTime.getMinute();
+        } else {
+            hour = minute = -1;
+        }
         for (int i = 0; i < 24; i++) {
             if (i % 2 == 0) {
                 row = new ArrayList<>();
                 rows.add(row);
             }
             String time = getTime(i, "час.");
-            String msg = Message.EMPTY_SYMBOL.concat(time);
+            String msg;
+            if (i != hour) {
+                msg = Message.EMPTY_SYMBOL.concat(time);
+            } else {
+                msg = Message.CONFIRM_SYMBOL.concat(time);
+            }
             row.add(newButton(msg, time));
         }
         for (int i = 0; i < 60; i += 5) {
@@ -150,7 +163,12 @@ public class SendHelper {
                 rows.add(row);
             }
             String time = getTime(i, "мин.");
-            String msg = Message.EMPTY_SYMBOL.concat(time);
+            String msg;
+            if (i != minute) {
+                msg = Message.EMPTY_SYMBOL.concat(time);
+            } else  {
+                msg = Message.CONFIRM_SYMBOL.concat(time);
+            }
             row.add(newButton(msg, time));
         }
         row = new ArrayList<>();

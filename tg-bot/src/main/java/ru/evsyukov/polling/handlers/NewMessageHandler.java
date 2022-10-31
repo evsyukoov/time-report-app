@@ -112,6 +112,7 @@ public class NewMessageHandler {
                     sm.setText(Message.REGISTER_NAME);
                 }
             } else {
+                log.info("Request was received by client {} on vacation", context.getClient());
                 SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.CLEAR_VACATION, 1);
                 sm.setText(Message.YOU_ARE_IN_VACATION);
             }

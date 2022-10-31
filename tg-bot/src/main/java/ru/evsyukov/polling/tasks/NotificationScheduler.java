@@ -101,7 +101,7 @@ public class NotificationScheduler {
             } catch (TelegramApiException e) {
                 log.error("Error send message to client {}, err: {}", client, e);
             }
-            log.info("Succesfully send notification message to client {}", client);
+            log.info("Succesfully send notification message {} to client {}", resultMessage, client);
         }
     }
 

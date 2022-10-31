@@ -170,20 +170,29 @@ public class MainCommandsHandler {
         return sm;
     }
 
+    private LocalDateTime getClientChosenTime(Client client) {
+        return notificationRepository.findById(client.getUid())
+                .map(Notification::getNextFireTime)
+                .orElse(null);
+    }
+
     public SendMessage handleMenuChoice(BotContext context) {
         String command = context.getMessage();
         SendMessage sm = new SendMessage();
         if (command.equals(buttonsProperties.getActionsMenu().get(0))) {
+            log.info("Client {} pressed {} button", context.getClient(), buttonsProperties.getActionsMenu().get(0));
             updateClientState(context.getClient(), State.CHOOSE_DAY);
             SendHelper.setInlineKeyboard(sm, buttonsProperties.getDays(), Message.BACK, 2);
             sm.setText(Message.CHOOSE_REPORT_TYPE);
             return sm;
         } else if (command.equals(buttonsProperties.getActionsMenu().get(1))) {
+            log.info("Client {} pressed {} button", context.getClient(), buttonsProperties.getActionsMenu().get(1));
             updateClientState(context.getClient(), State.NOTIFICATION_CHOICE);
-            SendHelper.setDateTimeInlineQuery(sm);
+            SendHelper.setDateTimeInlineQuery(sm, getClientChosenTime(context.getClient()));
             sm.setText(Message.NOTIFICATION_CHOICE);
             return sm;
         } else if (command.equals(buttonsProperties.getActionsMenu().get(2))) {
+            log.info("Client {} pressed {} button", context.getClient(), buttonsProperties.getActionsMenu().get(2));
             updateClientState(context.getClient(), State.VACATION);
             ArrayList<String> actionButtons = new ArrayList<>();
             actionButtons.add(Message.BACK);
@@ -208,6 +217,7 @@ public class MainCommandsHandler {
         if (command.split(" ")[0].matches("\\d+")) {
             refreshTimeBox(context, command);
         } else if (command.equals(Message.DISCHARGE_NOTIFICATION)) {
+            log.info("Client {} pressed {} button", context.getClient(), Message.DISCHARGE_NOTIFICATION);
             sm = new SendMessage();
             updateNotification(context.getClient(), null);
             sm.setText(Utils.generateResultMessage(Message.DISCHARGE_ACTION_ENABLED, Message.MENU));
@@ -216,6 +226,7 @@ public class MainCommandsHandler {
             return sm;
         } else if (command.equals(Message.APPROVE_NOTIFICATION) &&
                 (resultTime = getTimeFromClientChoice(context)) != null) {
+            log.info("Client {} pressed {} button", context.getClient(), Message.APPROVE_NOTIFICATION);
             sm = new SendMessage();
 
             updateNotification(context.getClient(), resultTime);

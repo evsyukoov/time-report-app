@@ -1,13 +1,11 @@
 package ru.evsyukov.polling.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @ConfigurationProperties(prefix = "polling-bot.buttons")
-//@PropertySource(value = "classpath:application.yaml", encoding = "ISO-8859-1")
 @Component
 public class ButtonsProperties {
 
