@@ -1,5 +1,6 @@
 package ru.evsyukov.polling.stateMachine;
 
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.messages.Message;
 
 public class EnumTranslators {

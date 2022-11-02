@@ -1,5 +1,7 @@
 package ru.evsyukov.app.data.entity;
 
+import ru.evsyukov.app.state.State;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -18,7 +20,8 @@ public class Client {
     private String name;
 
     @Column(name = "state")
-    private int state;
+    @Enumerated
+    private State state;
 
     @Column(name = "current_project")
     private String project;
@@ -103,11 +106,11 @@ public class Client {
         this.name = name;
     }
 
-    public int getState() {
+    public State getState() {
         return state;
     }
 
-    public void setState(int state) {
+    public void setState(State state) {
         this.state = state;
     }
 
@@ -143,7 +146,7 @@ public class Client {
         return "Client{" +
                 "uid=" + uid +
                 ", name='" + name + '\'' +
-                ", state=" + state +
+                ", state=" + state.name() +
                 '}';
     }
 }

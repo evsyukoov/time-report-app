@@ -1,4 +1,4 @@
-package ru.evsyukov.polling.stateMachine;
+package ru.evsyukov.app.state;
 
 public enum State {
     REGISTER_NAME,

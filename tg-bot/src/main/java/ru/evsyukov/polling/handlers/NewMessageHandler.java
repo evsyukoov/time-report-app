@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.repository.ClientRepository;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.bot.ReportingBot;
 import ru.evsyukov.polling.messages.Message;
@@ -15,7 +16,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.evsyukov.polling.properties.ButtonsProperties;
 import ru.evsyukov.polling.stateMachine.BotState;
 import ru.evsyukov.polling.stateMachine.BotStateFactory;
-import ru.evsyukov.polling.stateMachine.State;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
 
@@ -53,7 +53,7 @@ public class NewMessageHandler {
         if (clientOpt.isEmpty()) {
             client = new Client();
             current = State.REGISTER_NAME;
-            client.setState(current.ordinal());
+            client.setState(current);
             client.setUid(chat.getId());
             clientRepository.save(client);
             log.info("Create client with id {}", client);
@@ -97,14 +97,14 @@ public class NewMessageHandler {
             Client client = context.getClient();
             if (!client.isOnVacation()) {
                 if (client.isRegistered()) {
-                    client.setState(State.MENU_CHOICE.ordinal());
+                    client.setState(State.MENU_CHOICE);
                     clientRepository.save(client);
                     log.info("Update client id {} to state {}", client.getUid(), client.getState());
 
                     SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
                     sm.setText(Message.MENU);
                 } else {
-                    client.setState(State.CHECK_NAME.ordinal());
+                    client.setState(State.CHECK_NAME);
                     clientRepository.save(client);
                     log.info("Update client id {} to state {}", client.getUid(), client.getState());
 

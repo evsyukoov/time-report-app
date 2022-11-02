@@ -2,6 +2,7 @@ package ru.evsyukov.polling.stateMachine;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.evsyukov.app.state.State;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -19,8 +20,7 @@ public class BotStateFactory {
         }
     }
 
-    public static BotState createBotState(int st) {
-        State state = State.values()[st];
+    public static BotState createBotState(State state) {
         return states.get(state);
     }
 }

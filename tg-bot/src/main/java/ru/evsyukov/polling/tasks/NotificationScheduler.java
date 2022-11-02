@@ -1,9 +1,10 @@
 package ru.evsyukov.polling.tasks;
 
-import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.ReportingBot;
 import lombok.extern.slf4j.Slf4j;
+import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.app.data.entity.Client;
-import ru.evsyukov.app.data.entity.Notification;
-import ru.evsyukov.app.data.repository.NotificationRepository;
 import ru.evsyukov.polling.properties.ButtonsProperties;
-import ru.evsyukov.polling.stateMachine.State;
 import ru.evsyukov.polling.utils.DateTimeUtils;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
@@ -25,9 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @EnableScheduling
 @Component
@@ -36,9 +32,7 @@ public class NotificationScheduler {
 
     private final ReportingBot bot;
 
-    private final NotificationRepository notificationRepository;
-
-    private final ReportDayRepository reportDayRepository;
+    private final BotDataService botDataService;
 
     private final static int PERIOD = 30 * 1000;
 
@@ -54,26 +48,18 @@ public class NotificationScheduler {
 
     @Autowired
     public NotificationScheduler(ReportingBot bot,
-                                 NotificationRepository notificationRepository,
-                                 ReportDayRepository reportDayRepository,
-                                 ButtonsProperties buttonsProperties) {
+                                 BotDataService botDataService, ButtonsProperties buttonsProperties) {
         this.bot = bot;
-        this.notificationRepository = notificationRepository;
-        this.reportDayRepository = reportDayRepository;
+        this.botDataService = botDataService;
         this.buttonsProperties = buttonsProperties;
     }
 
     @Scheduled(fixedRate = PERIOD)
     public void notificate() {
-        List<Client> clients =
-                notificationRepository.getAllByNextFireTimeBefore(LocalDateTime.now().plusHours(3))
-                        .stream().map(Notification::getClient)
-                        .collect(Collectors.toList());
+        List<Client> clients = botDataService.getNotificationClients();
         for (Client client : clients) {
             log.info("Time to send notification for client: {}", client);
-            Notification notification = client.getNotification();
-            notification.setNextFireTime(notification.getNextFireTime().plusDays(1));
-            notificationRepository.save(notification);
+            botDataService.incrementNotificationTime(client);
 
             DayOfWeek dayOfWeek = DayOfWeek.from(LocalDateTime.now());
             if (dayOfWeek == DayOfWeek.SUNDAY || dayOfWeek == DayOfWeek.SATURDAY || client.isOnVacation()) {
@@ -81,18 +67,12 @@ public class NotificationScheduler {
             }
             SendMessage sm = new SendMessage();
             sm.setChatId(String.valueOf(client.getUid()));
-            if (client.getState() == State.MENU_CHOICE.ordinal()) {
+            if (client.getState() == State.MENU_CHOICE) {
                 SendHelper.setInlineKeyboard(sm,
                         buttonsProperties.getActionsMenu(), null, 3);
             }
-
-            Date start = DateTimeUtils.fromLocalDate(LocalDate.now().minusDays(DEPTH));
-            Date finished = DateTimeUtils.fromLocalDate(LocalDate.now().minusDays(1));
-            List<ReportDay> reportDays = reportDayRepository.findReportDayByDateGreaterThanEqualAndDateLessThanEqualAndUidEquals(
-                    start, finished, client.getUid());
-            List<LocalDate> dates = reportDays.stream().map(ReportDay::getDate)
-                    .map(DateTimeUtils::toLocalDate).collect(Collectors.toList());
-            String extraNotification = generateDatesIntervalsMessage(dates);
+            String extraNotification = generateDatesIntervalsMessage(botDataService
+                    .findFullReportDaysInterval(client.getUid(), DEPTH));
             String resultMessage = Message.NOTIFICATION + (extraNotification != null ?
                     String.format("\nТакже за последний месяц вы не отчитывались за следующие даты:\n %s", extraNotification) : "");
             sm.setText(resultMessage);

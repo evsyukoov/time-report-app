@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.repository.ClientRepository;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.messages.Message;
 import org.springframework.stereotype.Service;
@@ -69,7 +70,7 @@ public class CheckName implements BotState {
     }
 
     private void updateClient(Client client, State state, String name) {
-        client.setState(state.ordinal());
+        client.setState(state);
         client.setName(name);
         client.setRegistered(false);
 

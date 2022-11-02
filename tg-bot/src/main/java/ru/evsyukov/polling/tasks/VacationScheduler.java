@@ -2,6 +2,7 @@ package ru.evsyukov.polling.tasks;
 
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.repository.ClientRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.ReportingBot;
 import lombok.extern.slf4j.Slf4j;
 import ru.evsyukov.polling.messages.Message;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.polling.properties.ButtonsProperties;
-import ru.evsyukov.polling.stateMachine.State;
 import ru.evsyukov.polling.utils.DateTimeUtils;
 import ru.evsyukov.polling.utils.SendHelper;
 
@@ -69,7 +69,7 @@ public class VacationScheduler {
                 if (DateTimeUtils.greaterOrEquals(date, client.getEndVacation())) {
                     sm = new SendMessage();
                     updateReportDaysInfo(client);
-                    updateClientVacationInfo(client, State.MENU_CHOICE.ordinal(), null, null, false);
+                    updateClientVacationInfo(client, State.MENU_CHOICE, null, null, false);
                     sm.setText(Message.YOUR_VACATION_IS_OVER);
                     sm.setChatId(String.valueOf(client.getUid()));
                     SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
@@ -91,7 +91,7 @@ public class VacationScheduler {
         log.info("Update client vacation info {}", client);
     }
 
-    public void updateClientVacationInfo(Client client, int state, Date start, Date end, boolean onVacation) {
+    public void updateClientVacationInfo(Client client, State state, Date start, Date end, boolean onVacation) {
         client.setOnVacation(onVacation);
         client.setStartVacation(start);
         client.setEndVacation(end);

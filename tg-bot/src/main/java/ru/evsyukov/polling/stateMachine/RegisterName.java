@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.repository.ClientRepository;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.utils.SendHelper;
@@ -37,7 +38,7 @@ public class RegisterName implements BotState {
         SendMessage sm = new SendMessage();
 
         Client client = context.getClient();
-        client.setState(State.CHECK_NAME.ordinal());
+        client.setState(State.CHECK_NAME);
         clientRepository.save(client);
         log.info("Successfully update client {} at database", client);
 

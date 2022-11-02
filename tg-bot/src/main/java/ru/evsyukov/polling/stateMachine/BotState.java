@@ -1,5 +1,6 @@
 package ru.evsyukov.polling.stateMachine;
 
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.utils.SendHelper;

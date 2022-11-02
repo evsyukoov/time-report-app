@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.repository.ClientRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
 import ru.evsyukov.polling.messages.Message;
@@ -51,7 +52,7 @@ public class Menu implements BotState {
             SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
 
             Client client = context.getClient();
-            client.setState(State.MENU_CHOICE.ordinal());
+            client.setState(State.MENU_CHOICE);
             client.setName(context.getClient().getName());
             client.setRegistered(true);
             clientRepository.save(client);

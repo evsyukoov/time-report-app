@@ -12,6 +12,7 @@ import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.NotificationRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
 import ru.evsyukov.polling.messages.Message;
@@ -132,7 +133,7 @@ public class SelectProject implements BotState {
     }
 
     private void clearClient(Client client, State state) {
-        client.setState(State.MENU_CHOICE.ordinal());
+        client.setState(state);
         client.setProject(null);
         client.setDateTime(null);
         client.setExtraProjects(null);

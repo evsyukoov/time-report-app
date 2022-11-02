@@ -2,12 +2,11 @@ package ru.evsyukov.polling.utils;
 
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
 import ru.evsyukov.polling.messages.Message;
-import ru.evsyukov.polling.stateMachine.BotState;
-import ru.evsyukov.polling.stateMachine.State;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Utils {
 
