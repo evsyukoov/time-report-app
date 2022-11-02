@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.polling.properties.ButtonsProperties;
-import ru.evsyukov.polling.stateMachine.EnumTranslators;
 import ru.evsyukov.polling.utils.DateTimeUtils;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
@@ -256,14 +255,14 @@ public class MainCommandsHandler {
         SendMessage message = new SendMessage();
         if (command.equals(buttonsProperties.getDays().get(0))) {
             List<Project> projects = botDataService.getAllProjectsSorted();
-            message.setText(EnumTranslators.translate(State.SELECT_PROJECT.ordinal()));
+            message.setText(Message.SELECT_PROJECT);
             SendHelper.refreshInlineKeyboard(context);
             SendHelper.setInlineKeyboardProjects(message, projects);
             botDataService.updateClientState(context.getClient(), State.SELECT_PROJECT);
             return message;
         }
         else if (command.equals(buttonsProperties.getDays().get(1))) {
-            message.setText(EnumTranslators.translate(State.PARSE_DATE.ordinal()));
+            message.setText(Message.SELECT_DATE);
             SendHelper.refreshInlineKeyboard(context);
             SendHelper.setInlineKeyboard(message, Collections.emptyList(), Message.BACK, 2);
             botDataService.updateClientState(context.getClient(), State.PARSE_DATE);
