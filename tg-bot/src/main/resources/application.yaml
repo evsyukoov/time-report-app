@@ -13,8 +13,8 @@ spring:
     banner-mode: off
   datasource:
     url: jdbc:mysql://${db_host}:3306/reporting_bot?allowPublicKeyRetrieval=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useTimezone=true&autoReconnect=true&interactiveClient=true
-    username: ${user}
-    password: ${password}
+    username: ${db_user}
+    password: ${db_password}
     driver-class-name: com.mysql.jdbc.Driver
     dbcp2:
       test-while-idle: true
@@ -26,7 +26,7 @@ spring:
   jpa:
 #    hibernate:
 #      ddl-auto: create
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
