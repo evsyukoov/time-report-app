@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.evsyukov.app.data.entity.Client;
-import ru.evsyukov.app.data.repository.ClientRepository;
-import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.bot.ReportingBot;
+import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -26,39 +25,28 @@ import java.util.Optional;
 @Service
 public class NewMessageHandler {
 
-    private final ClientRepository clientRepository;
-
     private final MainCommandsHandler mainHandler;
 
-    private final EmployeeRepository employeeRepository;
+    private final BotDataService botDataService;
 
     private final ButtonsProperties buttonsProperties;
 
     @Autowired
-    public NewMessageHandler(ClientRepository clientRepository,
-                             MainCommandsHandler mainHandler,
-                             EmployeeRepository employeeRepository,
+    public NewMessageHandler(MainCommandsHandler mainHandler,
+                             BotDataService botDataService,
                              ButtonsProperties buttonsProperties) {
-        this.clientRepository = clientRepository;
         this.mainHandler = mainHandler;
-        this.employeeRepository = employeeRepository;
+        this.botDataService = botDataService;
         this.buttonsProperties = buttonsProperties;
     }
 
     public Client getClient(Update update) {
-        State current;
         Chat chat = Utils.getCurrentChat(update);
-        Optional<Client> clientOpt = clientRepository.findById(chat.getId());
+        Optional<Client> clientOpt = botDataService.getClientById(chat.getId());
         Client client;
         if (clientOpt.isEmpty()) {
-            client = new Client();
-            current = State.REGISTER_NAME;
-            client.setState(current);
-            client.setUid(chat.getId());
-            clientRepository.save(client);
-            log.info("Create client with id {}", client);
-        }
-        else {
+            client = botDataService.saveNewClient(chat.getId());
+        } else {
             client = clientOpt.get();
             log.info("Find client with id {}", client);
         }
@@ -97,18 +85,12 @@ public class NewMessageHandler {
             Client client = context.getClient();
             if (!client.isOnVacation()) {
                 if (client.isRegistered()) {
-                    client.setState(State.MENU_CHOICE);
-                    clientRepository.save(client);
-                    log.info("Update client id {} to state {}", client.getUid(), client.getState());
-
+                    botDataService.updateClientState(client, State.MENU_CHOICE);
                     SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
                     sm.setText(Message.MENU);
                 } else {
-                    client.setState(State.CHECK_NAME);
-                    clientRepository.save(client);
-                    log.info("Update client id {} to state {}", client.getUid(), client.getState());
-
-                    SendHelper.setInlineKeyboardOneColumn(sm, employeeRepository.getAllEmployeeNames(), null);
+                    botDataService.updateClientState(client, State.CHECK_NAME);
+                    SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
                     sm.setText(Message.REGISTER_NAME);
                 }
             } else {

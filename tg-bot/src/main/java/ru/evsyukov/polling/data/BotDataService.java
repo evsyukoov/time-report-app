@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public interface BotDataService {
 
@@ -37,5 +39,26 @@ public interface BotDataService {
 
     List<LocalDate> findFullReportDaysInterval(long clientId, int interval);
 
+    List<String> getAllRegisteredClientNames();
+
+    void updateClientStateAndName(Client client, State state, String name, boolean isRegistered);
+
+    boolean isRegisteredClient(Client client);
+
+    void clearClient(Client client, State state);
+
+    void saveOrUpdateReportDays(Client client, String finalDailyReportProjects);
+
+    Set<Project> getExtraProjectsFromIds(String extraProjects);
+
+    Project getMainProjectById(Client client);
+
+    List<Client> getClientsOnVacation();
+
+    void moveClientToVacation(Client client);
+
+    Optional<Client> getClientById(long uid);
+
+    Client saveNewClient(long id);
 
 }

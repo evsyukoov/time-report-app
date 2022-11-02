@@ -19,8 +19,12 @@ import ru.evsyukov.polling.utils.DateTimeUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,6 +61,14 @@ public class BotDataServiceImpl implements BotDataService {
         log.info("Update client state {}", client);
     }
 
+    public void updateClientStateAndName(Client client, State state, String name, boolean isRegistered) {
+        client.setState(state);
+        client.setName(name);
+        client.setRegistered(false);
+        clientRepository.save(client);
+        log.info("Successfully update client {} at database", client);
+    }
+
     @Override
     public void updateClientVacation(Client client, State state, Date start, Date end, boolean isOnVacation) {
         client.setState(state);
@@ -65,6 +77,13 @@ public class BotDataServiceImpl implements BotDataService {
         client.setOnVacation(isOnVacation);
         clientRepository.save(client);
         log.info("Set vacation on client {}", client);
+    }
+
+    @Override
+    public void moveClientToVacation(Client client) {
+        client.setOnVacation(true);
+        clientRepository.save(client);
+        log.info("Update client vacation info {}", client);
     }
 
     @Override
@@ -149,5 +168,84 @@ public class BotDataServiceImpl implements BotDataService {
                 start, finished, clientId);
         return reportDays.stream().map(ReportDay::getDate)
                 .map(DateTimeUtils::toLocalDate).collect(Collectors.toList());
+    }
+
+    public List<String> getAllRegisteredClientNames() {
+        return clientRepository.findAll()
+                .stream()
+                .map(Client::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isRegisteredClient(Client client) {
+        return clientRepository
+                .findById(client.getUid())
+                .filter(Client::isRegistered)
+                .isPresent();
+    }
+
+    @Override
+    public void clearClient(Client client, State state) {
+        client.setState(state);
+        client.setProject(null);
+        client.setDateTime(null);
+        client.setExtraProjects(null);
+
+        clientRepository.save(client);
+        log.info("Clear client and move him to start state {}", client);
+    }
+
+    public void saveOrUpdateReportDays(Client client, String finalDailyReportProjects) {
+        Date reportDate = DateTimeUtils.fromLocalDate(client.getDateTime().toLocalDate());
+        ReportDay reportDay = reportDayRepository.findReportDayByUidAndDate(client.getUid(), reportDate);
+        if (reportDay == null) {
+            reportDay = new ReportDay();
+            reportDay.setEmployee(employeeRepository.getEmployeeByName(client.getName()));
+            reportDay.setProjects(finalDailyReportProjects);
+            reportDay.setUid(client.getUid());
+            // время ставим по МСК
+            reportDay.setDate(reportDate);
+            reportDayRepository.save(reportDay);
+            log.info("Save report day for client id {} day {}", reportDay.getUid(), reportDate);
+        } else {
+            reportDay.setProjects(finalDailyReportProjects);
+            reportDayRepository.save(reportDay);
+            log.info("Update report day for client id {} day {}", reportDay.getUid(), reportDate);
+        }
+    }
+
+    // получить Проекты из сохранненых в строку ключей, разделенных разделителем
+    @Override
+    public Set<Project> getExtraProjectsFromIds(String extraProjects) {
+        return Arrays.stream(extraProjects.split(Message.DELIMETR))
+                .map(proj -> projectsRepository.getProjectById(
+                        Long.parseLong(proj)))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Project getMainProjectById(Client client) {
+        return projectsRepository.getProjectById(Long.parseLong(client.getProject()));
+    }
+
+    @Override
+    public List<Client> getClientsOnVacation() {
+        return clientRepository.getAllByStartVacationIsNotNullAndEndVacationIsNotNull();
+    }
+
+    public Optional<Client> getClientById(long uid) {
+        return clientRepository.findById(uid);
+    }
+
+    public Client saveNewClient(long id) {
+        Client client = new Client();
+        State current = State.REGISTER_NAME;
+        client.setState(current);
+        client.setUid(id);
+        clientRepository.save(client);
+        log.info("Create client with id {}", client);
+        return client;
     }
 }

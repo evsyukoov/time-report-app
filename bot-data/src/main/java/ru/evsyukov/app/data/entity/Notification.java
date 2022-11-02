@@ -47,7 +47,7 @@ public class Notification {
     public String toString() {
         return "Notification{" +
                 "uid=" + uid +
-                ", nextFireTime=" + nextFireTime.format(DateTimeFormatter.ISO_DATE) +
+                ", nextFireTime=" + (nextFireTime == null ? "Not setted time" : nextFireTime.format(DateTimeFormatter.ISO_DATE)) +
                 '}';
     }
 }

@@ -2,32 +2,25 @@ package ru.evsyukov.polling.stateMachine;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.evsyukov.app.data.entity.Client;
-import ru.evsyukov.app.data.repository.ClientRepository;
-import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
+import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.messages.Message;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.utils.SendHelper;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class CheckName implements BotState {
 
-    private final EmployeeRepository employeeRepository;
-
-    private final ClientRepository clientRepository;
+    private final BotDataService botDataService;
 
     @Autowired
-    public CheckName(EmployeeRepository employeeRepository, ClientRepository clientRepository) {
-        this.employeeRepository = employeeRepository;
-        this.clientRepository = clientRepository;
+    public CheckName(BotDataService botDataService) {
+        this.botDataService = botDataService;
     }
 
     @Override
@@ -43,24 +36,20 @@ public class CheckName implements BotState {
             log.warn("Callback expected, client {}", context.getClient());
             return;
         }
-        List<String> expected = employeeRepository.getAllEmployeeNames();
+        List<String> expected = botDataService.getAllEmployeeNamesSorted();
         String receive = context.getMessage().replace(Message.EMPTY_SYMBOL, "");
         if (!expected.contains(receive)) {
             log.warn("No such client, wrong text received by {}", context.getClient());
             return;
         }
-        List<String> allRegisteredClientsNames = clientRepository.findAll()
-                .stream()
-                .map(Client::getName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        List<String> allRegisteredClientsNames = botDataService.getAllRegisteredClientNames();
 
         if (allRegisteredClientsNames.contains(receive)) {
             log.warn("Already has such client at database {}", receive);
             sm.setText(Message.WRONG_NAME_CHOSEN);
-            SendHelper.setInlineKeyboardOneColumn(sm, employeeRepository.getAllEmployeeNames(), null);
+            SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
         } else {
-            updateClient(context.getClient(), State.MENU, receive);
+            botDataService.updateClientStateAndName(context.getClient(), State.MENU, receive, false);
             sm.setText(String.format(Message.NAME_CHOSEN, context.getMessage()));
             SendHelper.setInlineKeyboard(sm,
                     List.of(Message.BACK, Message.APPROVE), null, 2);
@@ -69,12 +58,4 @@ public class CheckName implements BotState {
         question(sm, context);
     }
 
-    private void updateClient(Client client, State state, String name) {
-        client.setState(state);
-        client.setName(name);
-        client.setRegistered(false);
-
-        clientRepository.save(client);
-        log.info("Successfully update client {} at database", client);
-    }
 }
