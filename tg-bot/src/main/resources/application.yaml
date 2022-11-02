@@ -3,7 +3,7 @@ server:
 
 polling-bot:
   token: ${token}
-    name: ${name}
+  name: ${name}
   buttons:
     days: ["🔳 Текущий день", "🔳 Ввести день"]
     actions-menu: ["🔳 Отчитаться", "🔳 Установить оповещения", "🔳 Зарегистрировать отпуск"]
