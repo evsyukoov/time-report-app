@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    banner-mode: off
+  datasource:
+    url: jdbc:mysql://${db_host}:3306/reporting_bot?allowPublicKeyRetrieval=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useTimezone=true&autoReconnect=true&interactiveClient=true
+    username: ${user}
+    password: ${password}
+    driver-class-name: com.mysql.jdbc.Driver
+    dbcp2:
+      test-while-idle: true
+      validation-query: SELECT 1
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 10
+      type: com.zaxxer.hikari.HikariDataSource
+  jpa:
+    #    hibernate:
+    #      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
