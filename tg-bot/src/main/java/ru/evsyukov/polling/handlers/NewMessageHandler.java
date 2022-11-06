@@ -8,7 +8,6 @@ import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.bot.ReportingBot;
 import ru.evsyukov.polling.data.BotDataService;
-import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,6 +16,7 @@ import ru.evsyukov.polling.stateMachine.BotState;
 import ru.evsyukov.polling.stateMachine.BotStateFactory;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
+import ru.evsyukov.utils.messages.Message;
 
 import java.util.Collections;
 import java.util.Optional;

@@ -10,8 +10,8 @@ import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.handlers.MainCommandsHandler;
-import ru.evsyukov.polling.messages.Message;
 import org.springframework.stereotype.Service;
+import ru.evsyukov.utils.messages.Message;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

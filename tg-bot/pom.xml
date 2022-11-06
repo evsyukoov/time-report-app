@@ -80,6 +80,11 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ru.evsyukov.utils</groupId>
+            <artifactId>bot-utils</artifactId>
+            <version>${tg-bot.version}</version>
+        </dependency>
 
     </dependencies>
 

@@ -1,4 +1,4 @@
-package ru.evsyukov.polling.utils;
+package ru.evsyukov.utils.helpers;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

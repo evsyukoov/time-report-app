@@ -1,11 +1,9 @@
 package ru.evsyukov.polling.tasks;
 
-import ru.evsyukov.app.data.repository.ReportDayRepository;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.ReportingBot;
 import lombok.extern.slf4j.Slf4j;
 import ru.evsyukov.polling.data.BotDataService;
-import ru.evsyukov.polling.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,9 +12,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.polling.properties.ButtonsProperties;
-import ru.evsyukov.polling.utils.DateTimeUtils;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
+import ru.evsyukov.utils.helpers.DateTimeUtils;
+import ru.evsyukov.utils.messages.Message;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

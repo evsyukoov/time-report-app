@@ -10,16 +10,16 @@ import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
-import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.polling.properties.ButtonsProperties;
-import ru.evsyukov.polling.utils.DateTimeUtils;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
+import ru.evsyukov.utils.helpers.DateTimeUtils;
+import ru.evsyukov.utils.messages.Message;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;

@@ -14,8 +14,8 @@ import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.data.BotDataService;
-import ru.evsyukov.polling.messages.Message;
-import ru.evsyukov.polling.utils.DateTimeUtils;
+import ru.evsyukov.utils.helpers.DateTimeUtils;
+import ru.evsyukov.utils.messages.Message;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

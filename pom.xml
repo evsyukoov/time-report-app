@@ -26,6 +26,7 @@
         <module>tg-bot</module>
         <module>gui-client</module>
         <module>bot-data</module>
+        <module>bot-utils</module>
     </modules>
 
     <dependencies>

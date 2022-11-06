@@ -3,12 +3,12 @@ package ru.evsyukov.polling.utils;
 import lombok.extern.slf4j.Slf4j;
 import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.polling.bot.BotContext;
-import ru.evsyukov.polling.messages.Message;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.evsyukov.utils.messages.Message;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

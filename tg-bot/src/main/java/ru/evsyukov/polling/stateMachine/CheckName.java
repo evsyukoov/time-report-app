@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.data.BotDataService;
-import ru.evsyukov.polling.messages.Message;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.utils.SendHelper;
+import ru.evsyukov.utils.messages.Message;
 
 import java.util.List;
 

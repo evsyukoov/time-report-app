@@ -1,4 +1,4 @@
-package ru.evsyukov.polling.messages;
+package ru.evsyukov.utils.messages;
 
 public class Message {
 

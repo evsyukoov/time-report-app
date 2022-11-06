@@ -6,7 +6,8 @@ import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
-import ru.evsyukov.polling.messages.Message;
+import ru.evsyukov.utils.helpers.DateTimeUtils;
+import ru.evsyukov.utils.messages.Message;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

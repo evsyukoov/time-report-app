@@ -71,6 +71,12 @@
             <version>${tg-bot.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ru.evsyukov.utils</groupId>
+            <artifactId>bot-utils</artifactId>
+            <version>${tg-bot.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>

@@ -8,7 +8,7 @@ import ru.evsyukov.polling.bot.BotContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.utils.SendHelper;
-import ru.evsyukov.polling.messages.Message;
+import ru.evsyukov.utils.messages.Message;
 
 @Service
 @Slf4j

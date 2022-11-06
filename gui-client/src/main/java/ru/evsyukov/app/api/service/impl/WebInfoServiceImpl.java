@@ -6,9 +6,9 @@ import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
 import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.ReportDay;
-import ru.evsyukov.polling.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.evsyukov.utils.messages.Message;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
