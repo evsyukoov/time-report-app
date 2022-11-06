@@ -11,7 +11,7 @@
 
     <appender name="FILE_ROLLING"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>tg-bot/app/tg-bot-journal</file>
+        <file>app/tg-bot-journal</file>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>tg-bot-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
