@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>ru.evsyukov.app</groupId>
-    <artifactId>time-report-gui</artifactId>
+    <artifactId>gui-client</artifactId>
     <version>${tg-bot.version}</version>
     <packaging>jar</packaging>
 
