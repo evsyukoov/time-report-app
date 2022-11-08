@@ -14,7 +14,7 @@
         <file>app/gui-client-journal.log</file>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>gui-client-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>app/gui-client-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>10</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
         </rollingPolicy>

@@ -14,7 +14,7 @@
         <file>app/tg-bot-journal</file>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>tg-bot-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>app/tg-bot-journal.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>10</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
         </rollingPolicy>
