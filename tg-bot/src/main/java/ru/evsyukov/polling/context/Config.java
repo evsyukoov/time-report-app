@@ -4,6 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 @Configuration
 public class Config {
 
@@ -15,5 +18,10 @@ public class Config {
         threadPoolExecutor.setKeepAliveSeconds(120);
         threadPoolExecutor.setQueueCapacity(100);
         return threadPoolExecutor;
+    }
+
+    @Bean
+    List<String> cacheProjects() {
+        return new CopyOnWriteArrayList<>();
     }
 }

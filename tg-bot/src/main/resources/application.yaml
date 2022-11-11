@@ -8,6 +8,9 @@ polling-bot:
     days: ["🔳 Текущий день", "🔳 Ввести день"]
     actions-menu: ["🔳 Отчитаться", "🔳 Установить оповещения", "🔳 Зарегистрировать отпуск"]
 
+projects-cache-scheduler:
+  period: 600000
+
 spring:
   main:
     banner-mode: off
