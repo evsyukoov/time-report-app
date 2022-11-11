@@ -1,6 +1,7 @@
 package ru.evsyukov.polling.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.polling.handlers.NewMessageHandler;
@@ -29,9 +30,12 @@ public class ReportingBot extends TelegramLongPollingBot {
 
     private final NewMessageHandler newMessageHandler;
 
+    private final ThreadPoolTaskExecutor threadPoolExecutor;
+
     @Autowired
-    public ReportingBot(NewMessageHandler newMessageHandler) {
+    public ReportingBot(NewMessageHandler newMessageHandler, ThreadPoolTaskExecutor threadPoolExecutor) {
         this.newMessageHandler = newMessageHandler;
+        this.threadPoolExecutor = threadPoolExecutor;
     }
 
     @Value("${polling-bot.token}")
@@ -46,23 +50,25 @@ public class ReportingBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        try {
-            if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
-                log.info("Received request by polling with client-id: {}", Utils.getCurrentChat(update).getId());
-                Client client = newMessageHandler.getClient(update);
-                BotContext context = newMessageHandler.initBotContext(client, update, this);
-                BotState botState = newMessageHandler.getBotState(context);
-                SendMessage sendMessage = newMessageHandler.getSendMessage(context);
-                if (sendMessage != null) {
-                    log.info("Send response to client {}", context.getClient());
-                    SendHelper.sendMessage(sendMessage, context);
-                    return;
+        threadPoolExecutor.execute(() -> {
+            try {
+                if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
+                    log.info("Received request by polling with client-id: {}", Utils.getCurrentChat(update).getId());
+                    Client client = newMessageHandler.getClient(update);
+                    BotContext context = newMessageHandler.initBotContext(client, update, this);
+                    BotState botState = newMessageHandler.getBotState(context);
+                    SendMessage sendMessage = newMessageHandler.getSendMessage(context);
+                    if (sendMessage != null) {
+                        log.info("Send response to client {}", context.getClient());
+                        SendHelper.sendMessage(sendMessage, context);
+                        return;
+                    }
+                    botState.handleMessage(context);
                 }
-                botState.handleMessage(context);
+            } catch (Exception e) {
+                log.error("Fatal error: ", e);
             }
-        } catch (Exception e) {
-            log.error("Fatal error: ", e);
-        }
+        });
     }
 
     @Override

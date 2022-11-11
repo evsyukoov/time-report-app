@@ -64,7 +64,7 @@ public class BotDataServiceImpl implements BotDataService {
     public void updateClientStateAndName(Client client, State state, String name, boolean isRegistered) {
         client.setState(state);
         client.setName(name);
-        client.setRegistered(false);
+        client.setRegistered(isRegistered);
         clientRepository.save(client);
         log.info("Successfully update client {} at database", client);
     }
