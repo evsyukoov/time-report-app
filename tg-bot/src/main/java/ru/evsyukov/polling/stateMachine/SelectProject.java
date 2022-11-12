@@ -50,16 +50,14 @@ public class SelectProject implements BotState {
         log.info("State {} with client {} start", getState().name(), context.getClient());
         Client client = context.getClient();
         SendMessage sm;
-        // приходим на этот стейт с разных мест, по наличию даты понимаем откуда пришли
-        if (client.getDateTime() == null) {
-            log.info("Client {} want to report for today", context.getClient());
-            sm = mainHandler.handleBackButton(context, Message.CHOOSE_REPORT_TYPE, State.CHOOSE_DAY);
-        } else {
-            log.info("Client {} want to report for day {}", context.getClient(), dtf.format(client.getDateTime()));
-            sm = mainHandler.handleBackButton(context, Message.SELECT_DATE, State.PARSE_DATE);
-        }
+        State previousState = (client.getDateTime() == null ? State.CHOOSE_DAY : State.PARSE_DATE);
+        String message = (client.getDateTime() == null ? Message.CHOOSE_REPORT_TYPE : Message.SELECT_DATE);
+        log.info("Client {} want to report for day {}", context.getClient(), client.getDateTime() == null
+                ? dtf.format(LocalDateTime.now()) : dtf.format(client.getDateTime()));
+        sm = mainHandler.handleBackButton(context, message, previousState);
         if ((sm != null)) {
             question(sm, context);
+            botDataService.clearClient(client, previousState);
         } else if ((sm = mainHandler.handleProjectsChoice(context)) != null) {
             botDataService.saveOrUpdateReportDays(client, getFinalProjects(client));
             updateClientNotification(client);
