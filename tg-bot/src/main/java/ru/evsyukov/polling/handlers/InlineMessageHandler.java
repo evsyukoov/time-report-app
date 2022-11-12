@@ -1,10 +1,12 @@
 package ru.evsyukov.polling.handlers;
 
+import com.ibm.icu.text.Transliterator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.inputmessagecontent.InputTextMessageContent;
@@ -23,13 +25,21 @@ public class InlineMessageHandler {
 
     private final List<String> cacheProjects;
 
+    private final Transliterator latinToCyrillic;
+
+    private final Transliterator cyrillicToLatin;
+
     // Отправка валится с TelegramException если список слишком большой
     @Value("${inline-bot.max-result}")
     private Integer maxResult;
 
     @Autowired
-    public InlineMessageHandler(List<String> cacheProjects) {
+    public InlineMessageHandler(List<String> cacheProjects,
+                                Transliterator latinToCyrillic,
+                                Transliterator cyrillicToLatin) {
         this.cacheProjects = cacheProjects;
+        this.latinToCyrillic = latinToCyrillic;
+        this.cyrillicToLatin = cyrillicToLatin;
     }
 
     public AnswerInlineQuery getInlineAnswer(Update update) {
@@ -56,10 +66,10 @@ public class InlineMessageHandler {
 
     private List<InlineQueryResult> prepareQueryAnswer(String receive) {
         List<InlineQueryResult> result = new ArrayList<>();
-        List<String> projects = cacheProjects.stream()
-                .filter(proj -> StringUtils.containsIgnoreCase(proj, receive))
-                .limit(maxResult)
-                .collect(Collectors.toList());
+        List<String> projects = filterStrings(receive);
+        if (CollectionUtils.isEmpty(projects)) {
+            projects = filterStrings(transliterateString(receive));
+        }
         int i = 0;
         for (String project : projects) {
             InlineQueryResultArticle inlineQueryResultArticle = new InlineQueryResultArticle();
@@ -71,5 +81,26 @@ public class InlineMessageHandler {
             result.add(inlineQueryResultArticle);
         }
         return result;
+    }
+
+    private List<String> filterStrings(String text) {
+        return cacheProjects.stream()
+                .filter(proj -> StringUtils.containsIgnoreCase(proj, text))
+                .limit(maxResult)
+                .collect(Collectors.toList());
+    }
+
+    private String transliterateString(String text) {
+        if (isCyrillic(text)) {
+            return cyrillicToLatin.transliterate(text);
+        } else {
+            return latinToCyrillic.transliterate(text);
+        }
+    }
+
+    private boolean isCyrillic(String text) {
+        return text.chars()
+                .mapToObj(Character.UnicodeBlock::of)
+                .anyMatch(Character.UnicodeBlock.CYRILLIC::equals);
     }
 }
