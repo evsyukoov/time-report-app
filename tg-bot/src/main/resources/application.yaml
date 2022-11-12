@@ -11,6 +11,9 @@ polling-bot:
 projects-cache-scheduler:
   period: 600000
 
+inline-bot:
+  max-result: 30
+
 spring:
   main:
     banner-mode: off

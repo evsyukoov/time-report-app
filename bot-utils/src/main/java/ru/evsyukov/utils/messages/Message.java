@@ -94,4 +94,6 @@ public class Message {
 
     public static String WRONG_NAME_CHOSEN = "Пользователь под таким именем уже зарегистрирован в системе!\nВыберите другое имя";
 
+    public static String INLINE_QUERY_PROMPT = "Начните вводить объект";
+
 }
