@@ -6,6 +6,14 @@ public class Message {
 
     public static final String CONFIRM_SYMBOL = "✅ ";
 
+    public static final String NO_PROJECT = "🚫 Нет такого проекта";
+
+    public static final String NO_REPORT = "🚫 Вы не внесли ни одного проекта";
+
+    public static final String PROJECT_ALREADY_EXISTS = "🚫 Вы уже вносили этот проект";
+
+    public static final String PROJECT_MAX_COUNT_ATTEMPT = "🚫 Вы пытаетесь внести 9-ый объект в ведомость отчетности. Закончите отчет";
+
     public static final String EXTRA_CONFIRM_SYMBOL = "📌 ";
 
     public static final String APPROVE = "📝 Подтвердить";
@@ -52,7 +60,7 @@ public class Message {
 
     public static final String CHOOSE_REPORT_TYPE = "Выберите за какой день отчитываться";
 
-    public static final String SELECT_PROJECT = "Выберите 1 главный проект и до 3-ех дополнительных объектов на которых работали";
+    public static final String SELECT_PROJECT = "Введите объекты";
 
     public static final String INFO_ABOUT_JOB = "Напишите краткий отчет о проделанной работе";
 
@@ -94,6 +102,12 @@ public class Message {
 
     public static String WRONG_NAME_CHOSEN = "Пользователь под таким именем уже зарегистрирован в системе!\nВыберите другое имя";
 
-    public static String INLINE_QUERY_PROMPT = "Начните вводить объект";
+    public static String INLINE_QUERY_PROMPT = "Начните вводить название объекта";
+
+    public static final String INLINE_BUTTON_NAME = "Ввод";
+
+    public static final String INLINE_BUTTON_PROMPT = "Введите до 8 объектов которыми занимались";
+
+    public static final String APPROVE_INLINE = "📝 Закончить отчет";
 
 }

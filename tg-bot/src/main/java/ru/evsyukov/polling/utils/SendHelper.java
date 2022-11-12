@@ -79,6 +79,25 @@ public class SendHelper {
         sm.setReplyMarkup(inlineKeyboard);
     }
 
+    public static synchronized void setInlineProjectsPrompt(SendMessage sm) {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        InlineKeyboardButton inlinePrompt = new InlineKeyboardButton();
+        inlinePrompt.setSwitchInlineQueryCurrentChat("");
+        inlinePrompt.setText(Message.INLINE_BUTTON_NAME);
+
+        InlineKeyboardButton finish = new InlineKeyboardButton();
+        finish.setText(Message.APPROVE_INLINE);
+        finish.setCallbackData(Message.APPROVE_INLINE);
+
+        InlineKeyboardButton back = new InlineKeyboardButton();
+        back.setText(Message.BACK);
+        back.setCallbackData(Message.BACK);
+
+        markup.setKeyboard(List.of(List.of(inlinePrompt, finish), List.of(back)));
+        sm.setReplyMarkup(markup);
+        sm.setText(Message.INLINE_BUTTON_PROMPT);
+    }
+
     public static synchronized void setInlineKeyboardOneColumn(SendMessage sm, List<String> buttons, String message) {
         InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();

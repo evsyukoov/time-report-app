@@ -2,8 +2,10 @@ package ru.evsyukov.polling.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.polling.handlers.InlineMessageHandler;
 import ru.evsyukov.polling.handlers.NewMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,10 +34,15 @@ public class ReportingBot extends TelegramLongPollingBot {
 
     private final ThreadPoolTaskExecutor threadPoolExecutor;
 
+    private final InlineMessageHandler inlineMessageHandler;
+
     @Autowired
-    public ReportingBot(NewMessageHandler newMessageHandler, ThreadPoolTaskExecutor threadPoolExecutor) {
+    public ReportingBot(NewMessageHandler newMessageHandler,
+                        ThreadPoolTaskExecutor threadPoolExecutor,
+                        InlineMessageHandler inlineMessageHandler) {
         this.newMessageHandler = newMessageHandler;
         this.threadPoolExecutor = threadPoolExecutor;
+        this.inlineMessageHandler = inlineMessageHandler;
     }
 
     @Value("${polling-bot.token}")
@@ -52,6 +59,11 @@ public class ReportingBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         threadPoolExecutor.execute(() -> {
             try {
+                if (update != null && update.getInlineQuery() != null) {
+                    AnswerInlineQuery query = inlineMessageHandler.getInlineAnswer(update);
+                    this.execute(query);
+                    return;
+                }
                 if (update != null && (update.getMessage() != null || update.getCallbackQuery() != null)) {
                     log.info("Received request by polling with client-id: {}", Utils.getCurrentChat(update).getId());
                     Client client = newMessageHandler.getClient(update);

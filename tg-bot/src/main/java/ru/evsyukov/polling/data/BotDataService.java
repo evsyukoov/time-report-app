@@ -15,6 +15,8 @@ public interface BotDataService {
 
     void updateClientState(Client client, State state);
 
+    void updateClientReportDays(Client client, String report);
+
     void updateClientVacation(Client client, State state, Date start, Date end, boolean isOnVacation);
 
     LocalDateTime getClientChosenTime(Client client);
@@ -60,5 +62,7 @@ public interface BotDataService {
     Optional<Client> getClientById(long uid);
 
     Client saveNewClient(long id);
+
+    String getProjectId(String projectName);
 
 }

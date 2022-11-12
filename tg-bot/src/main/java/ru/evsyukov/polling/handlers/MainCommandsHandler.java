@@ -1,20 +1,20 @@
 package ru.evsyukov.polling.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.evsyukov.app.data.entity.Project;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.polling.properties.ButtonsProperties;
 import ru.evsyukov.polling.utils.SendHelper;
 import ru.evsyukov.polling.utils.Utils;
@@ -23,7 +23,13 @@ import ru.evsyukov.utils.messages.Message;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,11 +40,17 @@ public class MainCommandsHandler {
 
     private final BotDataService botDataService;
 
+    private final List<String> cacheProjects;
+
+    private final static int MAX_NUMBER_OF_PROJECTS = 8;
+
     @Autowired
     public MainCommandsHandler(ButtonsProperties buttonsProperties,
-                               BotDataService botDataService) {
+                               BotDataService botDataService,
+                               List<String> cacheProjects) {
         this.buttonsProperties = buttonsProperties;
         this.botDataService = botDataService;
+        this.cacheProjects = cacheProjects;
     }
 
     public SendMessage handleBackButton(BotContext context, String message, State newState) {
@@ -51,9 +63,9 @@ public class MainCommandsHandler {
             if (message.equals(Message.REGISTER_NAME)) {
                 SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
             } else if (message.equals(Message.MENU)) {
-              SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
+                SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
             } else if (message.equals(Message.SELECT_PROJECT)) {
-                SendHelper.setInlineKeyboardProjects(sm, botDataService.getAllProjectsSorted());
+                SendHelper.setInlineProjectsPrompt(sm);
             } else if (message.equals(Message.CHOOSE_REPORT_TYPE)) {
                 SendHelper.setInlineKeyboard(sm, buttonsProperties.getDays(), Message.BACK, 2);
             } else if (message.equals(Message.SELECT_DATE)) {
@@ -93,8 +105,7 @@ public class MainCommandsHandler {
                 buttons.add(Message.CLEAR_VACATION);
             }
             res = Utils.parseVacationsDate(command);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             String finalMessage = null;
             if (e instanceof ValidationException) {
                 finalMessage = Utils.generateResultMessage(Message.VACATION_DATES_VALIDATION_ERROR, Message.VACATION);
@@ -196,8 +207,8 @@ public class MainCommandsHandler {
         return String.format("%s:%s по МСК", dateTime.getHour() < 10 ? "0".concat(String.valueOf(dateTime.getHour()))
                         : String.valueOf(dateTime.getHour())
                 , dateTime.getMinute() < 10 ?
-                "0".concat(String.valueOf(dateTime.getMinute()))
-                : String.valueOf(dateTime.getMinute()));
+                        "0".concat(String.valueOf(dateTime.getMinute()))
+                        : String.valueOf(dateTime.getMinute()));
     }
 
     private InlineKeyboardButton findPressedButton(String payload, InlineKeyboardMarkup markup) {
@@ -212,7 +223,7 @@ public class MainCommandsHandler {
     private LocalDateTime getTimeFromClientChoice(BotContext context) {
         InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
                 getMessage().getReplyMarkup();
-        InlineKeyboardButton pressedHour = findPressedButton("час." , markup);
+        InlineKeyboardButton pressedHour = findPressedButton("час.", markup);
         InlineKeyboardButton pressedMinutes = findPressedButton("мин.", markup);
         if (pressedHour == null || pressedMinutes == null) {
             return null;
@@ -236,16 +247,15 @@ public class MainCommandsHandler {
 
         } catch (DateAfterTodayException e) {
             sm.setText(Utils.generateResultMessage(Message.ERROR_DATE_AFTER_TODAY, Message.SELECT_DATE));
-            SendHelper.setInlineKeyboard(sm,Collections.emptyList(), Message.BACK, 2);
+            SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.BACK, 2);
             return sm;
         } catch (ParseException e) {
             sm.setText(Utils.generateResultMessage(Message.ERROR_DATE_FORMAT, Message.SELECT_DATE));
-            SendHelper.setInlineKeyboard(sm,Collections.emptyList(), Message.BACK, 2);
+            SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.BACK, 2);
             return sm;
         }
         botDataService.updateClientDateAndState(context.getClient(), State.SELECT_PROJECT, date);
-        List<Project> projects = botDataService.getAllProjectsSorted();
-        SendHelper.setInlineKeyboardProjects(sm, projects);
+        SendHelper.setInlineProjectsPrompt(sm);
         sm.setText(Message.SELECT_PROJECT);
         return sm;
     }
@@ -254,14 +264,12 @@ public class MainCommandsHandler {
         String command = context.getMessage();
         SendMessage message = new SendMessage();
         if (command.equals(buttonsProperties.getDays().get(0))) {
-            List<Project> projects = botDataService.getAllProjectsSorted();
             message.setText(Message.SELECT_PROJECT);
             SendHelper.refreshInlineKeyboard(context);
-            SendHelper.setInlineKeyboardProjects(message, projects);
+            SendHelper.setInlineProjectsPrompt(message);
             botDataService.updateClientState(context.getClient(), State.SELECT_PROJECT);
             return message;
-        }
-        else if (command.equals(buttonsProperties.getDays().get(1))) {
+        } else if (command.equals(buttonsProperties.getDays().get(1))) {
             message.setText(Message.SELECT_DATE);
             SendHelper.refreshInlineKeyboard(context);
             SendHelper.setInlineKeyboard(message, Collections.emptyList(), Message.BACK, 2);
@@ -302,117 +310,75 @@ public class MainCommandsHandler {
         }
     }
 
-    public long countFilledBoxes(String telegramSymbol, InlineKeyboardMarkup markup) {
-        return markup.getKeyboard().stream()
-                .flatMap(Collection::stream)
-                .filter(button -> button.getText().contains(telegramSymbol))
-                .count();
+    private boolean isRightClientChoice(String message) {
+        return cacheProjects.contains(message);
+    }
+
+    public void sendWarnNotification(BotContext context, String warn) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(String.valueOf(context.getClient().getUid()));
+        sendMessage.setText(warn);
+
+        try {
+            context.getBot().execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Error sending message to client {}, error: ", context.getClient(), e);
+        }
+
+    }
+
+    public boolean alreadyContainsProject(Client client, String projectId) {
+        return (!StringUtils.isEmpty(client.getProject()) && client.getProject().equals(projectId)) ||
+                (!StringUtils.isEmpty(client.getExtraProjects()) &&
+                Arrays.asList(client.getExtraProjects().split(Message.DELIMETR)).contains(projectId));
+    }
+
+    public boolean noReport(Client client) {
+        return StringUtils.isEmpty(client.getProject()) && StringUtils.isEmpty(client.getExtraProjects());
+    }
+
+    public int countProjects(Client client) {
+        int count = 0;
+        if (!StringUtils.isEmpty(client.getProject())) {
+            count++;
+        }
+        if (!StringUtils.isEmpty(client.getExtraProjects())) {
+            count += client.getExtraProjects().split(Message.DELIMETR).length;
+        }
+        return count;
     }
 
     public SendMessage handleProjectsChoice(BotContext context) {
-        if (!context.isCallBackQuery()) {
+        if (!context.getMessage().equals(Message.APPROVE_INLINE)) {
+            if (!isRightClientChoice(context.getMessage())) {
+                sendWarnNotification(context, Message.NO_PROJECT);
+                log.warn("Client {} typed project that not in projects cache. Message: {}", context.getClient(), context.getMessage());
+                return null;
+            }
+            String projectId = botDataService.getProjectId(context.getMessage());
+            if (alreadyContainsProject(context.getClient(), projectId)) {
+                sendWarnNotification(context, Message.PROJECT_ALREADY_EXISTS);
+                log.warn("Client {} dublicate project. Message: {}", context.getClient(), context.getMessage());
+            } else if (countProjects(context.getClient()) == MAX_NUMBER_OF_PROJECTS) {
+                sendWarnNotification(context, Message.PROJECT_MAX_COUNT_ATTEMPT);
+                log.warn("Client {} try to adding 9th project. Max value = {}. Message: {}", context.getClient(), MAX_NUMBER_OF_PROJECTS, context.getMessage());
+            } else {
+                botDataService.updateClientReportDays(context.getClient(), projectId);
+            }
             return null;
         } else {
-            if (!context.getMessage().equals(Message.APPROVE)) {
-                handleProjectBox(context);
+            if (noReport(context.getClient())) {
+                sendWarnNotification(context, Message.NO_REPORT);
+                log.warn("Client {} no report and trying finish.", context.getClient());
                 return null;
-            } else {
-                List<String> result = collectProjectChoice(context);
-                if (result.isEmpty()) {
-                    return null;
-                } else {
-                    botDataService.updateClientProjects(context.getClient(), State.FINISH, result);
-                }
             }
         }
+        log.info("Client {} pressed {}", context.getClient(), Message.APPROVE_INLINE);
         SendMessage sm = new SendMessage();
         sm.setText(Utils.generateResultMessage(Message.FINISH, Message.MENU));
-        SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);;
+        SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
         return sm;
     }
 
-    private List<String> collectProjectChoice(BotContext context) {
-        InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
-                getMessage().getReplyMarkup();
-        List<String> projects = new ArrayList<>();
-        InlineKeyboardButton mainProjectButton = findConfirmedBoxes(markup, Message.CONFIRM_SYMBOL);
-        if (mainProjectButton != null) {
-            projects.add(mainProjectButton.getCallbackData());
-            List<InlineKeyboardButton> extraButtons = findExtraConfirmedBoxes(markup, Message.EXTRA_CONFIRM_SYMBOL);
-
-            projects.addAll(extraButtons.stream()
-                    .map(InlineKeyboardButton::getCallbackData)
-                    .collect(Collectors.toList()));
-
-        }
-        return projects;
-    }
-
-    private InlineKeyboardButton findConfirmedBoxes(InlineKeyboardMarkup markup, String telegramSymbol) {
-        return markup.getKeyboard().stream()
-                .flatMap(Collection::stream)
-                .filter(button -> button.getText().contains(telegramSymbol))
-                .findAny()
-                .orElse(null);
-    }
-
-    private List<InlineKeyboardButton> findExtraConfirmedBoxes(InlineKeyboardMarkup markup, String telegramSymbol) {
-        return markup.getKeyboard().stream()
-                .flatMap(Collection::stream)
-                .filter(button -> button.getText().contains(telegramSymbol))
-                .collect(Collectors.toList());
-    }
-
-    private InlineKeyboardButton findPressedButton(InlineKeyboardMarkup markup, String text) {
-        return markup.getKeyboard().stream()
-                .flatMap(Collection::stream)
-                .filter(button -> button.getCallbackData().equals(text))
-                .findAny()
-                .orElse(null);
-    }
-
-    private void handleProjectBox(BotContext context) {
-        String command = context.getMessage();
-        InlineKeyboardMarkup markup = context.getUpdate().getCallbackQuery().
-                getMessage().getReplyMarkup();
-        int id = context.getUpdate().getCallbackQuery().getMessage().getMessageId();
-
-        InlineKeyboardButton pressedButton = findPressedButton(markup, command);
-        if (Objects.isNull(pressedButton)) {
-            return;
-        }
-
-        boolean isModified = false;
-        // главных объектов 1, дополнительных 7
-        if (countFilledBoxes(Message.CONFIRM_SYMBOL, markup) == 0) {
-            pressedButton.setText(pressedButton.getText().replace(Message.EMPTY_SYMBOL, Message.CONFIRM_SYMBOL));
-            isModified = true;
-        } else if (countFilledBoxes(Message.CONFIRM_SYMBOL, markup) == 1) {
-            if (pressedButton.getText().contains(Message.CONFIRM_SYMBOL)) {
-                pressedButton.setText(pressedButton.getText().replace(Message.CONFIRM_SYMBOL, Message.EMPTY_SYMBOL));
-                isModified = true;
-            } else {
-                if (pressedButton.getText().contains(Message.EXTRA_CONFIRM_SYMBOL)) {
-                    pressedButton.setText(pressedButton.getText().replace(Message.EXTRA_CONFIRM_SYMBOL, Message.EMPTY_SYMBOL));
-                    isModified = true;
-                } else if (countFilledBoxes(Message.EXTRA_CONFIRM_SYMBOL, markup) < 7){
-                    pressedButton.setText(pressedButton.getText().replace(Message.EMPTY_SYMBOL, Message.EXTRA_CONFIRM_SYMBOL));
-                    isModified = true;
-                }
-            }
-        }
-        if (isModified) {
-            EditMessageReplyMarkup editMessageReplyMarkup = EditMessageReplyMarkup.builder()
-                    .messageId(id)
-                    .chatId(String.valueOf(context.getClient().getUid()))
-                    .replyMarkup(markup)
-                    .build();
-            try {
-                context.getBot().execute(editMessageReplyMarkup);
-            } catch (TelegramApiException e) {
-                log.error("Error while edit reply markup: ", e);
-            }
-        }
-    }
 
 }

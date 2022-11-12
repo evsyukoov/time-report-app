@@ -12,6 +12,8 @@ public interface ProjectsRepository extends JpaRepository<Project, Long> {
 
     Project getProjectById(long id);
 
+    Project getProjectByProjectName(String name);
+
     @Query("SELECT projectName FROM Project ORDER BY UPPER(projectName) ASC")
     List<String> getAllProjectsNameSorted();
 

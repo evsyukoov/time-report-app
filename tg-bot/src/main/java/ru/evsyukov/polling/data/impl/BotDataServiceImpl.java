@@ -1,6 +1,7 @@
 package ru.evsyukov.polling.data.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.evsyukov.app.data.entity.Client;
@@ -59,6 +60,22 @@ public class BotDataServiceImpl implements BotDataService {
         client.setState(state);
         clientRepository.save(client);
         log.info("Update client state {}", client);
+    }
+
+    @Override
+    public void updateClientReportDays(Client client, String report) {
+        if (StringUtils.isEmpty(client.getProject())) {
+            client.setProject(report);
+        } else {
+            if (StringUtils.isEmpty(client.getExtraProjects())) {
+                client.setExtraProjects(report);
+            } else {
+                String extraProjects = client.getExtraProjects() + Message.DELIMETR + report;
+                client.setExtraProjects(extraProjects);
+            }
+        }
+        clientRepository.save(client);
+        log.info("Update client report {} with {}", client, report);
     }
 
     public void updateClientStateAndName(Client client, State state, String name, boolean isRegistered) {
@@ -198,7 +215,8 @@ public class BotDataServiceImpl implements BotDataService {
     }
 
     public void saveOrUpdateReportDays(Client client, String finalDailyReportProjects) {
-        Date reportDate = DateTimeUtils.fromLocalDate(client.getDateTime().toLocalDate());
+        Date reportDate = DateTimeUtils.fromLocalDate(client.getDateTime() == null ?
+                LocalDate.now() : client.getDateTime().toLocalDate());
         ReportDay reportDay = reportDayRepository.findReportDayByUidAndDate(client.getUid(), reportDate);
         if (reportDay == null) {
             reportDay = new ReportDay();
@@ -247,5 +265,9 @@ public class BotDataServiceImpl implements BotDataService {
         clientRepository.save(client);
         log.info("Create client with id {}", client);
         return client;
+    }
+
+    public String getProjectId(String projectName) {
+        return String.valueOf(projectsRepository.getProjectByProjectName(projectName).getId());
     }
 }
