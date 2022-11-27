@@ -2,7 +2,7 @@
 # вызывать в /etc/rc.local (при старте системы)
 
 server_bot_dir='/home/denis/time-report-app'
-version=$(cat ${server_bot_dir}/pom.xml | grep \<tg-bot.version\> | cut -d '    >' -f2 | cut -d '<' -f1)
+version=$(cat ${server_bot_dir}/pom.xml | grep \<tg-bot.version\> | cut -d '>' -f2 | cut -d '<' -f1)
 
 # поднимаем бота
 cd ${server_bot_dir}/tg-bot
