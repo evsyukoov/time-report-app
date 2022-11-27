@@ -1,5 +1,5 @@
 #!/bin/bash
-# вызывать в /etc/rc.local (при старте системы)
+# вызывать в /etc/rc.local (при старте системы) sudo sh /home/denis/time-report-app/entrypoint.sh
 
 server_bot_dir='/home/denis/time-report-app'
 version=$(cat ${server_bot_dir}/pom.xml | grep \<tg-bot.version\> | cut -d '>' -f2 | cut -d '<' -f1)
