@@ -410,8 +410,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     private Map<String, List<ReportDay>> getExcelStructure(List<ReportDay> days, Month month) {
         return days.stream()
                 .filter(reportDay ->
-                        DateTimeUtils.toLocalDate(reportDay.getDate()).getMonth().compareTo(month) >= 0
-                                && DateTimeUtils.toLocalDate(reportDay.getDate()).getMonth().compareTo(month.plus(1)) < 0)
+                        DateTimeUtils.toLocalDate(reportDay.getDate()).getMonth().compareTo(month) == 0)
                 .collect(Collectors.groupingBy(reportDay -> reportDay.getEmployee().getDepartment(),
                         Collectors.mapping(reportDay -> reportDay, Collectors.toList())));
 
