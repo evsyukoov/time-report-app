@@ -2,6 +2,7 @@ package ru.evsyukov.app.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import ru.evsyukov.app.api.dto.FiltersDto;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.api.service.WebInfoService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -23,6 +25,10 @@ public class MainController {
     private final WebInfoService webInfoService;
 
     private final ObjectMapper om;
+
+    public static String CUSTOM_ERROR_UUID_HEADER = "Error-uuid";
+
+    public static String ACCESS_CONTROL_HEADER = "Access-Control-Expose-Headers";
 
     @Autowired
     public MainController(DocGeneratorService docGenerator,
@@ -49,7 +55,11 @@ public class MainController {
             response.getOutputStream().close();
             log.info("Successfully return response to front page");
         } catch (Exception e) {
-            log.error("Request failed with error: ", e);
+            UUID error = UUID.randomUUID();
+            log.error("{}. Request failed with error: ", error, e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setHeader(CUSTOM_ERROR_UUID_HEADER, error.toString());
+            response.setHeader(ACCESS_CONTROL_HEADER, CUSTOM_ERROR_UUID_HEADER);
         }
     }
 

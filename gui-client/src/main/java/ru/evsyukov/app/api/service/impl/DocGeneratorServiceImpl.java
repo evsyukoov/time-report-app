@@ -57,7 +57,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     @Override
-    public ByteArrayOutputStream generateXml(FiltersDto dto) {
+    public ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception {
         List<ReportDay> days;
         if (dto.getName() == null) {
             if (dto.getDateStart() == null && dto.getDateEnd() == null) {
@@ -233,38 +233,34 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return rows;
     }
 
-    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName, boolean waitForDepartmentsReport, boolean waitForEmployeeReport) {
+    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName, boolean waitForDepartmentsReport, boolean waitForEmployeeReport) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
         predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
         Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(days));
-        try {
-            for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
-                Month month = entry.getKey();
-                LocalDate date = entry.getValue();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM yyyy");
-                String listName = formatter.format(date);
-                Sheet sheet = workbook.createSheet(listName);
-                Map<String, List<ReportDay>> reportList = getExcelStructure(days, month);
-                fillList(reportList, sheet);
-                normilizeColumns(sheet, date);
-            }
-            if (waitForEmployeeReport && employeeName != null) {
-                log.info("Start generate employee percent report");
-                createEmployeePercentReport(days, workbook.createSheet(
-                        TextUtil.getShortName(employeeName) + "%"));
-            }
-            if (waitForDepartmentsReport) {
-                log.info("Start generate department percent report");
-                createDepartmentPercentReport(days, workbook.createSheet(
-                        "По отделам, %"));
-            }
-            workbook.write(baos);
-            workbook.close();
-            baos.close();
-        } catch (Exception e) {
-            log.error("Fatal error when generate report", e);
+        for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
+            Month month = entry.getKey();
+            LocalDate date = entry.getValue();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM yyyy");
+            String listName = formatter.format(date);
+            Sheet sheet = workbook.createSheet(listName);
+            Map<String, List<ReportDay>> reportList = getExcelStructure(days, month);
+            fillList(reportList, sheet);
+            normilizeColumns(sheet, date);
         }
+        if (waitForEmployeeReport && employeeName != null) {
+            log.info("Start generate employee percent report");
+            createEmployeePercentReport(days, workbook.createSheet(
+                    TextUtil.getShortName(employeeName) + "%"));
+        }
+        if (waitForDepartmentsReport) {
+            log.info("Start generate department percent report");
+            createDepartmentPercentReport(days, workbook.createSheet(
+                    "По отделам, %"));
+        }
+        workbook.write(baos);
+        workbook.close();
+        baos.close();
         return baos;
     }
 

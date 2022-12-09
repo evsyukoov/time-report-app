@@ -8,5 +8,5 @@ import java.io.ByteArrayOutputStream;
 
 public interface DocGeneratorService {
 
-    ByteArrayOutputStream generateXml(FiltersDto dto);
+    ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception;
 }

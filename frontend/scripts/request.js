@@ -28,17 +28,23 @@ const req = () => {
         empl, "department": dep, "dateStart": parseDate(dateStart), "dateEnd": parseDate(dateEnd), "waitForEmployeeReport" : empChBox.checked,
         "waitForDepartmentsReport" : depChBox.checked });
     xhr.responseType = 'blob'
-    xhr.onload = function(oEvent) {
-        let blob = new Blob([xhr.response], {type: 'application/vnd.ms-excel'});
-        if (blob.size === 0) {
-            alert('Отчетных дней не найдено. Смените фильтры поиска!')
-            return
+    xhr.onreadystatechange = function(oEvent) {
+        if (xhr.readyState === 4) {
+            if (xhr.status !== 200) {
+                alert('Произошла ошибка на сервере. Сообщите поддержке данный ID ' + xhr.getResponseHeader('Error-uuid'))
+                return
+            }
+            let blob = new Blob([xhr.response], {type: 'application/vnd.ms-excel'});
+            if (blob.size === 0) {
+                alert('Отчетных дней не найдено. Смените фильтры поиска!')
+                return
+            }
+            let link = document.createElement('a');
+            link.download = 'Report.xls';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
         }
-        let link = document.createElement('a');
-        link.download = 'Report.xls';
-        link.href = URL.createObjectURL(blob);
-        link.click();
-        URL.revokeObjectURL(link.href);
     };
     xhr.send(data)
 }
