@@ -32,11 +32,14 @@ public class ProjectsCacheScheduler {
 
     @Scheduled(fixedRateString = "${projects-cache-scheduler.period}")
     public void updateCache() {
-        log.info("Start update projects cache. Size: {}", cacheProjects.size());
+        int size = cacheProjects.size();
+        log.debug("Start update projects cache. Size: {}", size);
         List<String> newProjects = projectsRepository.getAllProjectsNameSorted();
         cacheProjects.clear();
         cacheProjects.addAll(newProjects);
-        log.info("Successfully update projects cache. Size: {}", cacheProjects.size());
+        if (size != newProjects.size()) {
+            log.info("Successfully update projects cache. Size: {}", cacheProjects.size());
+        }
 
     }
 }
