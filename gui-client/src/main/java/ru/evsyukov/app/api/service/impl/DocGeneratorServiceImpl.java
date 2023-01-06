@@ -1,6 +1,17 @@
 package ru.evsyukov.app.api.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ru.evsyukov.app.api.dto.FiltersDto;
 import ru.evsyukov.app.api.helpers.common.TextUtil;
 import ru.evsyukov.app.api.helpers.styles.CellStyleHelper;
@@ -11,12 +22,6 @@ import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import ru.evsyukov.utils.helpers.DateTimeUtils;
 import ru.evsyukov.utils.messages.Message;
 
@@ -25,7 +30,15 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -285,8 +298,6 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     private void normilizeColumns(Sheet sheet, LocalDate localDate) {
         int lastRow = sheet.getLastRowNum();
         int column = -1;
-        Month month = localDate.getMonth();
-        int year = localDate.getYear();
         HashMap<Integer, Integer> columnWidthMap = new HashMap<>();
         for (int i = 0; i < lastRow; i++) {
             Row row = sheet.getRow(i);
@@ -309,12 +320,14 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         }
         for (int i = 0; i < column; i++) {
             sheet.setColumnWidth(i, columnWidthMap.get(i) * 150);
-            if (i != 0 && DateTimeUtils.isWeekend(LocalDate.of(year, month, i))) {
-                sheet.setDefaultColumnStyle(i, predefinedCellStyles.get(CellStyleType.WEEKEND_COLUMN));
-            } else {
-                sheet.setDefaultColumnStyle(i, predefinedCellStyles.get(CellStyleType.DEFAULT_COLUMN));
-            }
         }
+    }
+
+    private void addBorders(CellStyle cellStyle) {
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
     }
 
 
@@ -334,6 +347,18 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         .getDate());
     }
 
+    private void fillDepartmentRow(Row depRow, LocalDate monthDate, String department) {
+        Cell depCell = depRow.createCell(0);
+        int monthLength = monthDate.lengthOfMonth();
+        depCell.setCellValue(String.format("Отдел: %s", department));
+        depCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
+        for (int i = 1; i <= monthLength; i++) {
+            Cell emptyCell = depRow.createCell(i);
+            emptyCell.setCellValue("");
+            emptyCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
+        }
+    }
+
     private void fillList(Map<String, List<ReportDay>> reportList, Sheet sheet) {
         fillHeader(reportList, sheet);
         //по отделам
@@ -341,12 +366,9 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         for (Map.Entry<String, List<ReportDay>> entry : reportList.entrySet()) {
             String department = entry.getKey();
             List<ReportDay> days = entry.getValue();
+            LocalDate monthDate = DateTimeUtils.toLocalDate(days.get(0).getDate());
             Row depRow = sheet.createRow(i++);
-            depRow.setRowStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
-
-            Cell depCell = depRow.createCell(0);
-            depCell.setCellValue(String.format("Отдел: %s", department));
-            depCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
+            fillDepartmentRow(depRow, monthDate, department);
 
             Map<Employee, List<ReportDay>> reportDaysOfEmployee = days.stream().collect(
                     Collectors.groupingBy(ReportDay::getEmployee,
@@ -357,9 +379,8 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 Employee employee = employeeListEntry.getKey();
                 List<ReportDay> reportDays = employeeListEntry.getValue();
                 Row[] rows = createRowsForReportDays(sheet, i);
-                rows[0].setRowStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
                 Cell cell = rows[0].createCell(0, CellType.STRING);
-                fillEmployeeReport(reportDays, rows, sheet);
+                fillEmployeeReport(reportDays, rows, monthDate);
                 cell.setCellValue(employee.getName());
                 cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
                 i += NUM_OF_ROWS;
@@ -375,20 +396,63 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return rows;
     }
 
-    private void fillEmployeeReport(List<ReportDay> reportDays, Row[] rows, Sheet sheet) {
-        for (ReportDay reportDay : reportDays) {
-            int column = DateTimeUtils.toLocalDate(reportDay.getDate()).getDayOfMonth();
-            if (Objects.isNull(reportDay.getProjects())) {
-                continue;
-            }
-            String[] projects = reportDay.getProjects().split(Message.DELIMETR);
-            for (int i = 0; i < projects.length; i++) {
-                Cell cell = rows[i].createCell(column, CellType.STRING);
-                cell.setCellValue(projects[i]);
-                if (i == 0) {
-                    cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
-                } else {
-                    cell.setCellStyle(predefinedCellStyles.get(CellStyleType.PROJECT_CELL));
+    private void fillCell(Cell cell, Date date, String value) {
+        cell.setCellValue(value);
+        if (DateTimeUtils.isWeekend(date)) {
+            cell.setCellStyle(predefinedCellStyles.get(CellStyleType.WEEKEND_COLUMN));
+        } else  {
+            cell.setCellStyle(predefinedCellStyles.get(CellStyleType.PROJECT_CELL));
+        }
+    }
+
+    private void fillCell(Cell cell, Date date, String value, int rowNum) {
+        if (rowNum == 0) {
+            cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
+            cell.setCellValue(value);
+        } else {
+            fillCell(cell, date, value);
+        }
+    }
+
+    private void fillCell(Cell cell, LocalDate date, String value, int rowNum) {
+        if (rowNum == 0) {
+            cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
+            cell.setCellValue(value);
+        } else {
+            fillCell(cell, date, value);
+        }
+    }
+
+    private void fillCell(Cell cell, LocalDate date, String value) {
+        fillCell(cell, DateTimeUtils.fromLocalDate(date), value);
+    }
+
+    private void fillEmployeeReport(List<ReportDay> reportDays, Row[] rows, LocalDate monthDate) {
+        int monthLen = monthDate.lengthOfMonth();
+        for (int day = 1; day <= monthLen; day++) {
+            final int dayOfMonth = day;
+            ReportDay reportDay = reportDays.stream()
+                    .filter(rd -> DateTimeUtils.toLocalDate(rd.getDate()).getDayOfMonth() == dayOfMonth)
+                    .findFirst()
+                    .orElse(null);
+            if (reportDay != null) {
+                if (Objects.isNull(reportDay.getProjects())) {
+                    continue;
+                }
+                String[] projects = reportDay.getProjects().split(Message.DELIMETR);
+                for (int i = 0; i < NUM_OF_ROWS; i++) {
+                    if (i >= projects.length) {
+                        Cell cell = rows[i].createCell(dayOfMonth, CellType.STRING);
+                        fillCell(cell, reportDay.getDate(), "");
+                        continue;
+                    }
+                    Cell cell = rows[i].createCell(dayOfMonth, CellType.STRING);
+                    fillCell(cell, reportDay.getDate(), projects[i], i);
+                }
+            } else {
+                for (int i = 0; i < NUM_OF_ROWS; i++) {
+                    Cell cell = rows[i].createCell(dayOfMonth, CellType.STRING);
+                    fillCell(cell, LocalDate.of(monthDate.getYear(), monthDate.getMonth(), day), "", i);
                 }
             }
         }
