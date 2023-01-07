@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
+import ru.evsyukov.polling.exceptions.DateBeforeException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
 import ru.evsyukov.utils.helpers.DateTimeUtils;
@@ -11,13 +12,18 @@ import ru.evsyukov.utils.messages.Message;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+// TODO парсеры и валидаторы перенести
 public class Utils {
+
+    private final static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+    private final static Long DAYS_INTERVAL = 30L;
 
     public static State getState(int state) {
         return State.values()[state];
@@ -66,18 +72,14 @@ public class Utils {
         return isCallBackMessage(update) ? update.getCallbackQuery().getMessage().getChat() : update.getMessage().getChat();
     }
 
-    public static LocalDateTime parseDate(String dateText) throws ParseException, DateAfterTodayException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        //  флаг проверяет дату на наличие в календаре
-        dateFormat.setLenient(false);
-        Date date = dateFormat.parse(dateText);
-        if (date.after(new Date())) {
+    public static LocalDateTime parseDate(String dateText) {
+        LocalDate date = LocalDate.parse(dateText, dtf);
+        if (date.isAfter(LocalDate.now())) {
             throw new DateAfterTodayException();
+        } else if (date.isBefore(LocalDate.now().minusDays(DAYS_INTERVAL))) {
+            throw new DateBeforeException(String.format("Нельзя отчитаться за событие при прошествии более %d дней", DAYS_INTERVAL));
         }
-        return Instant.ofEpochMilli(date.getTime())
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-                .plusHours(3);
+        return date.atTime(LocalTime.of(3, 0));
     }
 
     public static Date[] parseVacationsDate(String dates) throws Exception {

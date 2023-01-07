@@ -13,6 +13,7 @@ import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.data.BotDataService;
 import ru.evsyukov.polling.exceptions.DateAfterTodayException;
+import ru.evsyukov.polling.exceptions.DateBeforeException;
 import ru.evsyukov.polling.exceptions.TooLongIntervalException;
 import ru.evsyukov.polling.exceptions.ValidationException;
 import ru.evsyukov.polling.properties.ButtonsProperties;
@@ -29,8 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -238,6 +237,7 @@ public class MainCommandsHandler {
                 hour, minutes);
     }
 
+    // TODO РЕФАКТОРИНГ!
     public SendMessage parseDate(BotContext context) {
         String command = context.getMessage();
         SendMessage sm = new SendMessage();
@@ -249,7 +249,11 @@ public class MainCommandsHandler {
             sm.setText(Utils.generateResultMessage(Message.ERROR_DATE_AFTER_TODAY, Message.SELECT_DATE));
             SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.BACK, 2);
             return sm;
-        } catch (ParseException e) {
+        } catch (DateBeforeException e) {
+            sm.setText(Utils.generateResultMessage(e.getMessage(), Message.SELECT_DATE));
+            SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.BACK, 2);
+            return sm;
+        } catch (Exception e) {
             sm.setText(Utils.generateResultMessage(Message.ERROR_DATE_FORMAT, Message.SELECT_DATE));
             SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.BACK, 2);
             return sm;
