@@ -40,7 +40,7 @@ const req = () => {
                 return
             }
             let link = document.createElement('a');
-            link.download = 'Report.xls';
+            link.download = 'Report-' + new Date().toISOString() + '.xls';
             link.href = URL.createObjectURL(blob);
             link.click();
             URL.revokeObjectURL(link.href);

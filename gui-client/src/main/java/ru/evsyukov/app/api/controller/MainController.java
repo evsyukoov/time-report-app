@@ -26,9 +26,10 @@ public class MainController {
 
     private final ObjectMapper om;
 
-    public static String CUSTOM_ERROR_UUID_HEADER = "Error-uuid";
+    private static final String CUSTOM_ERROR_UUID_HEADER = "Error-uuid";
 
-    public static String ACCESS_CONTROL_HEADER = "Access-Control-Expose-Headers";
+    private static final String ACCESS_CONTROL_HEADER = "Access-Control-Expose-Headers";
+
 
     @Autowired
     public MainController(DocGeneratorService docGenerator,

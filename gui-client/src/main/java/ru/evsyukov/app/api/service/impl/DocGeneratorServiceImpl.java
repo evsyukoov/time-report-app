@@ -212,9 +212,6 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 checkResult += cell.getNumericCellValue();
             }
         }
-        if (checkResult != 100) {
-            log.warn("Something wrong with Excel Data.");
-        }
         lastRow.createCell(columnNumber, CellType.NUMERIC).setCellValue(checkResult);
     }
 
@@ -250,26 +247,29 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
         predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
-        Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(days));
-        for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
-            Month month = entry.getKey();
-            LocalDate date = entry.getValue();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM yyyy");
-            String listName = formatter.format(date);
-            Sheet sheet = workbook.createSheet(listName);
-            Map<String, List<ReportDay>> reportList = getExcelStructure(days, month);
-            fillList(reportList, sheet);
-            normilizeColumns(sheet, date);
-        }
-        if (waitForEmployeeReport && employeeName != null) {
-            log.info("Start generate employee percent report");
-            createEmployeePercentReport(days, workbook.createSheet(
-                    TextUtil.getShortName(employeeName) + "%"));
-        }
-        if (waitForDepartmentsReport) {
-            log.info("Start generate department percent report");
-            createDepartmentPercentReport(days, workbook.createSheet(
-                    "По отделам, %"));
+        Map<Integer, List<ReportDay>> datesByYear = new TreeMap<>(groupingByYear(days));
+        for (Map.Entry<Integer, List<ReportDay>> oneYearDaysEntry : datesByYear.entrySet()) {
+            Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(oneYearDaysEntry.getValue()));
+            for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
+                Month month = entry.getKey();
+                LocalDate date = entry.getValue();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM yyyy");
+                String listName = formatter.format(date);
+                Sheet sheet = workbook.createSheet(listName);
+                Map<String, List<ReportDay>> reportList = getExcelStructure(oneYearDaysEntry.getValue(), month);
+                fillList(reportList, sheet);
+                normilizeColumns(sheet, date);
+            }
+            if (waitForEmployeeReport && employeeName != null) {
+                log.info("Start generate employee percent report");
+                createEmployeePercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
+                        TextUtil.getShortName(employeeName) + "%, " + oneYearDaysEntry.getKey() + " год"));
+            }
+            if (waitForDepartmentsReport) {
+                log.info("Start generate department percent report");
+                createDepartmentPercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
+                        String.format("По отделам, %%, %s год", oneYearDaysEntry.getKey())));
+            }
         }
         workbook.write(baos);
         workbook.close();
@@ -456,6 +456,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 }
             }
         }
+    }
+
+    private Map<Integer, List<ReportDay>> groupingByYear(List<ReportDay> days) {
+        return days.stream()
+                .collect(Collectors.groupingBy(reportDay -> DateTimeUtils.toLocalDate(reportDay.getDate()).getYear(),
+                        Collectors.mapping(reportDay -> reportDay, Collectors.toList())));
     }
 
     private Map<Month, LocalDate> getAllDates(List<ReportDay> days) {
