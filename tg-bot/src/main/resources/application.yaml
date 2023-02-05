@@ -36,3 +36,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
+
+dump:
+  cron: 0 0 21 * * 7 # воскресенье 21:00
+  save-dir: dumps
