@@ -2,8 +2,8 @@ server:
     port: 8100
 
 polling-bot:
-  token: ${token}
-  name: ${name}
+  token: ${TIME_REPORT_BOT_TOKEN}
+  name: ${TIME_REPORT_BOT_NAME}
   buttons:
     days: ["🔳 Текущий день", "🔳 Ввести день"]
     actions-menu: ["🔳 Отчитаться", "🔳 Установить оповещения", "🔳 Зарегистрировать отпуск"]
@@ -18,9 +18,9 @@ spring:
   main:
     banner-mode: off
   datasource:
-    url: jdbc:mysql://${db_host}:3306/reporting_bot?allowPublicKeyRetrieval=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useTimezone=true&autoReconnect=true&interactiveClient=true
-    username: ${db_user}
-    password: ${db_password}
+    url: jdbc:mysql://${DB_HOST}:3306/reporting_bot?allowPublicKeyRetrieval=true&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useTimezone=true&autoReconnect=true&interactiveClient=true
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.jdbc.Driver
     dbcp2:
       test-while-idle: true
