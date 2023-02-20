@@ -23,7 +23,7 @@ public class SendHelper {
         try {
             context.getBot().execute(sendMessage);
         } catch (TelegramApiException e) {
-            log.error("Problem with sending message to client {}", context.getClient());
+            log.error("Problem with sending message to client {}, exception: ", context.getClient(), e);
         }
     }
 
