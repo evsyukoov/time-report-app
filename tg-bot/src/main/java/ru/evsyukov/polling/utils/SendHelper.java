@@ -42,6 +42,7 @@ public class SendHelper {
             row = new ArrayList<>();
             rows.add(row);
             row.add(newButton(message));
+            row.add(newButton(Message.RESTART_BUTTON, Message.START));
         }
         inlineKeyboard.setKeyboard(rows);
         sm.setReplyMarkup(inlineKeyboard);
@@ -79,7 +80,7 @@ public class SendHelper {
         sm.setReplyMarkup(inlineKeyboard);
     }
 
-    public static synchronized void setInlineProjectsPrompt(SendMessage sm) {
+    public static synchronized void setInlineProjectsPrompt(SendMessage sm, boolean previousReport) {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         InlineKeyboardButton inlinePrompt = new InlineKeyboardButton();
         inlinePrompt.setSwitchInlineQueryCurrentChat("");
@@ -89,11 +90,29 @@ public class SendHelper {
         finish.setText(Message.APPROVE_INLINE);
         finish.setCallbackData(Message.APPROVE_INLINE);
 
+        InlineKeyboardButton previousReportButt = null;
+        if (previousReport) {
+            previousReportButt = new InlineKeyboardButton();
+            previousReportButt.setText(Message.PREVIOUS_DAY);
+            previousReportButt.setCallbackData(Message.PREVIOUS_DAY);
+        }
+
         InlineKeyboardButton back = new InlineKeyboardButton();
         back.setText(Message.BACK);
         back.setCallbackData(Message.BACK);
 
-        markup.setKeyboard(List.of(List.of(inlinePrompt, finish), List.of(back)));
+        InlineKeyboardButton restart = new InlineKeyboardButton();
+        restart.setText(Message.RESTART_BUTTON);
+        restart.setCallbackData(Message.START);
+
+        List<InlineKeyboardButton> buttons;
+        if (previousReportButt != null) {
+            buttons = List.of(inlinePrompt, finish, previousReportButt);
+        } else {
+            buttons = List.of(inlinePrompt, finish);
+        }
+
+        markup.setKeyboard(List.of(buttons, List.of(back, restart)));
         sm.setReplyMarkup(markup);
         sm.setText(Message.INLINE_BUTTON_PROMPT);
     }

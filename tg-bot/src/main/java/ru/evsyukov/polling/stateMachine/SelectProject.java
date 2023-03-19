@@ -15,9 +15,10 @@ import ru.evsyukov.utils.messages.Message;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -67,9 +68,9 @@ public class SelectProject implements BotState {
     }
 
     private String getFinalProjects(Client client) {
-        Set<Project> projects = new HashSet<>();
+        List<Project> projects = new ArrayList<>();
         projects.add(botDataService.getMainProjectById(client));
-        Set<Project> extraProjects = null;
+        List<Project> extraProjects = null;
         if (client.getExtraProjects() != null) {
             extraProjects = botDataService.getExtraProjectsFromIds(client.getExtraProjects());
         }

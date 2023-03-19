@@ -32,4 +32,5 @@ public interface ReportDayRepository extends JpaRepository<ReportDay, Long> {
 
     List<ReportDay> findReportDayByUidAndDateBetween(long uid, Date start, Date end);
 
+    ReportDay findFirstByUidOrderByDateDesc(long uid);
 }

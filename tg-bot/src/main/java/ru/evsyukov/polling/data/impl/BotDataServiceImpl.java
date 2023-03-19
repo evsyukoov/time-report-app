@@ -78,6 +78,17 @@ public class BotDataServiceImpl implements BotDataService {
         log.info("Update client report {} with {}", client, report);
     }
 
+    @Override
+    public void updateClientReportDays(Client client, List<String> report) {
+        client.setProject(report.get(0));
+        if (report.size() > 1) {
+            report.remove(0);
+            client.setExtraProjects(String.join(Message.DELIMETR, report));
+        }
+        clientRepository.save(client);
+        log.info("Update client report {} with {} by previous last report", client, report.get(0));
+    }
+
     public void updateClientStateAndName(Client client, State state, String name, boolean isRegistered) {
         client.setState(state);
         client.setName(name);
@@ -245,11 +256,11 @@ public class BotDataServiceImpl implements BotDataService {
 
     // получить Проекты из сохранненых в строку ключей, разделенных разделителем
     @Override
-    public Set<Project> getExtraProjectsFromIds(String extraProjects) {
+    public List<Project> getExtraProjectsFromIds(String extraProjects) {
         return Arrays.stream(extraProjects.split(Message.DELIMETR))
                 .map(proj -> projectsRepository.getProjectById(
                         Long.parseLong(proj)))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -278,5 +289,10 @@ public class BotDataServiceImpl implements BotDataService {
 
     public String getProjectId(String projectName) {
         return String.valueOf(projectsRepository.getProjectByProjectName(projectName).getId());
+    }
+
+    @Override
+    public ReportDay getLastClientReport(long id) {
+        return reportDayRepository.findFirstByUidOrderByDateDesc(id);
     }
 }
