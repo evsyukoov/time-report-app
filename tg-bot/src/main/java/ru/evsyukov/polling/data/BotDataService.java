@@ -33,7 +33,7 @@ public interface BotDataService {
 
     void clearClientVacation(Client client);
 
-    List<String> getAllEmployeeNamesSorted();
+    List<String> getFreeEmployeeNamesSorted();
 
     List<Project> getAllProjectsSorted();
 

@@ -161,8 +161,17 @@ public class BotDataServiceImpl implements BotDataService {
     }
 
     @Override
-    public List<String> getAllEmployeeNamesSorted() {
-        return employeeRepository.getAllEmployeeNames();
+    public List<String> getFreeEmployeeNamesSorted() {
+        //!!!TODO сделать нормальную связь клиент -> сотрудник
+        List<String> registeredClientNames = clientRepository.findAll()
+                .stream()
+                .filter(client -> !StringUtils.isBlank(client.getName()) && client.isRegistered())
+                .map(Client::getName)
+                .collect(Collectors.toList());
+        return employeeRepository.getAllEmployeeNames()
+                .stream()
+                .filter(name -> !registeredClientNames.contains(name))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -60,7 +60,7 @@ public class MainCommandsHandler {
             botDataService.updateClientState(context.getClient(), newState);
 
             if (message.equals(Message.REGISTER_NAME)) {
-                SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
+                SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getFreeEmployeeNamesSorted(), null);
             } else if (message.equals(Message.MENU)) {
                 SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
             } else if (message.equals(Message.SELECT_PROJECT)) {

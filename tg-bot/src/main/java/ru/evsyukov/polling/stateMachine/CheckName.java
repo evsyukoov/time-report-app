@@ -36,7 +36,7 @@ public class CheckName implements BotState {
             log.warn("Callback expected, client {}", context.getClient());
             return;
         }
-        List<String> expected = botDataService.getAllEmployeeNamesSorted();
+        List<String> expected = botDataService.getFreeEmployeeNamesSorted();
         String receive = context.getMessage().replace(Message.EMPTY_SYMBOL, "");
         if (!expected.contains(receive)) {
             log.warn("No such client, wrong text received by {}", context.getClient());
@@ -47,7 +47,7 @@ public class CheckName implements BotState {
         if (allRegisteredClientsNames.contains(receive)) {
             log.warn("Already has such client at database {}", receive);
             sm.setText(Message.WRONG_NAME_CHOSEN);
-            SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
+            SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getFreeEmployeeNamesSorted(), null);
         } else {
             botDataService.updateClientStateAndName(context.getClient(), State.MENU, receive, false);
             sm.setText(String.format(Message.NAME_CHOSEN, context.getMessage()));
