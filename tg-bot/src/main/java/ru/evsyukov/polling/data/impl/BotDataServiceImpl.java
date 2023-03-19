@@ -210,8 +210,8 @@ public class BotDataServiceImpl implements BotDataService {
     public List<String> getAllRegisteredClientNames() {
         return clientRepository.findAll()
                 .stream()
+                .filter(client -> client.getName() != null && client.isRegistered())
                 .map(Client::getName)
-                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
