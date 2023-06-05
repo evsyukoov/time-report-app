@@ -1,0 +1,103 @@
+body {
+    height: 100%;
+    background: url(img/background2.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));
+    background-size: cover;
+    background-blend-mode: overlay;
+    font-family: 'Lato', sans-serif;
+    color: #4A4A4A;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+form {
+    width: 350px;
+    position: relative;
+}
+form .form-field::before {
+    font-size: 20px;
+    position: absolute;
+    left: 15px;
+    top: 17px;
+    color: #888888;
+    content: " ";
+    display: block;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+form .form-field p {
+    margin: auto;
+    font-size: 19px;
+    color: #1a276b;
+}
+/*form .form-field p {*/
+/*    font-size: 1em;*/
+/*    text-align: center;*/
+/*    color: #333333;*/
+/*    alignment: center;*/
+/*    align-self: center;*/
+/*    horiz-align: center;*/
+/*    align-items: center;*/
+/*}*/
+form .form-field:nth-child(2)::before {
+    background-image: url(img/user-icon.png);
+    width: 20px;
+    height: 20px;
+    top: 15px;
+}
+form .form-field:nth-child(3)::before {
+    background-image: url(img/lock-icon.png);
+    width: 16px;
+    height: 16px;
+}
+form .form-field {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+form input {
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+    background-color: #fff;
+    border-radius: 4px;
+    border: none;
+    display: block;
+    padding: 0.9rem 0.7rem;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+    font-size: 17px;
+    color: #1a276b;
+    text-indent: 40px;
+}
+form .btn-enter {
+    outline: none;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 auto;
+    padding: 0.9rem 2.5rem;
+    text-align: center;
+    background-color: #1a276b;
+    color: #fff;
+    border-radius: 4px;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+    font-size: 17px;
+}
+
+form .btn-enter:hover {
+    background-color: rgba(26, 39, 107, 0.7)
+}

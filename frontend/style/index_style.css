@@ -248,4 +248,11 @@ body {
         height: 60px;
         font-size: 3em;
     }
+
+    .admin-button button {
+        color: #3f3e3e;
+        position: relative;
+        height: 60px;
+        font-size: 3em;
+    }
 }
