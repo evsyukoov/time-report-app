@@ -1,6 +1,9 @@
 server:
   port: 8082
 
+nginx:
+  host: ${nginx_host}
+
 spring:
   main:
     banner-mode: off
