@@ -3,6 +3,7 @@ package ru.evsyukov.app.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import ru.evsyukov.app.api.dto.FiltersDto;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.api.service.WebInfoService;
