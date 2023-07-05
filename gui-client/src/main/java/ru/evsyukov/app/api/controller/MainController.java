@@ -77,6 +77,12 @@ public class MainController {
         return webInfoService.getDepartments();
     }
 
+    @GetMapping(path = "/report/get-projects")
+    public List<String> getProjects() {
+        log.info("GET request /report/get-projects");
+        return webInfoService.getProjects();
+    }
+
 //    @GetMapping(path="/dbUpdate")
 //    public ResponseEntity<String> dbUpdate() {
 //        int count = webInfoService.dbUpdate();

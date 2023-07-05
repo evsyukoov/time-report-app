@@ -1,6 +1,7 @@
 package ru.evsyukov.app.api.service.impl;
 
 import ru.evsyukov.app.api.service.WebInfoService;
+import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
@@ -45,6 +46,15 @@ public class WebInfoServiceImpl implements WebInfoService {
                 .stream()
                 .map(Employee::getDepartment)
                 .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getProjects() {
+        return projectsRepository.findAll()
+                .stream()
+                .map(Project::getProjectName)
                 .sorted()
                 .collect(Collectors.toList());
     }

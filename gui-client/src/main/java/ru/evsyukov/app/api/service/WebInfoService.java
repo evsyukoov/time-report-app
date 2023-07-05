@@ -8,6 +8,8 @@ public interface WebInfoService {
 
     List<String> getDepartments();
 
+    List<String> getProjects();
+
     int dbUpdate();
 
     void fixDbTestData();

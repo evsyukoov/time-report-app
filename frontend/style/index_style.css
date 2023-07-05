@@ -85,6 +85,21 @@ body {
     font-size: 2em;
 }
 
+.admin-button {
+    color: #fff;
+    margin-top: 3%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.admin-button button {
+    color: #3f3e3e;
+    position: relative;
+    height: 40px;
+    font-size: 2em;
+}
+
 .drop p {
     line-height: 30px;
     margin: 0;
