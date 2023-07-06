@@ -47,15 +47,15 @@ public class AdminController {
     public ResponseEntity<OperationResponse> addEmployee(@RequestBody RestEmployee employee) throws JsonProcessingException {
         log.info("POST /admin/employee/add, body -  {}", objectMapper.writeValueAsString(employee));
         if (!isValidEmployee(employee)) {
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
         }
         try {
             adminService.addEmployee(employee);
         } catch (BusinessException e) {
-            return ResponseEntity.ok(OperationResponse.builder().status(e.getReason()).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(e.getReason()).build());
         } catch (Exception e) {
             log.error("Fatal Error - ", e);
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
+            return ResponseEntity.internalServerError().body(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
         }
         return ResponseEntity.ok().build();
     }
@@ -64,15 +64,15 @@ public class AdminController {
     public ResponseEntity<OperationResponse> addProject(@RequestBody RestProject project) throws JsonProcessingException {
         log.info("POST /admin/project/add, body -  {}", objectMapper.writeValueAsString(project));
         if (StringUtils.isEmpty(project.getProjectName())) {
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
         }
         try {
             adminService.addProject(project);
         } catch (BusinessException e) {
-            return ResponseEntity.ok(OperationResponse.builder().status(e.getReason()).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(e.getReason()).build());
         } catch (Exception e) {
             log.error("Fatal Error - ", e);
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
+            return ResponseEntity.internalServerError().body(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
         }
         return ResponseEntity.ok().build();
     }
@@ -81,15 +81,15 @@ public class AdminController {
     public ResponseEntity<OperationResponse> deleteEmployee(@RequestBody RestEmployee employee) throws JsonProcessingException {
         log.info("POST /admin/employee/remove, body -  {}", objectMapper.writeValueAsString(employee));
         if (StringUtils.isEmpty(employee.getName())) {
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
         }
         try {
             adminService.deleteEmployee(employee);
         } catch (BusinessException e) {
-            return ResponseEntity.ok(OperationResponse.builder().status(e.getReason()).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(e.getReason()).build());
         } catch (Exception e) {
             log.error("Fatal Error - ", e);
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
+            return ResponseEntity.internalServerError().body(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
         }
         return ResponseEntity.ok().build();
     }
@@ -97,15 +97,15 @@ public class AdminController {
     @DeleteMapping(path = "/project/remove")
     public ResponseEntity<OperationResponse> deleteProject(@RequestBody RestProject project) {
         if (StringUtils.isEmpty(project.getProjectName())) {
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
         }
         try {
             adminService.deleteProject(project);
         } catch (BusinessException e) {
-            return ResponseEntity.ok(OperationResponse.builder().status(e.getReason()).build());
+            return ResponseEntity.badRequest().body(OperationResponse.builder().status(e.getReason()).build());
         } catch (Exception e) {
             log.error("Fatal Error - ", e);
-            return ResponseEntity.ok(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
+            return ResponseEntity.internalServerError().body(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
         }
         return ResponseEntity.ok().build();
     }

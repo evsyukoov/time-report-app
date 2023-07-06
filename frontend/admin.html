@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link rel="stylesheet" href="style/admin_style.css">
 </head>
 
@@ -27,24 +28,33 @@
         <div class="col-md-6 text-center mt-2 mb-2 hover-block">
 
             <select id="departments-admin" onclick="fillSelectSections('departments-admin')" class="form-select mt-2 mb-2">
-                <option selected>Выберите отдел</option>
+                <option>Выберите отдел</option>
             </select>
 
             <div class="input-group mt-2 mb-2">
+                <input type="text" class="form-control" placeholder="Должность"
+                       id="employee-position"
+                       aria-label="Должность"
+                       aria-describedby="basic-addon2">
+            </div>
+
+            <div class="input-group mt-2 mb-2">
                 <input type="text" class="form-control" placeholder="ФИО нового сотрудника"
+                       id="employee-fio"
                        aria-label="ФИО нового сотрудника"
                        aria-describedby="basic-addon2">
             </div>
-            <button type="button" class="w-100 btn btn-lg btn-outline-primary mb-2">Добавить сотрудника</button>
+            <button type="submit" class="w-100 btn btn-lg btn-outline-primary mb-2" onclick="addEmployee()"> Добавить сотрудника</button>
 
         </div>
 
         <div class="col-md-6 mt-2 mb-2 hover-block">
             <div>
                 <input class="form-control mt-2 mb-2" placeholder="Наименование(шифр) проекта"
+                       id="project-input"
                        aria-describedby="basic-addon2">
             </div>
-            <button type="button" class="w-100 btn btn-lg btn-outline-primary mb-2">Добавить проект</button>
+            <button type="button" class="w-100 btn btn-lg btn-outline-primary mb-2" onclick="addProject()">Добавить проект</button>
         </div>
     </div>
 

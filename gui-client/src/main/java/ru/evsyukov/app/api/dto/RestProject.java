@@ -5,8 +5,6 @@ import javax.validation.constraints.NotNull;
 
 public class RestProject {
 
-    @NotNull
-    @NotEmpty
     private String projectName;
 
     public String getProjectName() {

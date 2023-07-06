@@ -5,16 +5,10 @@ import javax.validation.constraints.NotNull;
 
 public class RestEmployee {
 
-    @NotNull
-    @NotEmpty
     private String name;
 
-    @NotNull
-    @NotEmpty
     private String position;
 
-    @NotNull
-    @NotEmpty
     private String department;
 
     public String getName() {
