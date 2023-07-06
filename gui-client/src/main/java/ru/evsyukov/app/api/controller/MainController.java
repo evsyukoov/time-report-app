@@ -66,9 +66,9 @@ public class MainController {
     }
 
     @GetMapping(path = "/report/get-employees")
-    public List<String> getEmployesNames() {
-        log.info("GET request /report/get-employees");
-        return webInfoService.getEmployeesNames();
+    public List<String> getEmployesNames(@RequestParam(name = "unused", required = false) boolean unused) {
+        log.info("GET request /report/get-employees?unused={}", unused);
+        return webInfoService.getEmployeesNames(unused);
     }
 
     @GetMapping(path = "/report/get-departments")
@@ -78,9 +78,9 @@ public class MainController {
     }
 
     @GetMapping(path = "/report/get-projects")
-    public List<String> getProjects() {
-        log.info("GET request /report/get-projects");
-        return webInfoService.getProjects();
+    public List<String> getProjects(@RequestParam(name = "unused", required = false) boolean unused) {
+        log.info("GET request /report/get-projects?unused={}", unused);
+        return webInfoService.getProjects(unused);
     }
 
 //    @GetMapping(path="/dbUpdate")

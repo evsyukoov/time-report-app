@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface WebInfoService {
 
-    List<String> getEmployeesNames();
+    List<String> getEmployeesNames(boolean unused);
 
     List<String> getDepartments();
 
-    List<String> getProjects();
+    List<String> getProjects(boolean unused);
 
     int dbUpdate();
 

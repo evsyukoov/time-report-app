@@ -13,5 +13,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     List<Client> getAllByStartVacationIsNotNullAndEndVacationIsNotNull();
 
+    List<Client> getAllByRegisteredIs(boolean isRegistered);
+
 
 }
