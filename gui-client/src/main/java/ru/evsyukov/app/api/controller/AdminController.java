@@ -80,7 +80,7 @@ public class AdminController {
     @DeleteMapping(path = "/employee/remove")
     public ResponseEntity<OperationResponse> deleteEmployee(@RequestBody RestEmployee employee) throws JsonProcessingException {
         log.info("POST /admin/employee/remove, body -  {}", objectMapper.writeValueAsString(employee));
-        if (!isValidEmployee(employee)) {
+        if (StringUtils.isEmpty(employee.getName())) {
             return ResponseEntity.ok(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
         }
         try {
