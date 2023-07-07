@@ -1,11 +1,12 @@
 body {
     height: 100%;
-    /*background: url(img/background2.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));;*/
+    background: url(img/background2.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));;
     background-size: cover;
     background-blend-mode: overlay;
 }
 
 .hover-block:hover {
-    background-color: #ece7e7;
+    background-color: rgba(236, 231, 231, 0.65);
     border-radius: 10px;
+    z-index: 0.5;
 }

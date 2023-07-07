@@ -52,26 +52,26 @@ function addEmployee() {
     let selectList = document.getElementById("departments-admin");
     let department = selectList.options[selectList.selectedIndex].text
     if (!departments.includes(department)) {
-        swal("Выберите отдел!",{
+        swal("Выберите отдел!", {
             icon: "error",
         });
         return;
     }
     if (position == null || position === "" || position.length < 5) {
-        swal("Введите валидное поле должность!",{
+        swal("Введите валидное поле должность!", {
             icon: "error",
         });
         return;
     }
     if (fio == null || fio === "") {
-        swal("Поле ФИО не может быть пустым!",{
+        swal("Поле ФИО не может быть пустым!", {
             icon: "error",
         });
         return;
     }
     let fioArr = fio.split(" ")
     if (fioArr.length !== 3) {
-        swal("Введите Фамилию имя и отчество",{
+        swal("Введите Фамилию имя и отчество", {
             icon: "error",
         });
         return;
@@ -84,36 +84,36 @@ function addEmployee() {
     xhr.withCredentials = true
     const data = JSON.stringify({"name": fio, "position": position, "department": department});
 
-     xhr.onreadystatechange = function(oEvent) {
-         if (xhr.readyState === 4) {
+    xhr.onreadystatechange = function (oEvent) {
+        if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-             swal("Новый сотрудник успешно добавлен",{
-                 icon: "info",
-             });
-         } else if (xhr.status === 400) {
-            if (xhr.responseText.includes('ALREADY_CONTAINS')) {
-                swal("Такой сотрудник уже есть в справочнике!",{
-                                 icon: "error",
-                            });
-            } else {
-                        swal("Проверьте введеные данные по сотруднику!",{
-                             icon: "error",
-                        });
+                swal("Новый сотрудник успешно добавлен", {
+                    icon: "success",
+                });
+            } else if (xhr.status === 400) {
+                if (xhr.responseText.includes('ALREADY_CONTAINS')) {
+                    swal("Такой сотрудник уже есть в справочнике!", {
+                        icon: "error",
+                    });
+                } else {
+                    swal("Проверьте введеные данные по сотруднику!", {
+                        icon: "error",
+                    });
+                }
+            } else if (xhr.status === 500) {
+                swal("Произошла непредвиденная ошибка на сервере, сообщите администратору", {
+                    icon: "error",
+                });
             }
-         } else if (xhr.status === 500) {
-             swal("Произошла непредвиденная ошибка на сервере, сообщите администратору",{
-                 icon: "error",
-             });
-         }
-         }
-     };
+        }
+    };
     xhr.send(data)
 }
 
 function addProject() {
     let project = document.getElementById("project-input").value
     if (project == null || project === "" || project.length < 5) {
-        swal("Введите валидное поле проект!",{
+        swal("Введите валидное поле проект!", {
             icon: "error",
         });
         return;
@@ -126,29 +126,119 @@ function addProject() {
     xhr.withCredentials = true
     const data = JSON.stringify({"projectName": project});
 
-     xhr.onreadystatechange = function(oEvent) {
-         if (xhr.readyState === 4) {
+    xhr.onreadystatechange = function (oEvent) {
+        if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-             swal("Новый проект успешно добавлен",{
-                 icon: "info",
-             });
-         } else if (xhr.status === 400) {
-            if (xhr.responseText.includes('ALREADY_CONTAINS')) {
-                swal("Такой проект уже есть в справочнике!",{
-                                 icon: "error",
-                            });
-            } else {
-                        swal("Проверьте введеные данные по проекту!",{
-                             icon: "error",
-                        });
+                swal("Новый проект успешно добавлен", {
+                    icon: "success",
+                });
+            } else if (xhr.status === 400) {
+                if (xhr.responseText.includes('ALREADY_CONTAINS')) {
+                    swal("Такой проект уже есть в справочнике!", {
+                        icon: "error",
+                    });
+                } else {
+                    swal("Проверьте введеные данные по проекту!", {
+                        icon: "error",
+                    });
+                }
+            } else if (xhr.status === 500) {
+                swal("Произошла непредвиденная ошибка на сервере, сообщите администратору", {
+                    icon: "error",
+                });
             }
-         } else if (xhr.status === 500) {
-             swal("Произошла непредвиденная ошибка на сервере, сообщите администратору",{
-                 icon: "error",
-             });
-         }
-         }
-     };
+        }
+    };
+    xhr.send(data)
+}
+
+function rmEmployee() {
+    let selectList = document.getElementById("employees-admin");
+    let employee = selectList.options[selectList.selectedIndex].text
+    if (!employees.includes(employee)) {
+        swal("Выберите сотрудника!", {
+            icon: "error",
+        });
+        return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("DELETE", referer + "/admin/employee/remove");
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
+    xhr.withCredentials = true
+    const data = JSON.stringify({"name": employee});
+
+    xhr.onreadystatechange = function (oEvent) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                swal("Сотрудник успешно удален из справочника", {
+                    icon: "success",
+                });
+                let select = document.getElementById("employees-admin")
+                select.removeChild(selectList.options[selectList.selectedIndex])
+            } else if (xhr.status === 400) {
+                if (xhr.responseText.includes('IMPOSSIBLE_DELETE')) {
+                    swal("Невозможно удалить сотрудника у которого есть отчеты. Обратитесь к администратору", {
+                        icon: "error",
+                    });
+                } else {
+                    swal("Вы не выбрали сотрудника!", {
+                        icon: "error",
+                    });
+                }
+            } else if (xhr.status === 500) {
+                swal("Произошла непредвиденная ошибка на сервере, сообщите администратору", {
+                    icon: "error",
+                });
+            }
+        }
+    };
+    xhr.send(data)
+}
+
+function rmProject() {
+    let selectList = document.getElementById("projects-admin");
+    let project = selectList.options[selectList.selectedIndex].text
+    if (!projects.includes(project)) {
+        swal("Выберите проект!", {
+            icon: "error",
+        });
+        return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("DELETE", referer + "/admin/project/remove");
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
+    xhr.withCredentials = true
+    const data = JSON.stringify({"projectName": project});
+
+    xhr.onreadystatechange = function (oEvent) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                swal("Проект успешно удален из справочника", {
+                    icon: "success",
+                });
+                let select = document.getElementById("projects-admin")
+                select.removeChild(selectList.options[selectList.selectedIndex])
+            } else if (xhr.status === 400) {
+                if (xhr.responseText.includes('IMPOSSIBLE_DELETE')) {
+                    swal("Невозможно удалить проект, на который ссылаются отчеты сотрудников. Обратитесь к администратору", {
+                        icon: "error",
+                    });
+                } else {
+                    swal("Вы не выбрали проект!", {
+                        icon: "error",
+                    });
+                }
+            } else if (xhr.status === 500) {
+                swal("Произошла непредвиденная ошибка на сервере, сообщите администратору", {
+                    icon: "error",
+                });
+            }
+        }
+    };
     xhr.send(data)
 }
 

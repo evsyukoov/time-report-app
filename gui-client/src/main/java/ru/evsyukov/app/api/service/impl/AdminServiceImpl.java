@@ -44,7 +44,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void addEmployee(RestEmployee employee) {
-        Employee empl = employeeRepository.getEmployeeByName(employee.getName());
+        Employee empl = employeeRepository.getEmployeeByNameIgnoreCase(employee.getName());
         if (empl != null) {
             log.warn("Already contains employee with name {} at database", employee.getName());
             throw new BusinessException(Status.ALREADY_CONTAINS);
@@ -54,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void addProject(RestProject project) {
-        Project proj = projectsRepository.getProjectByProjectName(project.getProjectName());
+        Project proj = projectsRepository.getProjectByProjectNameIgnoreCase(project.getProjectName());
         if (proj != null) {
             log.warn("Already contains project with name {} at database", project.getProjectName());
             throw new BusinessException(Status.ALREADY_CONTAINS);
@@ -69,7 +69,7 @@ public class AdminServiceImpl implements AdminService {
             log.warn("Нельзя удалить сотрудника {}, у которого есть отчеты", employee.getName());
             throw new BusinessException(Status.IMPOSSIBLE_DELETE);
         }
-        employeeRepository.delete(dtoToDataMapper.restToDataEmployee(employee));
+        employeeRepository.deleteEmployeeByName(employee.getName());
     }
 
     @Override
@@ -79,6 +79,6 @@ public class AdminServiceImpl implements AdminService {
             log.warn("Нельзя удалить объект {}, на который ссылаются отчеты", project.getProjectName());
             throw new BusinessException(Status.IMPOSSIBLE_DELETE);
         }
-        projectsRepository.delete(dtoToDataMapper.restToDataProject(project));
+        projectsRepository.deleteProjectsByProjectName(project.getProjectName());
     }
 }

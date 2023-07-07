@@ -1,5 +1,6 @@
 package ru.evsyukov.app.data.repository;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.evsyukov.app.data.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,8 +15,13 @@ public interface ProjectsRepository extends JpaRepository<Project, Long> {
 
     Project getProjectByProjectName(String name);
 
+    Project getProjectByProjectNameIgnoreCase(String name);
+
     @Query("SELECT projectName FROM Project ORDER BY UPPER(projectName) ASC")
     List<String> getAllProjectsNameSorted();
 
     List<Project> findByOrderByProjectNameAsc();
+
+    @Transactional
+    void deleteProjectsByProjectName(String name);
 }
