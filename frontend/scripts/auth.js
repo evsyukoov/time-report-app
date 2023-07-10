@@ -47,7 +47,9 @@ window.addEventListener("load", () => {
         xhr.onreadystatechange = function(oEvent) {
             if (xhr.readyState === 4) {
                 if (xhr.status !== 200) {
-                    alert("Неверное имя или пароль!")
+                    swal("Неверное имя пользователя или пароль!",{
+                        icon: "error",
+                    });
                     return
                 }
                 console.log("Authorize was successfully")
@@ -67,30 +69,3 @@ window.addEventListener("load", () => {
         sendData();
     });
 });
-
-
-const mock = () => {
-
-    const promise = new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", referer + "/admin/test");
-        xhr.withCredentials = true
-        xhr.setRequestHeader('Access-Control-Allow-Origin', referer)
-
-        xhr.onload = () => {
-            if (xhr.status === 401) {
-                console.log("test")
-                alert("unauthorized")
-            } else {
-                alert("ok")
-            }
-        };
-
-        xhr.onerror = () => {
-            reject('Something went wrong!');
-        };
-
-        xhr.send();
-    });
-    return promise;
-};

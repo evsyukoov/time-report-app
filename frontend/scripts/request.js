@@ -24,19 +24,29 @@ const req = () => {
     xhr.open("POST", referer + "/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
-    var data = JSON.stringify({ "name":
-        empl, "department": dep, "dateStart": parseDate(dateStart), "dateEnd": parseDate(dateEnd), "waitForEmployeeReport" : empChBox.checked,
-        "waitForDepartmentsReport" : depChBox.checked });
+    var data = JSON.stringify({
+        "name":
+        empl,
+        "department": dep,
+        "dateStart": parseDate(dateStart),
+        "dateEnd": parseDate(dateEnd),
+        "waitForEmployeeReport": empChBox.checked,
+        "waitForDepartmentsReport": depChBox.checked
+    });
     xhr.responseType = 'blob'
     xhr.onreadystatechange = function(oEvent) {
         if (xhr.readyState === 4) {
             if (xhr.status !== 200) {
-                alert('Произошла ошибка на сервере. Сообщите поддержке данный ID ' + xhr.getResponseHeader('Error-uuid'))
+                swal("Произошла ошибка на сервере. Сообщите поддержке данный ID " + xhr.getResponseHeader('Error-uuid'), {
+                    icon: 'error'
+                })
                 return
             }
             let blob = new Blob([xhr.response], {type: 'application/vnd.ms-excel'});
             if (blob.size === 0) {
-                alert('Отчетных дней не найдено. Смените фильтры поиска!')
+                swal('Отчетных дней не найдено. Смените фильтры поиска!', {
+                    icon: 'error'
+                })
                 return
             }
             let link = document.createElement('a');

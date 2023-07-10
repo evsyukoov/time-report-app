@@ -101,3 +101,12 @@ form .btn-enter {
 form .btn-enter:hover {
     background-color: rgba(26, 39, 107, 0.7)
 }
+
+/* Sweet alert lib. Custom colors for button */
+.swal-button--confirm {
+    background: #1a276b;
+}
+
+.swal-button--confirm:active {
+    background-color: rgba(26, 39, 107, 0.7)
+}

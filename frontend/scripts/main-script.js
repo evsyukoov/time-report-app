@@ -1,7 +1,7 @@
 let referer = document.referrer
 
 const sendHttpRequest = (method, url) => {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open(method, url);
 
@@ -23,7 +23,6 @@ const sendHttpRequest = (method, url) => {
 
         xhr.send();
     });
-    return promise;
 };
 
 const dep = () => {
