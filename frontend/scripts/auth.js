@@ -13,11 +13,17 @@ const checkUserRequest = (redirectFromMainPage) => {
              if (xhr.status === 401) {
                  console.log("Пользователь не авторизован")
                  window.location.href = referer + "/login.html"
-             } else {
+             } else if (xhr.status === 404) {
+                 console.log("Не найден метод проверки cookie. Проверить сервер")
+                 window.location.href = referer + "/login.html"
+             } else if (xhr.status === 200) {
                  console.log("Пользователь уже получил cookie и может работать с админ-панелью")
                  if (redirectFromMainPage) {
                      window.location.href = referer + "/admin.html"
                  }
+             } else {
+                 console.log("Проверить сервер")
+                 window.location.href = referer + "/login.html"
              }
          };
 
