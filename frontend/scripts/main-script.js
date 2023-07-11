@@ -1,4 +1,7 @@
 let referer = document.referrer
+if (referer.endsWith("/")) {
+    referer = referer.substring(0, referer.length - 1)
+}
 
 const sendHttpRequest = (method, url) => {
     return new Promise((resolve, reject) => {
