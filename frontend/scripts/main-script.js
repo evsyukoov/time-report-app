@@ -29,7 +29,7 @@ const sendHttpRequest = (method, url) => {
 };
 
 const dep = () => {
-    sendHttpRequest('GET', referer + '/report/get-departments').then(responseData => {
+    sendHttpRequest('GET', referer + '/time-report-app/report/get-departments').then(responseData => {
         startConditionCheckboxes()
         var departmentsDiv = document.getElementById("departments")
         addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData)
@@ -37,7 +37,7 @@ const dep = () => {
 }
 
 const empl = () => {
-    sendHttpRequest('GET', referer + '/report/get-employees').then(responseData => {
+    sendHttpRequest('GET', referer + '/time-report-app/report/get-employees').then(responseData => {
         startConditionCheckboxes()
         var employeesDiv = document.getElementById("employees")
         addElementsToUl(employeesDiv, "dropdown-block-empl", responseData)

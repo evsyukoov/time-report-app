@@ -2,7 +2,7 @@ const checkUserRequest = (redirectFromMainPage) => {
 
      new Promise((resolve, reject) => {
          const xhr = new XMLHttpRequest();
-         xhr.open("GET", referer + "/check/user");
+         xhr.open("GET", referer + "/time-report-app/check/user");
          xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
          xhr.setRequestHeader('Access-Control-Allow-Origin', referer)
          xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
@@ -41,7 +41,7 @@ window.addEventListener("load", () => {
 
         const xhr = new XMLHttpRequest();
 
-        xhr.open("POST", referer + "/login");
+        xhr.open("POST", referer + "/time-report-app/login");
         xhr.withCredentials = true
         xhr.setRequestHeader('Access-Control-Allow-Origin', referer)
 

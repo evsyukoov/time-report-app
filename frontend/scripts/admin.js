@@ -4,19 +4,19 @@ let projects = null
 
 function preRequest() {
     if (departments == null) {
-        sendHttpRequest('GET', referer + '/report/get-departments').then(resp => {
+        sendHttpRequest('GET', referer + '/time-report-app/report/get-departments').then(resp => {
             departments = resp;
             console.log(departments)
         })
     }
     if (employees == null) {
-        sendHttpRequest('GET', referer + '/report/get-employees?unused=true').then(resp => {
+        sendHttpRequest('GET', referer + '/time-report-app/report/get-employees?unused=true').then(resp => {
             employees = resp;
             console.log(employees)
         })
     }
     if (projects == null) {
-        sendHttpRequest('GET', referer + '/report/get-projects?unused=true').then(resp => {
+        sendHttpRequest('GET', referer + '/time-report-app/report/get-projects?unused=true').then(resp => {
             projects = resp;
             console.log(projects)
         })
@@ -78,7 +78,7 @@ function addEmployee() {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", referer + "/admin/employee/add");
+    xhr.open("POST", referer + "/time-report-app/admin/employee/add");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
     xhr.withCredentials = true
@@ -120,7 +120,7 @@ function addProject() {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", referer + "/admin/project/add");
+    xhr.open("POST", referer + "/time-report-app/admin/project/add");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
     xhr.withCredentials = true
@@ -163,7 +163,7 @@ function rmEmployee() {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("DELETE", referer + "/admin/employee/remove");
+    xhr.open("DELETE", referer + "/time-report-app/admin/employee/remove");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
     xhr.withCredentials = true
@@ -208,7 +208,7 @@ function rmProject() {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("DELETE", referer + "/admin/project/remove");
+    xhr.open("DELETE", referer + "/time-report-app/admin/project/remove");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
     xhr.withCredentials = true

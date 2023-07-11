@@ -21,7 +21,7 @@ const req = () => {
     // alert(depChBox.checked)
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", referer + "/report/get-report");
+    xhr.open("POST", referer + "/time-report-app/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
     var data = JSON.stringify({
