@@ -1,6 +1,7 @@
 let referer = document.referrer
-if (referer.endsWith("/")) {
-    referer = referer.substring(0, referer.length - 1)
+let index = referer.indexOf("/")
+if (index !== -1) {
+    referer = referer.substring(0, index)
 }
 
 const sendHttpRequest = (method, url) => {
