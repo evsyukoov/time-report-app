@@ -10,3 +10,31 @@ body {
     border-radius: 10px;
     z-index: 0.5;
 }
+
+
+
+html { font-size: 10px; }
+
+.swal-text {
+    font-size: 1.2rem;
+}
+
+:root {
+    --bs-body-font-size: 1.2rem;  /* Overwrite this variable */
+    font-size: var(--bs-body-font-size);
+}
+
+@media screen and (max-width: 992px) {
+    :root {
+        --bs-body-font-size: 2rem;  /* Overwrite this variable */
+        font-size: var(--bs-body-font-size);
+    }
+
+    .swal-text {
+        font-size: 1.7rem;
+    }
+
+    .swal-modal {
+        width: 900px !important;
+    }
+}
