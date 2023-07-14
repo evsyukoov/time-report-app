@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.data.BotDataService;
@@ -23,6 +24,7 @@ import ru.evsyukov.utils.helpers.DateTimeUtils;
 import ru.evsyukov.utils.messages.Message;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,6 +45,12 @@ public class MainCommandsHandler {
     private final List<String> cacheProjects;
 
     private final static int MAX_NUMBER_OF_PROJECTS = 8;
+
+    private static final SimpleDateFormat sdf;
+
+    static {
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
+    }
 
     @Autowired
     public MainCommandsHandler(ButtonsProperties buttonsProperties,
@@ -60,11 +69,11 @@ public class MainCommandsHandler {
             botDataService.updateClientState(context.getClient(), newState);
 
             if (message.equals(Message.REGISTER_NAME)) {
-                SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
+                SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getFreeEmployeeNamesSorted(), null);
             } else if (message.equals(Message.MENU)) {
                 SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
             } else if (message.equals(Message.SELECT_PROJECT)) {
-                SendHelper.setInlineProjectsPrompt(sm);
+                SendHelper.setInlineProjectsPrompt(sm, botDataService.getLastClientReport(context.getClient().getUid()) != null);
             } else if (message.equals(Message.CHOOSE_REPORT_TYPE)) {
                 SendHelper.setInlineKeyboard(sm, buttonsProperties.getDays(), Message.BACK, 2);
             } else if (message.equals(Message.SELECT_DATE)) {
@@ -259,7 +268,7 @@ public class MainCommandsHandler {
             return sm;
         }
         botDataService.updateClientDateAndState(context.getClient(), State.SELECT_PROJECT, date);
-        SendHelper.setInlineProjectsPrompt(sm);
+        SendHelper.setInlineProjectsPrompt(sm, false);
         sm.setText(Message.SELECT_PROJECT);
         return sm;
     }
@@ -270,7 +279,7 @@ public class MainCommandsHandler {
         if (command.equals(buttonsProperties.getDays().get(0))) {
             message.setText(Message.SELECT_PROJECT);
             SendHelper.refreshInlineKeyboard(context);
-            SendHelper.setInlineProjectsPrompt(message);
+            SendHelper.setInlineProjectsPrompt(message, botDataService.getLastClientReport(context.getClient().getUid()) != null);
             botDataService.updateClientState(context.getClient(), State.SELECT_PROJECT);
             return message;
         } else if (command.equals(buttonsProperties.getDays().get(1))) {
@@ -352,8 +361,31 @@ public class MainCommandsHandler {
         return count;
     }
 
+    private SendMessage handlePreviousReportDayChoice(Client client) {
+        ReportDay reportDay = botDataService.getLastClientReport(client.getUid());
+        String lastReport = String.join("\n", reportDay.getProjects().split(Message.DELIMETR));
+
+        SendMessage sm = new SendMessage();
+        sm.setText(Utils.generateResultMessage(
+                String.format("За сегодня в отчет внесены ваши объекты за %s: %s\n", sdf.format(reportDay.getDate()),lastReport),
+                Message.MENU));
+        SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
+        List<String> projectsId = Arrays.stream(reportDay.getProjects().split(Message.DELIMETR)).map(botDataService::getProjectId).collect(Collectors.toList());
+        botDataService.updateClientReportDays(client, projectsId);
+        return sm;
+    }
+
     public SendMessage handleProjectsChoice(BotContext context) {
-        if (!context.getMessage().equals(Message.APPROVE_INLINE)) {
+        if (context.getMessage().equals(Message.PREVIOUS_DAY)) {
+            log.info("Client {} pressed {}", context.getClient(), Message.PREVIOUS_DAY);
+            return handlePreviousReportDayChoice(context.getClient());
+        } else if (context.getMessage().equals(Message.APPROVE_INLINE)) {
+            if (noReport(context.getClient())) {
+                sendWarnNotification(context, Message.NO_REPORT);
+                log.warn("Client {} no report and trying finish.", context.getClient());
+                return null;
+            }
+        } else {
             if (!isRightClientChoice(context.getMessage())) {
                 sendWarnNotification(context, Message.NO_PROJECT);
                 log.warn("Client {} typed project that not in projects cache. Message: {}", context.getClient(), context.getMessage());
@@ -370,12 +402,6 @@ public class MainCommandsHandler {
                 botDataService.updateClientReportDays(context.getClient(), projectId);
             }
             return null;
-        } else {
-            if (noReport(context.getClient())) {
-                sendWarnNotification(context, Message.NO_REPORT);
-                log.warn("Client {} no report and trying finish.", context.getClient());
-                return null;
-            }
         }
         log.info("Client {} pressed {}", context.getClient(), Message.APPROVE_INLINE);
         SendMessage sm = new SendMessage();

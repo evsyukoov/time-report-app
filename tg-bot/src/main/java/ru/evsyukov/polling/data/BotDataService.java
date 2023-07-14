@@ -2,6 +2,7 @@ package ru.evsyukov.polling.data;
 
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.entity.Project;
+import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.state.State;
 
 import java.time.LocalDate;
@@ -16,6 +17,8 @@ public interface BotDataService {
     void updateClientState(Client client, State state);
 
     void updateClientReportDays(Client client, String report);
+
+    void updateClientReportDays(Client client, List<String> report);
 
     void updateClientVacation(Client client, State state, Date start, Date end, boolean isOnVacation);
 
@@ -33,7 +36,7 @@ public interface BotDataService {
 
     void clearClientVacation(Client client);
 
-    List<String> getAllEmployeeNamesSorted();
+    List<String> getFreeEmployeeNamesSorted();
 
     List<Project> getAllProjectsSorted();
 
@@ -51,7 +54,7 @@ public interface BotDataService {
 
     void saveOrUpdateReportDays(Client client, String finalDailyReportProjects);
 
-    Set<Project> getExtraProjectsFromIds(String extraProjects);
+    List<Project> getExtraProjectsFromIds(String extraProjects);
 
     Project getMainProjectById(Client client);
 
@@ -64,5 +67,7 @@ public interface BotDataService {
     Client saveNewClient(long id);
 
     String getProjectId(String projectName);
+
+    ReportDay getLastClientReport(long id);
 
 }

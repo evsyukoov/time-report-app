@@ -34,7 +34,7 @@ public class RegisterName implements BotState {
 
         sm.setText(Message.REGISTER_NAME);
         SendHelper.setInlineKeyboardOneColumn(sm,
-                botDataService.getAllEmployeeNamesSorted(),null);
+                botDataService.getFreeEmployeeNamesSorted(),null);
         question(sm, context);
     }
 

@@ -110,4 +110,8 @@ public class Message {
 
     public static final String APPROVE_INLINE = "📝 Закончить отчет";
 
+    public static final String RESTART_BUTTON = "🔄 Перезапуск";
+
+    public static final String PREVIOUS_DAY = "📝 Повторить предыдущий";
+
 }

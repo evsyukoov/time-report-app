@@ -1,0 +1,33 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Login page</title>
+    <link rel="stylesheet" href="style/login_style.css">
+</head>
+
+<script src="scripts/auth.js"></script>
+<script src="scripts/main-script.js"></script>
+<script src="scripts/request.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<body>
+<form id="formLogin" method="POST" action="login">
+    <div class="form-field" >
+        <p>Вход в панель администратора</p>
+    </div>
+
+    <div class="form-field">
+        <input class="input-data" type="text" id="user" placeholder="Имя пользователя" required/>
+    </div>
+
+    <div class="form-field">
+        <input class="input-data" type="password" id="pass" placeholder="Пароль" required/>
+    </div>
+
+    <div class="form-field">
+        <button class="btn-enter" formaction="login" type="submit">Войти</button>
+    </div>
+
+</form>
+</body>
+</html>

@@ -4,11 +4,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Excel Report Helper</title>
     <link rel="stylesheet" href="scripts/js-datepicker/cssworld.ru-xcal.css">
-    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="style/index_style.css">
 </head>
 <script src="scripts/main-script.js"></script>
 <script src="scripts/js-datepicker/cssworld.ru-xcal-en.js"></script>
 <script src="scripts/request.js"></script>
+<script src="scripts/auth.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <body>
 <div class="img">
@@ -55,6 +57,10 @@
 
     <div class="report-button">
         <button type="submit" onclick="req()">Получить отчет</button>
+    </div>
+
+    <div class="admin-button">
+        <button type="submit" onclick="checkUserRequest(true)">Админ панель</button>
     </div>
 </div>
 </div>

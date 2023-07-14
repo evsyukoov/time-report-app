@@ -90,7 +90,7 @@ public class NewMessageHandler {
                     sm.setText(Message.MENU);
                 } else {
                     botDataService.updateClientState(client, State.CHECK_NAME);
-                    SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getAllEmployeeNamesSorted(), null);
+                    SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getFreeEmployeeNamesSorted(), null);
                     sm.setText(Message.REGISTER_NAME);
                 }
             } else {

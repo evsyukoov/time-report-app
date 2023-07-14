@@ -1,6 +1,9 @@
 package ru.evsyukov.app.api.service.impl;
 
 import ru.evsyukov.app.api.service.WebInfoService;
+import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.entity.Project;
+import ru.evsyukov.app.data.repository.ClientRepository;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
@@ -23,15 +26,34 @@ public class WebInfoServiceImpl implements WebInfoService {
 
     private ProjectsRepository projectsRepository;
 
+    private ClientRepository clientRepository;
+
     @Autowired
-    public WebInfoServiceImpl(EmployeeRepository employeeRepository, ReportDayRepository reportDayRepository, ProjectsRepository projectsRepository) {
+    public WebInfoServiceImpl(EmployeeRepository employeeRepository,
+                              ReportDayRepository reportDayRepository,
+                              ProjectsRepository projectsRepository,
+                              ClientRepository clientRepository) {
         this.employeeRepository = employeeRepository;
         this.reportDayRepository = reportDayRepository;
         this.projectsRepository = projectsRepository;
+        this.clientRepository = clientRepository;
     }
 
     @Override
-    public List<String> getEmployeesNames() {
+    public List<String> getEmployeesNames(boolean unused) {
+        if (unused) {
+            Set<String> registeredEmpls = clientRepository.getAllByRegisteredIs(true)
+                    .stream()
+                    .map(Client::getName)
+                    .collect(Collectors.toSet());
+
+            return employeeRepository.findAll()
+                    .stream()
+                    .map(Employee::getName)
+                    .filter(name -> !registeredEmpls.contains(name))
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
         return employeeRepository.findAll()
                 .stream()
                 .map(Employee::getName)
@@ -45,6 +67,30 @@ public class WebInfoServiceImpl implements WebInfoService {
                 .stream()
                 .map(Employee::getDepartment)
                 .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getProjects(boolean unused) {
+        if (unused) {
+            Set<String> usedProjects = reportDayRepository.findAll()
+                    .stream()
+                    .map(ReportDay::getProjects)
+                    .map(projects -> Arrays.asList(projects.split(Message.DELIMETR)))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+
+            return projectsRepository.findAll()
+                    .stream()
+                    .map(Project::getProjectName)
+                    .filter(proj -> !usedProjects.contains(proj))
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+        return projectsRepository.findAll()
+                .stream()
+                .map(Project::getProjectName)
                 .sorted()
                 .collect(Collectors.toList());
     }

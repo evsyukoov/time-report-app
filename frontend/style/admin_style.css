@@ -1,0 +1,40 @@
+body {
+    height: 100%;
+    background: url(img/background2.jpg), linear-gradient(rgba(255, 255, 255,0.6), rgba(255, 255, 255,0.6));;
+    background-size: cover;
+    background-blend-mode: overlay;
+}
+
+.hover-block:hover {
+    background-color: rgba(236, 231, 231, 0.65);
+    border-radius: 10px;
+    z-index: 0.5;
+}
+
+
+
+html { font-size: 10px; }
+
+.swal-text {
+    font-size: 1.2rem;
+}
+
+:root {
+    --bs-body-font-size: 1.2rem;  /* Overwrite this variable */
+    font-size: var(--bs-body-font-size);
+}
+
+@media screen and (max-width: 992px) {
+    :root {
+        --bs-body-font-size: 2rem;  /* Overwrite this variable */
+        font-size: var(--bs-body-font-size);
+    }
+
+    .swal-text {
+        font-size: 1.7rem;
+    }
+
+    .swal-modal {
+        width: 900px !important;
+    }
+}

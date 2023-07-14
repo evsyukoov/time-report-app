@@ -3,6 +3,7 @@ package ru.evsyukov.app.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import ru.evsyukov.app.api.dto.FiltersDto;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.api.service.WebInfoService;
@@ -65,15 +66,21 @@ public class MainController {
     }
 
     @GetMapping(path = "/report/get-employees")
-    public List<String> getEmployesNames() {
-        log.info("GET request /report/get-employees");
-        return webInfoService.getEmployeesNames();
+    public List<String> getEmployesNames(@RequestParam(name = "unused", required = false) boolean unused) {
+        log.info("GET request /report/get-employees?unused={}", unused);
+        return webInfoService.getEmployeesNames(unused);
     }
 
     @GetMapping(path = "/report/get-departments")
     public List<String> getDepartments() {
         log.info("GET request /report/get-departments");
         return webInfoService.getDepartments();
+    }
+
+    @GetMapping(path = "/report/get-projects")
+    public List<String> getProjects(@RequestParam(name = "unused", required = false) boolean unused) {
+        log.info("GET request /report/get-projects?unused={}", unused);
+        return webInfoService.getProjects(unused);
     }
 
 //    @GetMapping(path="/dbUpdate")

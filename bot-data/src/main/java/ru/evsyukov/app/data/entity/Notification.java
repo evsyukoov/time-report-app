@@ -12,7 +12,7 @@ public class Notification {
     @Column(name = "uid")
     private long uid;
 
-    @Column(name = "nextFireTime")
+    @Column(name = "next_fire_time")
     private LocalDateTime nextFireTime;
 
     @OneToOne

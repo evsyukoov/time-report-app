@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link rel="stylesheet" href="style/admin_style.css">
+</head>
+
+<script src="scripts/main-script.js"></script>
+<script src="scripts/js-datepicker/cssworld.ru-xcal-en.js"></script>
+<script src="scripts/request.js"></script>
+<script src="scripts/auth.js"></script>
+<script src="scripts/admin.js"></script>
+
+<body onload="checkUserRequest(false);preRequest()">
+<div class="container">
+    <div class="p-3 pb-md-4 mx-auto text-center mb-5">
+        <h1>Панель администратора</h1>
+    </div>
+    <div class="row mb-3 text-center">
+        <h4 class="align-content-between">Добавление</h4>
+        <div class="col-lg-6 col-md-12 text-center mt-2 mb-2 hover-block">
+
+            <select id="departments-admin" onclick="fillSelectSections('departments-admin')" class="form-select mt-2 mb-2">
+                <option>Выберите отдел</option>
+            </select>
+
+            <div class="input-group mt-2 mb-2">
+                <input type="text" class="form-control" placeholder="Должность"
+                       id="employee-position"
+                       aria-label="Должность"
+                       aria-describedby="basic-addon2">
+            </div>
+
+            <div class="input-group mt-2 mb-2">
+                <input type="text" class="form-control" placeholder="ФИО нового сотрудника"
+                       id="employee-fio"
+                       aria-label="ФИО нового сотрудника"
+                       aria-describedby="basic-addon2">
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="addEmployee()"> Добавить сотрудника</button>
+
+        </div>
+
+        <div class="col-lg-6 col-md-12 mt-2 mb-2 hover-block">
+            <div>
+                <input class="form-control mt-2 mb-2" placeholder="Наименование(шифр) проекта"
+                       id="project-input"
+                       aria-describedby="basic-addon2">
+            </div>
+            <button type="button" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="addProject()">Добавить проект</button>
+        </div>
+    </div>
+
+    <div class="row gy-lg-5 text-center">
+        <h4 class="align-content-between">Удаление</h4>
+        <div class="col-lg-6 col-md-12 text-center mt-2 mb-2 hover-block">
+
+            <select id="employees-admin" onclick="fillSelectSections('employees-admin')" class="form-select mt-2 mb-2">
+                <option selected>Выбрать сотрудника</option>
+            </select>
+            <button type="button" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="rmEmployee()">Удалить сотрудника</button>
+
+        </div>
+
+        <div class="col-lg-6 col-md-12 mt-2 mb-2 hover-block">
+            <select id="projects-admin" onclick="fillSelectSections('projects-admin')" class="form-select mt-2 mb-2">
+                <option selected>Выбрать проект</option>
+            </select>
+            <button type="button" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="rmProject()">Удалить проект</button>
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+</html>

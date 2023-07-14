@@ -1,5 +1,6 @@
 package ru.evsyukov.app.data.repository;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.evsyukov.app.data.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<String> getAllEmployeeNames();
 
     Employee getEmployeeByName(String name);
+
+    Employee getEmployeeByNameIgnoreCase(String name);
+
+    @Transactional
+    long deleteEmployeeByName(String name);
 }

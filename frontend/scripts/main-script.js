@@ -1,7 +1,11 @@
 let referer = document.referrer
+let index = referer.indexOf("/")
+if (index !== -1) {
+    referer = referer.substring(0, index)
+}
 
 const sendHttpRequest = (method, url) => {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open(method, url);
 
@@ -23,11 +27,10 @@ const sendHttpRequest = (method, url) => {
 
         xhr.send();
     });
-    return promise;
 };
 
 const dep = () => {
-    sendHttpRequest('GET', referer + '/report/get-departments').then(responseData => {
+    sendHttpRequest('GET', referer + '/time-report-app/report/get-departments').then(responseData => {
         startConditionCheckboxes()
         var departmentsDiv = document.getElementById("departments")
         addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData)
@@ -35,7 +38,7 @@ const dep = () => {
 }
 
 const empl = () => {
-    sendHttpRequest('GET', referer + '/report/get-employees').then(responseData => {
+    sendHttpRequest('GET', referer + '/time-report-app/report/get-employees').then(responseData => {
         startConditionCheckboxes()
         var employeesDiv = document.getElementById("employees")
         addElementsToUl(employeesDiv, "dropdown-block-empl", responseData)
