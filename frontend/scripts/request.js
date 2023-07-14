@@ -34,6 +34,12 @@ const req = () => {
         "waitForDepartmentsReport": depChBox.checked
     });
     xhr.responseType = 'blob'
+    xhr.onloadstart = function (e) {
+        document.getElementsByClassName("loader").item(0).style.display = "block";
+    }
+    xhr.onloadend = function (e) {
+        document.getElementsByClassName("loader").item(0).style.display = "none";
+    }
     xhr.onreadystatechange = function(oEvent) {
         if (xhr.readyState === 4) {
             if (xhr.status !== 200) {
