@@ -33,7 +33,7 @@ function fillSelectSections(idElem) {
     if (idElem.startsWith('employees')) {
         filledArray = employees
     } else if (idElem.startsWith('departments')) {
-        filledArray = departments
+        filledArray = getDepartmentsNames()
     } else {
         filledArray = projects
     }
@@ -51,7 +51,7 @@ function addEmployee() {
     let fio = document.getElementById("employee-fio").value
     let selectList = document.getElementById("departments-admin");
     let department = selectList.options[selectList.selectedIndex].text
-    if (!departments.includes(department)) {
+    if (!getDepartmentsNames().includes(department)) {
         swal("Выберите отдел!", {
             icon: "error",
         });
@@ -82,7 +82,7 @@ function addEmployee() {
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
     xhr.withCredentials = true
-    const data = JSON.stringify({"name": fio, "position": position, "department": department});
+    const data = JSON.stringify({"name": fio, "position": position, "department": department, "departmentShort": getShortNameByName(department)});
 
     xhr.onreadystatechange = function (oEvent) {
         if (xhr.readyState === 4) {
@@ -240,6 +240,22 @@ function rmProject() {
         }
     };
     xhr.send(data)
+}
+
+function getDepartmentsNames() {
+    let departmentsNames = []
+    for (let i = 0; i < departments.length; i++) {
+        departmentsNames.push(departments[i]["name"]);
+    }
+    return departmentsNames;
+}
+
+function getShortNameByName(name) {
+    for (let i = 0; i < departments.length; i++) {
+        if (departments[i]["name"] === name) {
+            return departments[i]["shortName"];
+        }
+    }
 }
 
 
