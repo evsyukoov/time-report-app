@@ -8,7 +8,7 @@ import ru.evsyukov.app.api.dto.RestEmployee;
 import ru.evsyukov.app.api.dto.RestProject;
 import ru.evsyukov.app.api.dto.Status;
 import ru.evsyukov.app.api.exception.BusinessException;
-import ru.evsyukov.app.api.mappers.DtoToDataMapper;
+import ru.evsyukov.app.api.mappers.DataMapper;
 import ru.evsyukov.app.api.service.AdminService;
 import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Project;
@@ -29,16 +29,16 @@ public class AdminServiceImpl implements AdminService {
 
     private final ReportDayRepository reportDayRepository;
 
-    private final DtoToDataMapper dtoToDataMapper;
+    private final DataMapper dataMapper;
 
     @Autowired
     public AdminServiceImpl(ProjectsRepository projectsRepository,
                             EmployeeRepository employeeRepository,
                             ReportDayRepository reportDayRepository,
-                            DtoToDataMapper dtoToDataMapper) {
+                            DataMapper dataMapper) {
         this.projectsRepository = projectsRepository;
         this.employeeRepository = employeeRepository;
-        this.dtoToDataMapper = dtoToDataMapper;
+        this.dataMapper = dataMapper;
         this.reportDayRepository = reportDayRepository;
     }
 
@@ -49,7 +49,7 @@ public class AdminServiceImpl implements AdminService {
             log.warn("Already contains employee with name {} at database", employee.getName());
             throw new BusinessException(Status.ALREADY_CONTAINS);
         }
-        employeeRepository.save(dtoToDataMapper.restToDataEmployee(employee));
+        employeeRepository.save(dataMapper.restToDataEmployee(employee));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class AdminServiceImpl implements AdminService {
             log.warn("Already contains project with name {} at database", project.getProjectName());
             throw new BusinessException(Status.ALREADY_CONTAINS);
         }
-        projectsRepository.save(dtoToDataMapper.restToDataProject(project));
+        projectsRepository.save(dataMapper.restToDataProject(project));
     }
 
     @Override
