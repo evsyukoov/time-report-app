@@ -33,7 +33,7 @@ const dep = () => {
     sendHttpRequest('GET', referer + '/time-report-app/report/get-departments').then(responseData => {
         startConditionCheckboxes()
         var departmentsDiv = document.getElementById("departments")
-        addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData)
+        addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData, true)
     })
 }
 
@@ -41,7 +41,7 @@ const empl = () => {
     sendHttpRequest('GET', referer + '/time-report-app/report/get-employees').then(responseData => {
         startConditionCheckboxes()
         var employeesDiv = document.getElementById("employees")
-        addElementsToUl(employeesDiv, "dropdown-block-empl", responseData)
+        addElementsToUl(employeesDiv, "dropdown-block-empl", responseData, false)
     })
 }
 
@@ -50,7 +50,7 @@ function startConditionCheckboxes() {
     document.getElementById("empl-report").checked = false
 }
 
-function addElementsToUl(div, classElemName, responseData) {
+function addElementsToUl(div, classElemName, responseData, isDepartments) {
     var ul;
     if (document.getElementById('ul-id-' + classElemName) == null) {
         ul = createUl(classElemName)
@@ -61,7 +61,11 @@ function addElementsToUl(div, classElemName, responseData) {
     for (let i = 0; i < responseData.length; i++) {
         var li = document.createElement('li');
         li.className = classElemName
-        li.innerHTML = responseData[i]["name"];
+        if (isDepartments) {
+            li.innerHTML = responseData[i]["name"];
+        } else {
+            li.innerHTML = responseData[i]
+        }
         li.addEventListener('click', function (event) {
             let userChoiceLi = event.target;
             deleteUl(classElemName)
