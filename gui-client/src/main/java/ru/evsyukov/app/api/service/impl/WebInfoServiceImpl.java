@@ -1,5 +1,7 @@
 package ru.evsyukov.app.api.service.impl;
 
+import ru.evsyukov.app.api.dto.Department;
+import ru.evsyukov.app.api.mappers.DataMapper;
 import ru.evsyukov.app.api.service.WebInfoService;
 import ru.evsyukov.app.data.entity.Client;
 import ru.evsyukov.app.data.entity.Project;
@@ -28,15 +30,19 @@ public class WebInfoServiceImpl implements WebInfoService {
 
     private ClientRepository clientRepository;
 
+    private final DataMapper dataMapper;
+
     @Autowired
     public WebInfoServiceImpl(EmployeeRepository employeeRepository,
                               ReportDayRepository reportDayRepository,
                               ProjectsRepository projectsRepository,
-                              ClientRepository clientRepository) {
+                              ClientRepository clientRepository,
+                              DataMapper dataMapper) {
         this.employeeRepository = employeeRepository;
         this.reportDayRepository = reportDayRepository;
         this.projectsRepository = projectsRepository;
         this.clientRepository = clientRepository;
+        this.dataMapper = dataMapper;
     }
 
     @Override
@@ -62,12 +68,11 @@ public class WebInfoServiceImpl implements WebInfoService {
     }
 
     @Override
-    public List<String> getDepartments() {
+    public List<Department> getDepartments() {
         return employeeRepository.findAll()
                 .stream()
-                .map(Employee::getDepartment)
+                .map(dataMapper::employeeToDepartment)
                 .distinct()
-                .sorted()
                 .collect(Collectors.toList());
     }
 

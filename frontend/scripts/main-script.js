@@ -61,7 +61,7 @@ function addElementsToUl(div, classElemName, responseData) {
     for (let i = 0; i < responseData.length; i++) {
         var li = document.createElement('li');
         li.className = classElemName
-        li.innerHTML = responseData[i];
+        li.innerHTML = responseData[i]["name"];
         li.addEventListener('click', function (event) {
             let userChoiceLi = event.target;
             deleteUl(classElemName)

@@ -114,6 +114,7 @@ public class AdminController {
         return !StringUtils.isEmpty(employee.getName())
                 && !StringUtils.isEmpty(employee.getPosition())
                 && !StringUtils.isEmpty(employee.getDepartment())
+                && !StringUtils.isEmpty(employee.getDepartmentShort())
                 && employee.getName().split(" ").length == 3;
     }
 }
