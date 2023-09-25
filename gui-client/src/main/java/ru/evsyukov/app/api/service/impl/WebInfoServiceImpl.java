@@ -78,14 +78,13 @@ public class WebInfoServiceImpl implements WebInfoService {
 
     @Override
     public List<String> getProjects(boolean unused) {
+        Set<String> usedProjects = reportDayRepository.findAll()
+                .stream()
+                .map(ReportDay::getProjects)
+                .map(projects -> Arrays.asList(projects.split(Message.DELIMETR)))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
         if (unused) {
-            Set<String> usedProjects = reportDayRepository.findAll()
-                    .stream()
-                    .map(ReportDay::getProjects)
-                    .map(projects -> Arrays.asList(projects.split(Message.DELIMETR)))
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-
             return projectsRepository.findAll()
                     .stream()
                     .map(Project::getProjectName)
@@ -96,6 +95,7 @@ public class WebInfoServiceImpl implements WebInfoService {
         return projectsRepository.findAll()
                 .stream()
                 .map(Project::getProjectName)
+                .filter(usedProjects::contains)
                 .sorted()
                 .collect(Collectors.toList());
     }
