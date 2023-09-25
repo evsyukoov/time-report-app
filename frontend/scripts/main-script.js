@@ -45,6 +45,14 @@ const empl = () => {
     })
 }
 
+const project = () => {
+    sendHttpRequest('GET', referer + '/time-report-app/report/get-projects').then(responseData => {
+        startConditionCheckboxes()
+        var employeesDiv = document.getElementById("projects")
+        addElementsToUl(employeesDiv, "dropdown-block-project", responseData, false)
+    })
+}
+
 function startConditionCheckboxes() {
     document.getElementById("empl-report").setAttribute("disabled", "disabled");
     document.getElementById("empl-report").checked = false

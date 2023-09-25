@@ -3,6 +3,7 @@ const req = () => {
     let dateEnd = document.getElementById("dateEnd").value
     let empl
     let dep
+    let project
     let ulEmpl = document.getElementById("ul-id-dropdown-block-empl")
     let empChBox = document.getElementById("empl-report")
     let depChBox = document.getElementById("department-report")
@@ -13,10 +14,15 @@ const req = () => {
     if (ulDep != null) {
         dep = ulDep.children[0].firstChild.nodeValue
     }
+    let ulProject = document.getElementById("ul-id-dropdown-block-project")
+    if (ulProject != null) {
+        project = ulProject.children[0].firstChild.nodeValue
+    }
     //alert(dep + " " + empl + " " + dateStart + " " + dateEnd)
     var formData = new FormData()
     formData.append('name', empl)
     formData.append('department', dep)
+    formData.append('project', project)
 
     // alert(depChBox.checked)
 
