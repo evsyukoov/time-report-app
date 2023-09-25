@@ -261,6 +261,10 @@ body {
         font-size: 3em;
     }
 
+    #ul-id-dropdown-block-project li {
+        font-size: 3em;
+    }
+
     .drop ul {
         max-height: 300px;
     }

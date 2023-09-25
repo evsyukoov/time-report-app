@@ -101,6 +101,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                             reportDay.getEmployee().getDepartment(), dto.getDepartment()))
                     .collect(Collectors.toList());
         }
+        if (dto.getProject() != null) {
+            days = days.stream()
+                    .filter(reportDay ->
+                            reportDay.getProjects().contains(dto.getProject()))
+                    .collect(Collectors.toList());
+        }
         if (days.isEmpty()) {
             log.info("No report days at Database");
             return new ByteArrayOutputStream();
