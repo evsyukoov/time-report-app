@@ -28,6 +28,7 @@ import ru.evsyukov.utils.messages.Message;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -72,10 +73,15 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     @Override
     public ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception {
         List<ReportDay> days;
+        // если отчет не ограничен по датам, то формирование происходит долго, будем брать за текущий год,
+        // если нужны старые года, то есть фильтры
+        if (dto.getDateStart() == null && dto.getDateEnd() == null) {
+            Year year = Year.now();
+            dto.setDateStart(DateTimeUtils.fromLocalDate(LocalDate.of(year.getValue(), Month.JANUARY, 1)));
+            dto.setDateEnd(DateTimeUtils.fromLocalDate(LocalDate.of(year.getValue(), Month.DECEMBER, 31)));
+        }
         if (dto.getName() == null) {
-            if (dto.getDateStart() == null && dto.getDateEnd() == null) {
-                days = daysRepository.findAll();
-            } else if (dto.getDateStart() == null && dto.getDateEnd() != null) {
+            if (dto.getDateStart() == null && dto.getDateEnd() != null) {
                 days = daysRepository.findReportDayByDateLessThanEqual(dto.getDateEnd());
             } else if (dto.getDateStart() != null && dto.getDateEnd() == null) {
                 days = daysRepository.findReportDayByDateGreaterThanEqual(dto.getDateStart());
@@ -84,9 +90,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         .findReportDayByDateGreaterThanEqualAndDateLessThanEqual(dto.getDateStart(), dto.getDateEnd());
             }
         } else {
-            if (dto.getDateStart() == null && dto.getDateEnd() == null) {
-                days = daysRepository.findReportDayByEmployeeName(dto.getName());
-            } else if (dto.getDateStart() == null && dto.getDateEnd() != null) {
+            if (dto.getDateStart() == null && dto.getDateEnd() != null) {
                 days = daysRepository.findReportDayByDateLessThanEqualAndEmployeeName(dto.getDateEnd(), dto.getName());
             } else if (dto.getDateStart() != null && dto.getDateEnd() == null) {
                 days = daysRepository.findReportDayByDateGreaterThanEqualAndEmployeeName(dto.getDateStart(), dto.getName());

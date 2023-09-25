@@ -19,10 +19,6 @@ const req = () => {
         project = ulProject.children[0].firstChild.nodeValue
     }
     //alert(dep + " " + empl + " " + dateStart + " " + dateEnd)
-    var formData = new FormData()
-    formData.append('name', empl)
-    formData.append('department', dep)
-    formData.append('project', project)
 
     // alert(depChBox.checked)
 
@@ -33,6 +29,7 @@ const req = () => {
     var data = JSON.stringify({
         "name":
         empl,
+        "project": project,
         "department": dep,
         "dateStart": parseDate(dateStart),
         "dateEnd": parseDate(dateEnd),
