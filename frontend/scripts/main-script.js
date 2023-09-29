@@ -30,27 +30,21 @@ const sendHttpRequest = (method, url) => {
 };
 
 const dep = () => {
-    sendHttpRequest('GET', referer + '/time-report-app/report/get-departments').then(responseData => {
         startConditionCheckboxes()
         var departmentsDiv = document.getElementById("departments")
-        addElementsToUl(departmentsDiv, "dropdown-block-dep", responseData, true)
-    })
+        addElementsToUl(departmentsDiv, "dropdown-block-dep", departments, true)
 }
 
 const empl = () => {
-    sendHttpRequest('GET', referer + '/time-report-app/report/get-employees').then(responseData => {
         startConditionCheckboxes()
         var employeesDiv = document.getElementById("employees")
-        addElementsToUl(employeesDiv, "dropdown-block-empl", responseData, false)
-    })
+        addElementsToUl(employeesDiv, "dropdown-block-empl", employees, false)
 }
 
 const project = () => {
-    sendHttpRequest('GET', referer + '/time-report-app/report/get-projects').then(responseData => {
         startConditionCheckboxes()
         var employeesDiv = document.getElementById("projects")
-        addElementsToUl(employeesDiv, "dropdown-block-project", responseData, false)
-    })
+        addElementsToUl(employeesDiv, "dropdown-block-project", projects, false)
 }
 
 function startConditionCheckboxes() {
@@ -58,7 +52,7 @@ function startConditionCheckboxes() {
     document.getElementById("empl-report").checked = false
 }
 
-function addElementsToUl(div, classElemName, responseData, isDepartments) {
+function addElementsToUl(div, classElemName, data, isDepartments) {
     var ul;
     if (document.getElementById('ul-id-' + classElemName) == null) {
         ul = createUl(classElemName)
@@ -66,13 +60,13 @@ function addElementsToUl(div, classElemName, responseData, isDepartments) {
         deleteUl(classElemName)
     }
     div.appendChild(ul)
-    for (let i = 0; i < responseData.length; i++) {
+    for (let i = 0; i < data.length; i++) {
         var li = document.createElement('li');
         li.className = classElemName
         if (isDepartments) {
-            li.innerHTML = responseData[i]["name"];
+            li.innerHTML = data[i]["name"];
         } else {
-            li.innerHTML = responseData[i]
+            li.innerHTML = data[i]
         }
         li.addEventListener('click', function (event) {
             let userChoiceLi = event.target;
