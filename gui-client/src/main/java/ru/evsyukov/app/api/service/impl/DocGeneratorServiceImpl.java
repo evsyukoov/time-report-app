@@ -76,6 +76,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     @Override
     public ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception {
         List<ReportDay> days;
+        numOfRows = 8;
         // если отчет не ограничен по датам, то формирование происходит долго, будем брать за текущий год,
         // если нужны старые года, то есть фильтры
         if (dto.getDateStart() == null && dto.getDateEnd() == null) {
@@ -129,7 +130,6 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             return new ByteArrayOutputStream();
         }
         log.info("Successfully get report days from Database {}", days);
-        numOfRows = 8;
         ExtraOptions extraOptions = new ExtraOptions(waitForProjectReport, dto.isWaitForEmployeeReport(), dto.isWaitForDepartmentsReport());
         return createDoc(days, dto.getName(), extraOptions);
     }
