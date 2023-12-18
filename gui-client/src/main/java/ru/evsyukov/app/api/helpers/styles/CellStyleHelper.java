@@ -79,6 +79,10 @@ public class CellStyleHelper {
         map.put(Month.DECEMBER, initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIME, workbook));
         return map;
     }
+
+    public static CellStyle predefineBasicColumnStyle(Workbook workbook) {
+        return initCellStyleColumn(HSSFColor.HSSFColorPredefined.LIGHT_YELLOW, workbook);
+    }
     
     private static CellStyle initCellStyleColumn(HSSFColor.HSSFColorPredefined color, Workbook workbook) {
         return CellStyleBuilder.builder()
