@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "employee_dictionary")
-public class Employee {
+public class Employee implements Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,5 +69,16 @@ public class Employee {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Employee employee = new Employee();
+        employee.setDepartmentShort(this.departmentShort);
+        employee.setDepartment(this.department);
+        employee.setName(this.name);
+        employee.setPosition(this.position);
+        employee.setId(this.id);
+        return employee;
     }
 }

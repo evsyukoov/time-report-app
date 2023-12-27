@@ -181,12 +181,24 @@ body {
     justify-content: center;
 }
 
+.checkbox-project {
+    color: #fff;
+    display: flex;
+    margin-top: 3%;
+    justify-content: center;
+}
+
 .label1 {
     color: #3f3e3e;
     font-size: 1.5em;
 }
 
 .label2 {
+    color: #3f3e3e;
+    font-size: 1.5em;
+}
+
+.label3 {
     color: #3f3e3e;
     font-size: 1.5em;
 }
@@ -223,6 +235,11 @@ body {
     }
 
     .label2 {
+        color: black;
+        font-size: 2em;
+    }
+
+    .label3 {
         color: black;
         font-size: 2em;
     }

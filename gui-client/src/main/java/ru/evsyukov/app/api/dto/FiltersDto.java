@@ -18,6 +18,8 @@ public class FiltersDto {
 
     private boolean waitForDepartmentsReport;
 
+    private boolean waitForProjectReport;
+
     public String getName() {
         return name;
     }
@@ -60,6 +62,14 @@ public class FiltersDto {
 
     public boolean isWaitForDepartmentsReport() {
         return waitForDepartmentsReport;
+    }
+
+    public boolean isWaitForProjectReport() {
+        return waitForProjectReport;
+    }
+
+    public void setWaitForProjectReport(boolean waitForProjectReport) {
+        this.waitForProjectReport = waitForProjectReport;
     }
 
     public void setWaitForDepartmentsReport(boolean waitForDepartmentsReport) {

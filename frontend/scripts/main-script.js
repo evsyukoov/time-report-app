@@ -30,34 +30,43 @@ const sendHttpRequest = (method, url) => {
 };
 
 const dep = () => {
-        startConditionCheckboxes()
         var departmentsDiv = document.getElementById("departments")
         addElementsToUl(departmentsDiv, "dropdown-block-dep", departments, true)
+        startConditionCheckboxes()
 }
 
 const empl = () => {
-        startConditionCheckboxes()
         var employeesDiv = document.getElementById("employees")
         addElementsToUl(employeesDiv, "dropdown-block-empl", employees, false)
+        startConditionCheckboxes()
 }
 
 const project = () => {
-        startConditionCheckboxes()
         var employeesDiv = document.getElementById("projects")
         addElementsToUl(employeesDiv, "dropdown-block-project", projects, false)
+        startConditionCheckboxes()
 }
 
 function startConditionCheckboxes() {
-    document.getElementById("empl-report").setAttribute("disabled", "disabled");
-    document.getElementById("empl-report").checked = false
+    if (document.getElementById("ul-id-dropdown-block-project") != null) {
+        document.getElementById("empl-report").setAttribute("disabled", "disabled");
+        document.getElementById("empl-report").checked = false
+    }
+    if (document.getElementById("ul-id-dropdown-block-project") == null) {
+        document.getElementById("project-report").setAttribute("disabled", "disabled");
+        document.getElementById("project-report").checked = false
+    }
 }
 
 function addElementsToUl(div, classElemName, data, isDepartments) {
-    var ul;
+    var ul = null;
     if (document.getElementById('ul-id-' + classElemName) == null) {
         ul = createUl(classElemName)
     } else {
         deleteUl(classElemName)
+    }
+    if (ul == null) {
+        return
     }
     div.appendChild(ul)
     for (let i = 0; i < data.length; i++) {
@@ -74,9 +83,13 @@ function addElementsToUl(div, classElemName, data, isDepartments) {
             let ul = createUl(classElemName)
             ul.appendChild(userChoiceLi)
             div.appendChild(ul)
-            if (classElemName === "dropdown-block-empl") {
+            if ((classElemName === "dropdown-block-empl" && document.getElementById("ul-id-dropdown-block-project") == null)) {
                 document.getElementById("empl-report").removeAttribute("disabled")
                 document.getElementById("empl-report").checked = false
+            }
+            if (classElemName === "dropdown-block-project") {
+                document.getElementById("project-report").removeAttribute("disabled")
+                document.getElementById("project-report").checked = false
             }
 
         })

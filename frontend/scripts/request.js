@@ -7,6 +7,7 @@ const req = () => {
     let ulEmpl = document.getElementById("ul-id-dropdown-block-empl")
     let empChBox = document.getElementById("empl-report")
     let depChBox = document.getElementById("department-report")
+    let projectChBox = document.getElementById("project-report")
     if (ulEmpl != null) {
         empl = ulEmpl.children[0].firstChild.nodeValue
     }
@@ -34,7 +35,8 @@ const req = () => {
         "dateStart": parseDate(dateStart),
         "dateEnd": parseDate(dateEnd),
         "waitForEmployeeReport": empChBox.checked,
-        "waitForDepartmentsReport": depChBox.checked
+        "waitForDepartmentsReport": depChBox.checked,
+        "waitForProjectReport": projectChBox.checked
     });
     xhr.responseType = 'blob'
     xhr.onloadstart = function (e) {

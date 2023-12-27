@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "report_days")
-public class ReportDay {
+public class ReportDay implements Cloneable {
 
     private static final SimpleDateFormat sdf;
 
@@ -81,5 +81,16 @@ public class ReportDay {
                 ", uid=" + uid +
                 ", projects='" + projects + '\'' +
                 '}';
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        ReportDay rd = new ReportDay();
+        rd.setProjects(this.projects);
+        rd.setId(this.id);
+        rd.setDate(this.date);
+        rd.setUid(this.uid);
+        rd.setEmployee((Employee) this.employee.clone());
+        return rd;
     }
 }
