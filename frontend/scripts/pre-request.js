@@ -7,6 +7,15 @@ function preRequestAdmin() {
 }
 
 function preRequestMain() {
+    //Listeners
+    // убрать всплывающий список по клику мимо списка
+    document.addEventListener('click', (event) => {
+      if (event.target.className !== 'dropbtn' && !event.target.className.startsWith('dropdown-block')) {
+          if (isDropdownsActive()) {
+              clearDropdowns()
+          }
+      }
+    })
     preRequest('false')
 }
 

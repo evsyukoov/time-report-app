@@ -11,6 +11,7 @@
 <script src="scripts/js-datepicker/cssworld.ru-xcal-en.js"></script>
 <script src="scripts/request.js"></script>
 <script src="scripts/auth.js"></script>
+<script src="scripts/autocomplete.js"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <body onload="preRequestMain()">
@@ -22,19 +23,19 @@
 <div class="main">
     <div class="main-row">
         <div class="drop">
-            <p onclick="dep()" class="dropbtn">Выбрать отдел</p>
+            <input id="get-departments" placeholder="Вводите отдел" oninput="dep()" class="dropbtn">
             <div id="departments" class="dropdown-block-dep">
             </div>
         </div>
 
         <div class="drop">
-            <p onclick="empl()" class="dropbtn">Выбрать сотрудника</p>
+            <input id="get-employees" placeholder="Вводите сотрудника" oninput="empl()" class="dropbtn">
             <div id="employees" class="dropdown-block-empl">
             </div>
         </div>
 
         <div class="drop">
-            <p onclick="project()" class="dropbtn">Выбрать объект</p>
+            <input id="get-projects" placeholder="Вводите проект" oninput="project()" class="dropbtn">
             <div id="projects" class="dropdown-block-project">
             </div>
         </div>
@@ -42,14 +43,12 @@
     <div class="calendar-forms">
         <div class="calendar">
             <input id="dateStart" type="text" placeholder="Выберите дату начала отчета" value="" size="40"
-                   onClick="xCal(this)"
-                   onmouseenter="xCal(this)" onKeyUp="xCal()">
+                   onClick="xCal(this)" onKeyUp="xCal()">
         </div>
 
         <div class="calendar">
             <input id="dateEnd" type="text" placeholder="Выберите дату конца отчета" value="" size="40"
-                   onClick="xCal(this)"
-                   onmouseenter="xCal(this)" onKeyUp="xCal()">
+                   onClick="xCal(this)" onKeyUp="xCal()">
         </div>
     </div>
 

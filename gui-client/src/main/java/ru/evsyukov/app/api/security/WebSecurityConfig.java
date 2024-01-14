@@ -36,7 +36,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.cors().and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/report/*", "/check/*").
+                .antMatchers("/report/*", "/check/*", "/autocomplete/*").
                 permitAll()
                 .antMatchers("/admin/*")
                 .hasRole("ADMIN")
