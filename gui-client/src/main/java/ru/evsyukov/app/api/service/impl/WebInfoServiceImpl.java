@@ -1,5 +1,6 @@
 package ru.evsyukov.app.api.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import ru.evsyukov.app.api.dto.Department;
 import ru.evsyukov.app.api.mappers.DataMapper;
 import ru.evsyukov.app.api.service.WebInfoService;
@@ -68,6 +69,14 @@ public class WebInfoServiceImpl implements WebInfoService {
     }
 
     @Override
+    public List<String> getEmployeesNamesAutocomplete(String query) {
+        return employeeRepository.getAllEmployeeNamesFromCache()
+                .stream()
+                .filter(empl -> StringUtils.containsIgnoreCase(empl, query))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Department> getDepartments() {
         return employeeRepository.findAll()
                 .stream()
@@ -97,6 +106,24 @@ public class WebInfoServiceImpl implements WebInfoService {
                 .map(Project::getProjectName)
                 .filter(usedProjects::contains)
                 .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getProjectsAutocomplete(String query) {
+        return projectsRepository.getAllProjectsNameSortedFromCache()
+                .stream()
+                .filter(proj -> StringUtils.containsIgnoreCase(proj, query))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Department> getDepartmentsAutocomplete(String query) {
+        return employeeRepository.findAllFromCache()
+                .stream()
+                .filter(empl -> StringUtils.containsIgnoreCase(empl.getDepartment(), query))
+                .map(dataMapper::employeeToDepartment)
+                .distinct()
                 .collect(Collectors.toList());
     }
 

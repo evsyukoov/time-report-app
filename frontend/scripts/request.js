@@ -1,28 +1,34 @@
 const req = () => {
     let dateStart = document.getElementById("dateStart").value
     let dateEnd = document.getElementById("dateEnd").value
-    let empl
-    let dep
-    let project
-    let ulEmpl = document.getElementById("ul-id-dropdown-block-empl")
+    let empl = document.getElementById("get-employees").value
+    let dep = document.getElementById("get-departments").value
+    let project = document.getElementById("get-projects").value
+
+    if (empl === "") {
+        empl = null
+    }
+    if (dep === "") {
+        dep = null
+    }
+    if (project === "") {
+        project = null
+    }
+
+    if ((empl != null && !employees.includes(empl))
+        || (project != null && !projects.includes(project))
+        || (dep != null && !checkDepartments(dep))) {
+        swal("Неверные значения в полях ввода", {
+            icon: 'error'
+        })
+        return
+    }
+
     let empChBox = document.getElementById("empl-report")
     let depChBox = document.getElementById("department-report")
-    if (ulEmpl != null) {
-        empl = ulEmpl.children[0].firstChild.nodeValue
-    }
-    let ulDep = document.getElementById("ul-id-dropdown-block-dep")
-    if (ulDep != null) {
-        dep = ulDep.children[0].firstChild.nodeValue
-    }
-    let ulProject = document.getElementById("ul-id-dropdown-block-project")
-    if (ulProject != null) {
-        project = ulProject.children[0].firstChild.nodeValue
-    }
-    //alert(dep + " " + empl + " " + dateStart + " " + dateEnd)
+    let projectChBox = document.getElementById("project-report")
 
-    // alert(depChBox.checked)
-
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open("POST", referer + "/time-report-app/report/get-report");
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
@@ -34,7 +40,8 @@ const req = () => {
         "dateStart": parseDate(dateStart),
         "dateEnd": parseDate(dateEnd),
         "waitForEmployeeReport": empChBox.checked,
-        "waitForDepartmentsReport": depChBox.checked
+        "waitForDepartmentsReport": depChBox.checked,
+        "waitForProjectReport": projectChBox.checked
     });
     xhr.responseType = 'blob'
     xhr.onloadstart = function (e) {
@@ -74,4 +81,13 @@ function parseDate(dateStr) {
     let month = arr[1]
     let year = arr[2]
     return Date.UTC(year, month - 1, day);
+}
+
+function checkDepartments(department) {
+    for (let i = 0; i < departments.length; i++) {
+        if (departments[i].name === department) {
+            return true
+        }
+    }
+    return false;
 }

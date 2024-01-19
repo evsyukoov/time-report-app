@@ -7,17 +7,22 @@ body {
 }
 
 .dropbtn {
-    background-color: #3498DB;
-    color: white;
-    font-size: 2em;
+    background-color: #99b2c4;
+    color: #1a1919;
+    font-size: 1.5em;
+    width: 90%;
     cursor: pointer;
-    border: 3px solid #a99e9e;
+    border: 3px solid #312f2f;
 
+}
+
+::placeholder {
+  color: #1a1919;
 }
 
 /* Dropdown button on hover & focus */
 .dropbtn:hover, .dropbtn:focus {
-    background-color: #2980B9;
+    background-color: #90bce0;
 }
 
 /* The container <div> - needed to position the dropdown content */
@@ -62,7 +67,7 @@ body {
 
 .drop {
     margin-top: 5%;
-    width: 400px;
+    width: 500px;
     color: #fff;
 }
 
@@ -98,14 +103,6 @@ body {
     position: relative;
     height: 40px;
     font-size: 2em;
-}
-
-.drop p {
-    line-height: 30px;
-    margin: 0;
-    padding: 0 10px;
-    box-sizing: border-box;
-    background: #3f3e3e;
 }
 
 .drop:hover .dropdown-block,
@@ -181,12 +178,24 @@ body {
     justify-content: center;
 }
 
+.checkbox-project {
+    color: #fff;
+    display: flex;
+    margin-top: 3%;
+    justify-content: center;
+}
+
 .label1 {
     color: #3f3e3e;
     font-size: 1.5em;
 }
 
 .label2 {
+    color: #3f3e3e;
+    font-size: 1.5em;
+}
+
+.label3 {
     color: #3f3e3e;
     font-size: 1.5em;
 }
@@ -223,6 +232,11 @@ body {
     }
 
     .label2 {
+        color: black;
+        font-size: 2em;
+    }
+
+    .label3 {
         color: black;
         font-size: 2em;
     }

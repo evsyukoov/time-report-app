@@ -32,6 +32,7 @@ import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -109,8 +110,13 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                             reportDay.getEmployee().getDepartment(), dto.getDepartment()))
                     .collect(Collectors.toList());
         }
-        boolean waitForProjectReport = false;
-        if (dto.getProject() != null) {
+        //если сотрудник не выбран
+        ExtraOptions extraOptions = new ExtraOptions(dto.isWaitForProjectReport(), dto.isWaitForEmployeeReport(), dto.isWaitForDepartmentsReport());
+        //разные виды отчетов (ТЗ)
+        // тут отчет по всем сотрудникам и сколько времени каждый потратил на объект
+        List<ReportDay> originalDays = Collections.emptyList();
+        if (extraOptions.waitForProjectReport) {
+            originalDays = cloneDays(days);
             days = days.stream()
                     .filter(reportDay ->
                             reportDay.getProjects().contains(dto.getProject()))
@@ -122,18 +128,50 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         reportDay.setProjects(proj);
                     })
                     .collect(Collectors.toList());
-            waitForProjectReport = true;
             numOfRows = 1;
+            extraOptions.remainingProject = dto.getProject();
+            //тут по сути такой же отчет, но нужно оставить конкретного сотрудника и объект не меняя соотношение ко всем объектам
+            // (поэтому нужно оставить для расчета все объекты, исключая объекты уже из Excel)
+            //TODO рефакторинг по завершению всех хотелок
         }
         if (days.isEmpty()) {
             log.info("No report days at Database");
             return new ByteArrayOutputStream();
         }
         log.info("Successfully get report days from Database {}", days);
-        ExtraOptions extraOptions = new ExtraOptions(waitForProjectReport, dto.isWaitForEmployeeReport(), dto.isWaitForDepartmentsReport());
-        return createDoc(days, dto.getName(), extraOptions);
+        return createDoc(days, originalDays, dto.getName(), extraOptions);
     }
 
+    private List<ReportDay> cloneDays(List<ReportDay> days) throws CloneNotSupportedException {
+        List<ReportDay> res = new ArrayList<>();
+        for (ReportDay reportDay : days) {
+            res.add((ReportDay) reportDay.clone());
+        }
+        return res;
+    }
+
+    // общий отчет без учета месяца
+    private void createCommonProjectsPercentReport(List<ReportDay> days, Sheet sheet) {
+        Map<String, List<ReportDay>> byEmployees = groupingByEmployees(days);
+        List<String> employees = new ArrayList<>(byEmployees.keySet());
+        List<Row> rows = createEmployeesColumn(sheet, employees, 1);
+        Row firstRow = sheet.createRow(0);
+        Cell nameCell = firstRow.createCell(1, CellType.STRING);
+        nameCell.setCellValue("Всего");
+        sheet.setDefaultColumnStyle(1, CellStyleHelper.predefineBasicColumnStyle(sheet.getWorkbook()));
+        int colNumber = 1;
+        for (int i = 0; i < employees.size(); i++) {
+            long employeeReportDays = byEmployees.get(employees.get(i)).size();
+            long allEmployeesDays = days.size();
+            double percent = employeeReportDays * 100.0 / allEmployeesDays;
+
+            Row currentRow = rows.get(i);
+            Cell cell = currentRow.createCell(colNumber, CellType.NUMERIC);
+            cell.setCellValue(percent);
+        }
+    }
+
+    //общий отчет по месяцам
     private void createProjectsPercentReport(List<ReportDay> days, Sheet sheet) {
         // группируем сотрудник - отчетные дни
         Map<String, List<ReportDay>> byEmployees = groupingByEmployees(days);
@@ -254,6 +292,33 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         });
     }
 
+    //отчет в разрезе сотрудник - процент потраченный сотрудником на этот объект / время потраченное этим сотрудником на все объекты
+    private void createEmployeeProjectPercentReport(List<ReportDay> days, Sheet sheet, String project) {
+        Map<String, List<ReportDay>> byEmployees = groupingByEmployees(days);
+        List<String> employees = new ArrayList<>(byEmployees.keySet());
+        List<Row> rows = createEmployeesColumn(sheet, employees, 1);
+        Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
+        Row firstRow = sheet.createRow(0);
+        int colNumber = 1;
+        Set<Month> months = findAllMonths(days);
+        //идем по сотрудникам
+        for (Month month : months) {
+            sheet.setDefaultColumnStyle(colNumber, colorMap.get(month));
+            Cell monthCell = firstRow.createCell(colNumber, CellType.STRING);
+            monthCell.setCellValue(getMonthName(month));
+            List<ReportDay> currentMonthDays = days.stream().filter(day -> DateTimeUtils.toLocalDate(day.getDate()).getMonth() == month).collect(Collectors.toList());
+            for (int i = 0; i < employees.size(); i++) {
+                String employee = employees.get(i);
+                Map<String, Double> map = initPercentMap(currentMonthDays.stream().filter(day -> day.getEmployee().getName().equals(employee)).collect(Collectors.toList()));
+
+                Row currentRow = rows.get(i);
+                Cell cell = currentRow.createCell(colNumber, CellType.NUMERIC);
+                cell.setCellValue(map.get(project) == null ? 0 : map.get(project));
+            }
+            colNumber++;
+        }
+    }
+
     private void normalizeColumn(int startRow, int projectsCount, int columnNumber, Sheet sheet, Row lastRow) {
         double checkResult = 0;
         for (int i = startRow; i < projectsCount + startRow; i++) {
@@ -266,6 +331,16 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             }
         }
         lastRow.createCell(columnNumber, CellType.NUMERIC).setCellValue(checkResult);
+    }
+
+    private void normalizeColumn(int projectsCount, int columnNumber, Sheet sheet) {
+        for (int i = 1; i < projectsCount + 1; i++) {
+            Cell cell = sheet.getRow(i).getCell(columnNumber, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            if (cell.getCellType() == CellType.BLANK) {
+                cell.setCellType(CellType.NUMERIC);
+                cell.setCellValue(0);
+            }
+        }
     }
 
     private String getMonthName(Month month) {
@@ -309,11 +384,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return rows;
     }
 
-    private ByteArrayOutputStream createDoc(List<ReportDay> days, String employeeName, ExtraOptions extraOptions) throws Exception {
+    private ByteArrayOutputStream createDoc(List<ReportDay> days, List<ReportDay> originalDays, String employeeName, ExtraOptions extraOptions) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
         predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
         Map<Integer, List<ReportDay>> datesByYear = new TreeMap<>(groupingByYear(days));
+        Map<Integer, List<ReportDay>> datesByYearOriginal = new TreeMap<>(groupingByYear(originalDays));
         for (Map.Entry<Integer, List<ReportDay>> oneYearDaysEntry : datesByYear.entrySet()) {
             Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(oneYearDaysEntry.getValue()));
             for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
@@ -340,6 +416,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 log.info("Start generate projects percent report");
                 createProjectsPercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
                         String.format("По людям, %% проект, %s год", oneYearDaysEntry.getKey())));
+                createCommonProjectsPercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
+                        String.format("По людям, %% проект(всего), %s год", oneYearDaysEntry.getKey())));
+                //нужно соотношение ко всем объектам сотрудника
+                createEmployeeProjectPercentReport(datesByYearOriginal.get(oneYearDaysEntry.getKey()),
+                        workbook.createSheet(String.format("По людям, %% от всех объектов, %s год", oneYearDaysEntry.getKey())),
+                                extraOptions.remainingProject);
             }
         }
         workbook.write(baos);
@@ -576,20 +658,18 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private static class ExtraOptions {
-        boolean waitForProjectReport;
         boolean waitForEmployeeReport;
         boolean waitForDepartmentsReport;
+        boolean waitForProjectReport;
+        boolean removeProjects;
+        String remainingProject;
 
         public ExtraOptions(boolean waitForProjectReport,
                             boolean waitForEmployeeReport,
                             boolean waitForDepartmentsReport) {
-            this.waitForProjectReport = waitForProjectReport;
             this.waitForEmployeeReport = waitForEmployeeReport;
             this.waitForDepartmentsReport = waitForDepartmentsReport;
-        }
-
-        public boolean isWaitForProjectReport() {
-            return waitForProjectReport;
+            this.waitForProjectReport = waitForProjectReport;
         }
 
         public boolean isWaitForEmployeeReport() {
@@ -600,5 +680,16 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             return waitForDepartmentsReport;
         }
 
+        public boolean isWaitForProjectReport() {
+            return waitForProjectReport;
+        }
+
+        public boolean isRemoveProjects() {
+            return removeProjects;
+        }
+
+        public String getRemainingProject() {
+            return remainingProject;
+        }
     }
 }
