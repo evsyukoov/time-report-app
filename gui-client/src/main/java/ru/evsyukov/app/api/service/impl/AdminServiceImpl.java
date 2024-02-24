@@ -13,11 +13,14 @@ import ru.evsyukov.app.api.service.AdminService;
 import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.entity.ReportDay;
+import ru.evsyukov.app.data.entity.ReportDayArchive;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
+import ru.evsyukov.app.data.repository.ReportDayArchiveRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,17 +32,21 @@ public class AdminServiceImpl implements AdminService {
 
     private final ReportDayRepository reportDayRepository;
 
+    private ReportDayArchiveRepository archiveRepository;
+
     private final DataMapper dataMapper;
 
     @Autowired
     public AdminServiceImpl(ProjectsRepository projectsRepository,
                             EmployeeRepository employeeRepository,
                             ReportDayRepository reportDayRepository,
+                            ReportDayArchiveRepository archiveRepository,
                             DataMapper dataMapper) {
         this.projectsRepository = projectsRepository;
         this.employeeRepository = employeeRepository;
         this.dataMapper = dataMapper;
         this.reportDayRepository = reportDayRepository;
+        this.archiveRepository = archiveRepository;
     }
 
     @Override
@@ -63,13 +70,20 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void deleteEmployee(RestEmployee employee) {
+    public void deleteEmployee(RestEmployee employee, boolean approve) {
         List<ReportDay> days = reportDayRepository.findReportDayByEmployeeName(employee.getName());
-        if (!CollectionUtils.isEmpty(days)) {
-            log.warn("Нельзя удалить сотрудника {}, у которого есть отчеты", employee.getName());
-            throw new BusinessException(Status.IMPOSSIBLE_DELETE);
+        if (!approve) {
+            if (!CollectionUtils.isEmpty(days)) {
+                log.warn("Нельзя поностью удалить сотрудника {}, у которого есть отчеты", employee.getName());
+                throw new BusinessException(Status.WAIT_APPROVEMENT);
+            }
+            employeeRepository.deleteEmployeeByName(employee.getName());
+        } else {
+            //логика перемещения в архив
+            archiveRepository.saveAll(days.stream().map(ReportDayArchive::new).collect(Collectors.toList()));
+            reportDayRepository.deleteAll(days);
+            employeeRepository.deleteEmployeeByName(employee.getName());
         }
-        employeeRepository.deleteEmployeeByName(employee.getName());
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.evsyukov.app.api.dto.OperationResponse;
 import ru.evsyukov.app.api.dto.RestEmployee;
@@ -77,14 +78,22 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     *
+     * @param employee - сотрудник на удаление из системы
+     * @param approve - параметр, отвечающий за перемещение сотрудника, у которого есть отчетные дни, в архив
+     * @return код ответа и статус
+     * @throws JsonProcessingException
+     */
     @DeleteMapping(path = "/employee/remove")
-    public ResponseEntity<OperationResponse> deleteEmployee(@RequestBody RestEmployee employee) throws JsonProcessingException {
+    public ResponseEntity<OperationResponse> deleteEmployee(@RequestBody RestEmployee employee,
+                                                            @RequestParam boolean approve) throws JsonProcessingException {
         log.info("POST /admin/employee/remove, body -  {}", objectMapper.writeValueAsString(employee));
         if (StringUtils.isEmpty(employee.getName())) {
             return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
         }
         try {
-            adminService.deleteEmployee(employee);
+            adminService.deleteEmployee(employee, approve);
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body(OperationResponse.builder().status(e.getReason()).build());
         } catch (Exception e) {
