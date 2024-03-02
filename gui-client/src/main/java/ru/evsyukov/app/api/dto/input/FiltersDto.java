@@ -1,4 +1,4 @@
-package ru.evsyukov.app.api.dto;
+package ru.evsyukov.app.api.dto.input;
 
 import java.util.Date;
 

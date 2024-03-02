@@ -4,9 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.springframework.stereotype.Component;
-import ru.evsyukov.app.api.dto.Department;
-import ru.evsyukov.app.api.dto.RestEmployee;
-import ru.evsyukov.app.api.dto.RestProject;
+import ru.evsyukov.app.api.dto.output.Department;
+import ru.evsyukov.app.api.dto.input.RestEmployee;
+import ru.evsyukov.app.api.dto.input.RestProject;
 import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Project;
 

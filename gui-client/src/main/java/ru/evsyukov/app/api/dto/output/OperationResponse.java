@@ -1,7 +1,8 @@
-package ru.evsyukov.app.api.dto;
+package ru.evsyukov.app.api.dto.output;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.evsyukov.app.api.dto.output.Status;
 
 @Builder
 @Data

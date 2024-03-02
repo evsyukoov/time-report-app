@@ -3,9 +3,10 @@ package ru.evsyukov.app.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import ru.evsyukov.app.api.dto.Department;
-import ru.evsyukov.app.api.dto.FiltersDto;
+import ru.evsyukov.app.api.dto.output.Department;
+import ru.evsyukov.app.api.dto.input.FiltersDto;
+import ru.evsyukov.app.api.dto.output.Employee;
+import ru.evsyukov.app.api.dto.output.Project;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.api.service.WebInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,9 +68,9 @@ public class MainController {
     }
 
     @GetMapping(path = "/report/get-employees")
-    public List<String> getEmployesNames(@RequestParam(name = "unused", required = false) boolean unused) {
-        log.info("GET request /report/get-employees?unused={}", unused);
-        return webInfoService.getEmployeesNames(unused);
+    public List<Employee> getEmployesNames() {
+        log.info("GET request /report/get-employees");
+        return webInfoService.getEmployees();
     }
 
     @GetMapping(path = "/report/get-departments")
@@ -79,9 +80,9 @@ public class MainController {
     }
 
     @GetMapping(path = "/report/get-projects")
-    public List<String> getProjects(@RequestParam(name = "unused", required = false) boolean unused) {
-        log.info("GET request /report/get-projects?unused={}", unused);
-        return webInfoService.getProjects(unused);
+    public List<Project> getProjects() {
+        log.info("GET request /report/get-projects");
+        return webInfoService.getProjects();
     }
 
 //    @GetMapping(path="/dbUpdate")

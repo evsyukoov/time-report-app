@@ -1,7 +1,7 @@
 package ru.evsyukov.app.api.service;
 
-import ru.evsyukov.app.api.dto.RestEmployee;
-import ru.evsyukov.app.api.dto.RestProject;
+import ru.evsyukov.app.api.dto.input.RestEmployee;
+import ru.evsyukov.app.api.dto.input.RestProject;
 
 public interface AdminService {
 

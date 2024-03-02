@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.evsyukov.app.api.dto.OperationResponse;
-import ru.evsyukov.app.api.dto.RestEmployee;
-import ru.evsyukov.app.api.dto.RestProject;
-import ru.evsyukov.app.api.dto.Status;
+import ru.evsyukov.app.api.dto.output.OperationResponse;
+import ru.evsyukov.app.api.dto.input.RestEmployee;
+import ru.evsyukov.app.api.dto.input.RestProject;
+import ru.evsyukov.app.api.dto.output.Status;
 import ru.evsyukov.app.api.exception.BusinessException;
 import ru.evsyukov.app.api.service.AdminService;
 
@@ -87,7 +87,7 @@ public class AdminController {
      */
     @DeleteMapping(path = "/employee/remove")
     public ResponseEntity<OperationResponse> deleteEmployee(@RequestBody RestEmployee employee,
-                                                            @RequestParam boolean approve) throws JsonProcessingException {
+                                                            @RequestParam(required = false) boolean approve) throws JsonProcessingException {
         log.info("POST /admin/employee/remove, body -  {}", objectMapper.writeValueAsString(employee));
         if (StringUtils.isEmpty(employee.getName())) {
             return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
@@ -118,6 +118,22 @@ public class AdminController {
         }
         return ResponseEntity.ok().build();
     }
+
+//    @DeleteMapping(path = "/project/archive/add")
+//    public ResponseEntity<OperationResponse> archiveProject(@RequestBody RestProject project) {
+//        if (StringUtils.isEmpty(project.getProjectName())) {
+//            return ResponseEntity.badRequest().body(OperationResponse.builder().status(Status.INCORRECT_INPUT).build());
+//        }
+//        try {
+//            adminService.deleteProject(project);
+//        } catch (BusinessException e) {
+//            return ResponseEntity.badRequest().body(OperationResponse.builder().status(e.getReason()).build());
+//        } catch (Exception e) {
+//            log.error("Fatal Error - ", e);
+//            return ResponseEntity.internalServerError().body(OperationResponse.builder().status(Status.UNKNOWN_ERROR).build());
+//        }
+//        return ResponseEntity.ok().build();
+//    }
 
     private boolean isValidEmployee(RestEmployee employee) {
         return !StringUtils.isEmpty(employee.getName())

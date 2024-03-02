@@ -21,9 +21,18 @@ public interface ProjectsRepository extends JpaRepository<Project, Long> {
     @Query("SELECT projectName FROM Project ORDER BY UPPER(projectName) ASC")
     List<String> getAllProjectsNameSorted();
 
-    @Query("SELECT projectName FROM Project ORDER BY UPPER(projectName) ASC")
-    @Cacheable("projects")
-    List<String> getAllProjectsNameSortedFromCache();
+    // проекты задействованные хотя бы в 1 отчете
+    //TODO !!!! менять структуру БД, ReportDay должен ссылаться на таблицу проектов OneToMany
+    @Query("SELECT projectName FROM Project p " +
+            "WHERE EXISTS " +
+            "(SELECT 1 FROM ReportDay rd WHERE rd.projects LIKE CONCAT('%', p.projectName, '%'))")
+    List<String> getAllActualProjectsName();
+
+    // проекты незадействованные ни в одном отчете или помещенные на удаление
+    @Query("SELECT projectName FROM Project p " +
+            "WHERE NOT EXISTS " +
+            "(SELECT 1 FROM ReportDay rd WHERE rd.projects LIKE CONCAT('%', p.projectName, '%'))")
+    List<String> getAllNotActualProjectsName();
 
     List<Project> findByOrderByProjectNameAsc();
 
