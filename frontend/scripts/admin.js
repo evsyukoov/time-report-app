@@ -6,11 +6,11 @@ function fillSelectSections(idElem) {
     }
     let filledArray
     if (idElem.startsWith('employees')) {
-        filledArray = employees
+        filledArray = employees.filter(empl => empl['actual'] == false).map(empl => empl['employeeName'])
     } else if (idElem.startsWith('departments')) {
-        filledArray = getDepartmentsNames()
+        filledArray = departments.map(dep => dep['name'])
     } else {
-        filledArray = projects
+        filledArray = projects.filter(proj => proj['used'] == false).map(proj => proj['projectName'])
     }
     for (let i = 0; i < filledArray.length; i++) {
         let option = document.createElement('option')
