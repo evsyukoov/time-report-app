@@ -19,9 +19,9 @@
 <script src="scripts/admin.js"></script>
 <script src="scripts/pre-request.js"></script>
 
-<body onload="checkUserRequest(false);preRequestAdmin()">
+<body onload="preRequestAdmin()">
 <div class="container">
-    <div class="p-3 pb-md-4 mx-auto text-center mb-5">
+    <div class="p-2 pb-md-1 mx-auto text-center mb-5">
         <h1>Панель администратора</h1>
     </div>
     <div class="row mb-3 text-center">
@@ -75,6 +75,25 @@
                 <option selected>Выбрать проект</option>
             </select>
             <button type="button" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="rmProject()">Удалить проект</button>
+        </div>
+    </div>
+
+    <div class="row gy-lg-5 text-center">
+        <h4 class="align-content-between">Перенос в архив</h4>
+        <div class="col-lg-6 col-md-12 text-center mt-2 mb-2 hover-block">
+
+            <select id="employees-archive-admin" onclick="fillSelectSections('employees-archive-admin')" class="form-select mt-2 mb-2">
+                <option selected>Выбрать сотрудника</option>
+            </select>
+            <button type="button" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="archiveEmployee()">Сотрудника в архив</button>
+
+        </div>
+
+        <div class="col-lg-6 col-md-12 mt-2 mb-2 hover-block">
+            <select id="projects-archive-admin" onclick="fillSelectSections('projects-archive-admin')" class="form-select mt-2 mb-2">
+                <option selected>Выбрать проект</option>
+            </select>
+            <button type="button" class="w-100 btn btn-lg btn-outline-dark mb-2" onclick="archiveProject()">Проект в архив</button>
         </div>
     </div>
 

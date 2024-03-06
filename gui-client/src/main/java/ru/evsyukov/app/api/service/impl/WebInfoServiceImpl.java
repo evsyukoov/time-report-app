@@ -48,10 +48,10 @@ public class WebInfoServiceImpl implements WebInfoService {
 
     @Override
     public List<Employee> getEmployees() {
-        var actualEmployees = employeeRepository.getAllEmployeeNamesActual().stream()
-                .map(name -> new Employee(name, true)).collect(Collectors.toList());
-        var nonActualEmployees = employeeRepository.getAllEmployeeNamesNonActual().stream()
-                .map(name -> new Employee(name, false)).collect(Collectors.toList());
+        var actualEmployees = employeeRepository.getAllEmployeesActual().stream()
+                .map(e -> new Employee(e.getName(), true, e.isArchived())).collect(Collectors.toList());
+        var nonActualEmployees = employeeRepository.getAllEmployeesNonActual().stream()
+                .map(e -> new Employee(e.getName(), false, e.isArchived())).collect(Collectors.toList());
         actualEmployees.addAll(nonActualEmployees);
         return actualEmployees.stream()
                 .sorted(Comparator.comparing(Employee::getEmployeeName))
@@ -60,10 +60,10 @@ public class WebInfoServiceImpl implements WebInfoService {
 
     @Override
     public List<Project> getProjects() {
-        var actualProjects = projectsRepository.getAllActualProjectsName().stream()
-                .map(proj -> new Project(proj, true)).collect(Collectors.toList());
-        var nonActualProjects = projectsRepository.getAllNotActualProjectsName().stream()
-                .map(proj -> new Project(proj, false)).collect(Collectors.toList());
+        var actualProjects = projectsRepository.getAllActualProjects().stream()
+                .map(proj -> new Project(proj.getProjectName(), true, proj.isArchived())).collect(Collectors.toList());
+        var nonActualProjects = projectsRepository.getAllNotActualProjects().stream()
+                .map(proj -> new Project(proj.getProjectName(), false, proj.isArchived())).collect(Collectors.toList());
         actualProjects.addAll(nonActualProjects);
         return actualProjects.stream()
                 .sorted(Comparator.comparing(Project::getProjectName))

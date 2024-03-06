@@ -7,9 +7,13 @@ public class Employee {
     // признак того, есть ли отчеты у данного сотрудника
     private boolean actual;
 
-    public Employee(String employeeName, boolean actual) {
+    // сотрудник перенесен в архив через админ-панель
+    private boolean archived;
+
+    public Employee(String employeeName, boolean actual, boolean archived) {
         this.employeeName = employeeName;
         this.actual = actual;
+        this.archived = archived;
     }
 
     public String getEmployeeName() {
@@ -26,5 +30,13 @@ public class Employee {
 
     public void setActual(boolean actual) {
         this.actual = actual;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

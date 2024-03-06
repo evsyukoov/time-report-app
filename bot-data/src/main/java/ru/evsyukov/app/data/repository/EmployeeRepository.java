@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findAll();
+
+    Optional<Employee> findByName(String name);
 
     @Query("FROM Employee")
     @Cacheable("employees")
@@ -21,15 +24,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT name FROM Employee order by name ASC")
     List<String> getAllEmployeeNames();
 
-    @Query("SELECT name FROM Employee e " +
+    @Query("SELECT e FROM Employee e " +
             "WHERE EXISTS " +
             "(SELECT 1 FROM ReportDay rd WHERE rd.employee.id = e.id)")
-    List<String> getAllEmployeeNamesActual();
+    List<Employee> getAllEmployeesActual();
 
-    @Query("SELECT name FROM Employee e " +
+    @Query("SELECT e FROM Employee e " +
             "WHERE NOT EXISTS " +
             "(SELECT 1 FROM ReportDay rd WHERE rd.employee.id = e.id)")
-    List<String> getAllEmployeeNamesNonActual();
+    List<Employee> getAllEmployeesNonActual();
 
     Employee getEmployeeByName(String name);
 

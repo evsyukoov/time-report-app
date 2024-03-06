@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProjectsRepository extends JpaRepository<Project, Long> {
+
+    Optional<Project> findByProjectName(String name);
 
     Project getProjectById(long id);
 
@@ -23,16 +26,16 @@ public interface ProjectsRepository extends JpaRepository<Project, Long> {
 
     // проекты задействованные хотя бы в 1 отчете
     //TODO !!!! менять структуру БД, ReportDay должен ссылаться на таблицу проектов OneToMany
-    @Query("SELECT projectName FROM Project p " +
+    @Query("SELECT p FROM Project p " +
             "WHERE EXISTS " +
             "(SELECT 1 FROM ReportDay rd WHERE rd.projects LIKE CONCAT('%', p.projectName, '%'))")
-    List<String> getAllActualProjectsName();
+    List<Project> getAllActualProjects();
 
     // проекты незадействованные ни в одном отчете или помещенные на удаление
-    @Query("SELECT projectName FROM Project p " +
+    @Query("SELECT p FROM Project p " +
             "WHERE NOT EXISTS " +
             "(SELECT 1 FROM ReportDay rd WHERE rd.projects LIKE CONCAT('%', p.projectName, '%'))")
-    List<String> getAllNotActualProjectsName();
+    List<Project> getAllNotActualProjects();
 
     List<Project> findByOrderByProjectNameAsc();
 

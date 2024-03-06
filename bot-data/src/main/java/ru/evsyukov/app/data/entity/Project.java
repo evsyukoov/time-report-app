@@ -13,6 +13,9 @@ public class Project {
     @Column(name = "project_name")
     private String projectName;
 
+    @Column(name = "archived")
+    private boolean archived;
+
     public String getProjectName() {
         return projectName;
     }
@@ -27,5 +30,13 @@ public class Project {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

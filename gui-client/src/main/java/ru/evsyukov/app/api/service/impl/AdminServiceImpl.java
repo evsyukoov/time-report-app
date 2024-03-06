@@ -13,14 +13,12 @@ import ru.evsyukov.app.api.service.AdminService;
 import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.entity.ReportDay;
-import ru.evsyukov.app.data.entity.ReportDayArchive;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
-import ru.evsyukov.app.data.repository.ReportDayArchiveRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -32,21 +30,17 @@ public class AdminServiceImpl implements AdminService {
 
     private final ReportDayRepository reportDayRepository;
 
-    private ReportDayArchiveRepository archiveRepository;
-
     private final DataMapper dataMapper;
 
     @Autowired
     public AdminServiceImpl(ProjectsRepository projectsRepository,
                             EmployeeRepository employeeRepository,
                             ReportDayRepository reportDayRepository,
-                            ReportDayArchiveRepository archiveRepository,
                             DataMapper dataMapper) {
         this.projectsRepository = projectsRepository;
         this.employeeRepository = employeeRepository;
         this.dataMapper = dataMapper;
         this.reportDayRepository = reportDayRepository;
-        this.archiveRepository = archiveRepository;
     }
 
     @Override
@@ -70,20 +64,13 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void deleteEmployee(RestEmployee employee, boolean approve) {
+    public void deleteEmployee(RestEmployee employee) {
         List<ReportDay> days = reportDayRepository.findReportDayByEmployeeName(employee.getName());
-        if (!approve) {
-            if (!CollectionUtils.isEmpty(days)) {
-                log.warn("Нельзя поностью удалить сотрудника {}, у которого есть отчеты", employee.getName());
-                throw new BusinessException(Status.WAIT_APPROVEMENT);
-            }
-            employeeRepository.deleteEmployeeByName(employee.getName());
-        } else {
-            //логика перемещения в архив
-            archiveRepository.saveAll(days.stream().map(ReportDayArchive::new).collect(Collectors.toList()));
-            reportDayRepository.deleteAll(days);
-            employeeRepository.deleteEmployeeByName(employee.getName());
+        if (!CollectionUtils.isEmpty(days)) {
+            log.warn("Нельзя удалить сотрудника {}, у которого есть отчеты", employee.getName());
+            throw new BusinessException(Status.IMPOSSIBLE_DELETE);
         }
+        employeeRepository.deleteEmployeeByName(employee.getName());
     }
 
     @Override
@@ -94,5 +81,29 @@ public class AdminServiceImpl implements AdminService {
             throw new BusinessException(Status.IMPOSSIBLE_DELETE);
         }
         projectsRepository.deleteProjectsByProjectName(project.getProjectName());
+    }
+
+    @Override
+    public void archiveEmployee(RestEmployee employee) {
+        Optional<Employee> dbEmployeeOpt = employeeRepository.findByName(employee.getName());
+        dbEmployeeOpt.ifPresentOrElse(e -> {
+            e.setArchived(true);
+            employeeRepository.save(e);
+        }, () ->  {
+            log.warn("Не найден сотрудник которого пытаются перенести в архив");
+            throw new BusinessException(Status.NOT_FOUND);
+        });
+    }
+
+    @Override
+    public void archiveProject(RestProject project) {
+        Optional<Project> dbProjectOpt = projectsRepository.findByProjectName(project.getProjectName());
+        dbProjectOpt.ifPresentOrElse(p -> {
+            p.setArchived(true);
+            projectsRepository.save(p);
+        }, () -> {
+            log.warn("Не найден проект с таким названием");
+            throw new BusinessException(Status.NOT_FOUND);
+        });
     }
 }

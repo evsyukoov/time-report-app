@@ -7,9 +7,12 @@ public class Project {
     // признак для понимания используется ли сейчас данный проект где-то в отчетах
     private boolean used;
 
-    public Project(String projectName, boolean used) {
+    private boolean archived;
+
+    public Project(String projectName, boolean used, boolean archived) {
         this.projectName = projectName;
         this.used = used;
+        this.archived = archived;
     }
 
     public String getProjectName() {
@@ -26,5 +29,13 @@ public class Project {
 
     public void setUsed(boolean used) {
         this.used = used;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

@@ -9,7 +9,11 @@ public interface AdminService {
 
     void addProject(RestProject project);
 
-    void deleteEmployee(RestEmployee employee, boolean approve);
+    void deleteEmployee(RestEmployee employee);
 
     void deleteProject(RestProject project);
+
+    void archiveEmployee(RestEmployee employee);
+
+    void archiveProject(RestProject project);
 }
