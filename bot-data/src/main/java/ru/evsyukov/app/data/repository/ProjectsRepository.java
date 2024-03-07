@@ -21,8 +21,8 @@ public interface ProjectsRepository extends JpaRepository<Project, Long> {
 
     Project getProjectByProjectNameIgnoreCase(String name);
 
-    @Query("SELECT projectName FROM Project ORDER BY UPPER(projectName) ASC")
-    List<String> getAllProjectsNameSorted();
+    @Query("SELECT p FROM Project p ORDER BY UPPER(p.projectName) ASC")
+    List<Project> getAllProjectsSorted();
 
     // проекты задействованные хотя бы в 1 отчете
     //TODO !!!! менять структуру БД, ReportDay должен ссылаться на таблицу проектов OneToMany

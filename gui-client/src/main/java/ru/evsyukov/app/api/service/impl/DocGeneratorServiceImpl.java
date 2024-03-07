@@ -18,6 +18,7 @@ import ru.evsyukov.app.api.helpers.styles.CellStyleHelper;
 import ru.evsyukov.app.api.helpers.styles.CellStyleType;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.data.entity.Employee;
+import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
@@ -200,7 +201,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createDepartmentPercentReport(List<ReportDay> days, Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsNameSorted();
+        List<String> projects = projectsRepository.getAllProjectsSorted()
+                .stream()
+                .map(Project::getProjectName)
+                .collect(Collectors.toList());
+
         List<Row> rows = createProjectsColumn(sheet, projects, 2);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
@@ -267,7 +272,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createEmployeePercentReport(List<ReportDay> days, Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsNameSorted();
+        List<String> projects = projectsRepository.getAllProjectsSorted()
+                .stream()
+                .map(Project::getProjectName)
+                .collect(Collectors.toList());
         List<Row> rows = createProjectsColumn(sheet, projects, 1);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<CellStyleType, CellStyle> styleMap = CellStyleHelper.predefineCellStyles(sheet.getWorkbook());

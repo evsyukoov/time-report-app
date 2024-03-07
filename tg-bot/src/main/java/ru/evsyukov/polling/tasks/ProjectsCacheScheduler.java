@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Таска чтобы перекладывать данные по проектам из базы в кеш
@@ -34,7 +36,11 @@ public class ProjectsCacheScheduler {
     public void updateCache() {
         int size = cacheProjects.size();
         log.debug("Start update projects cache. Size: {}", size);
-        List<String> newProjects = projectsRepository.getAllProjectsNameSorted();
+        List<String> newProjects = projectsRepository.getAllProjectsSorted().stream()
+                .filter(proj -> !proj.isArchived())
+                .map(Project::getProjectName)
+                .collect(Collectors.toList());
+
         cacheProjects.clear();
         cacheProjects.addAll(newProjects);
         if (size != newProjects.size()) {
