@@ -427,7 +427,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         String.format("По людям, %% проект(всего), %s год", oneYearDaysEntry.getKey())));
                 //нужно соотношение ко всем объектам сотрудника
                 createEmployeeProjectPercentReport(datesByYearOriginal.get(oneYearDaysEntry.getKey()),
-                        workbook.createSheet(String.format("По людям, %% от всех объектов, %s год", oneYearDaysEntry.getKey())),
+                        workbook.createSheet(String.format("По людям, %% от всех, %s год", oneYearDaysEntry.getKey())),
                                 extraOptions.remainingProject);
             }
         }
