@@ -41,6 +41,7 @@ const empl = () => {
     let currentEmployees = employees
     let query = document.getElementById('get-employees').value
     let actualEmployeeNames = currentEmployees.filter(e => e["actual"] == true)
+                                            .filter(e => e['archived'] == false)
                                             .map(e => e["employeeName"])
                                             .filter(e => e.toLowerCase().includes(query.toLowerCase()))
 
@@ -59,6 +60,7 @@ const project = async () => {
     let currentProjects = projects
     let query = document.getElementById('get-projects').value
     let actualProjectNames = currentProjects.filter(p => p["used"] == true)
+                                                .filter(e => e['archived'] == false)
                                                 .map(p => p["projectName"])
                                                 .filter(p => p.toLowerCase().includes(query.toLowerCase()))
 
