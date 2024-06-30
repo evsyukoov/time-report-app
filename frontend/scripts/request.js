@@ -15,8 +15,8 @@ const req = () => {
         project = null
     }
 
-    if ((empl != null && !employees.includes(empl))
-        || (project != null && !projects.includes(project))
+    if ((empl != null && !employees.map(e => e['employeeName']).includes(empl))
+        || (project != null && !projects.map(p => p['projectName']).includes(project))
         || (dep != null && !checkDepartments(dep))) {
         swal("Неверные значения в полях ввода", {
             icon: 'error'

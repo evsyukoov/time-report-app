@@ -23,6 +23,9 @@ public class Employee implements Cloneable {
     @Column(name="department_short")
     private String departmentShort;
 
+    @Column(name = "archived")
+    private boolean archived;
+
     public String getName() {
         return name;
     }
@@ -61,6 +64,15 @@ public class Employee implements Cloneable {
 
     public void setDepartmentShort(String departmentShort) {
         this.departmentShort = departmentShort;
+    }
+
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 
     @Override

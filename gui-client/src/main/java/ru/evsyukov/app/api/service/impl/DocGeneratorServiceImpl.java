@@ -12,12 +12,13 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.evsyukov.app.api.dto.FiltersDto;
+import ru.evsyukov.app.api.dto.input.FiltersDto;
 import ru.evsyukov.app.api.helpers.common.TextUtil;
 import ru.evsyukov.app.api.helpers.styles.CellStyleHelper;
 import ru.evsyukov.app.api.helpers.styles.CellStyleType;
 import ru.evsyukov.app.api.service.DocGeneratorService;
 import ru.evsyukov.app.data.entity.Employee;
+import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.data.repository.EmployeeRepository;
 import ru.evsyukov.app.data.repository.ProjectsRepository;
@@ -36,7 +37,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -201,7 +201,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createDepartmentPercentReport(List<ReportDay> days, Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsNameSorted();
+        List<String> projects = projectsRepository.getAllProjectsSorted()
+                .stream()
+                .map(Project::getProjectName)
+                .collect(Collectors.toList());
+
         List<Row> rows = createProjectsColumn(sheet, projects, 2);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<Month, List<ReportDay>> reportMap = getExcelMonthDaysStructure(days);
@@ -268,7 +272,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     private void createEmployeePercentReport(List<ReportDay> days, Sheet sheet) {
-        List<String> projects = projectsRepository.getAllProjectsNameSorted();
+        List<String> projects = projectsRepository.getAllProjectsSorted()
+                .stream()
+                .map(Project::getProjectName)
+                .collect(Collectors.toList());
         List<Row> rows = createProjectsColumn(sheet, projects, 1);
         Map<Month, CellStyle> colorMap = CellStyleHelper.predefineMonthColumnsStyle(sheet.getWorkbook());
         Map<CellStyleType, CellStyle> styleMap = CellStyleHelper.predefineCellStyles(sheet.getWorkbook());
@@ -420,7 +427,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         String.format("По людям, %% проект(всего), %s год", oneYearDaysEntry.getKey())));
                 //нужно соотношение ко всем объектам сотрудника
                 createEmployeeProjectPercentReport(datesByYearOriginal.get(oneYearDaysEntry.getKey()),
-                        workbook.createSheet(String.format("По людям, %% от всех объектов, %s год", oneYearDaysEntry.getKey())),
+                        workbook.createSheet(String.format("По людям, %% от всех, %s год", oneYearDaysEntry.getKey())),
                                 extraOptions.remainingProject);
             }
         }

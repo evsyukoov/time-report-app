@@ -5,12 +5,16 @@ function fillSelectSections(idElem) {
         return
     }
     let filledArray
-    if (idElem.startsWith('employees')) {
-        filledArray = employees
-    } else if (idElem.startsWith('departments')) {
-        filledArray = getDepartmentsNames()
-    } else {
-        filledArray = projects
+    if (idElem.startsWith('employees-admin')) {
+        filledArray = employees.filter(empl => empl['actual'] == false).map(empl => empl['employeeName'])
+    } else if (idElem.startsWith('departments-admin')) {
+        filledArray = departments.map(dep => dep['name'])
+    } else if (idElem.startsWith('projects-admin')) {
+        filledArray = projects.filter(proj => proj['used'] == false).map(proj => proj['projectName'])
+    } else if (idElem.startsWith('employees-archive-admin')) {
+        filledArray = employees.filter(empl => empl['actual'] == true && empl['archived'] == false).map(empl => empl['employeeName'])
+    } else if (idElem.startsWith('projects-archive-admin')) {
+        filledArray = projects.filter(proj => proj['used'] == true && proj['archived'] == false).map(proj => proj['projectName'])
     }
     for (let i = 0; i < filledArray.length; i++) {
         let option = document.createElement('option')
@@ -130,7 +134,8 @@ function addProject() {
 function rmEmployee() {
     let selectList = document.getElementById("employees-admin");
     let employee = selectList.options[selectList.selectedIndex].text
-    if (!employees.includes(employee)) {
+    let employeeNames = employees.map(e => e['employeeName'])
+    if (!employeeNames.includes(employee)) {
         swal("Выберите сотрудника!", {
             icon: "error",
         });
@@ -175,7 +180,8 @@ function rmEmployee() {
 function rmProject() {
     let selectList = document.getElementById("projects-admin");
     let project = selectList.options[selectList.selectedIndex].text
-    if (!projects.includes(project)) {
+    let projectNames = projects.map(p => p['projectName'])
+    if (!projectNames.includes(project)) {
         swal("Выберите проект!", {
             icon: "error",
         });
@@ -200,6 +206,98 @@ function rmProject() {
             } else if (xhr.status === 400) {
                 if (xhr.responseText.includes('IMPOSSIBLE_DELETE')) {
                     swal("Невозможно удалить проект, на который ссылаются отчеты сотрудников. Обратитесь к администратору", {
+                        icon: "error",
+                    });
+                } else {
+                    swal("Вы не выбрали проект!", {
+                        icon: "error",
+                    });
+                }
+            } else if (xhr.status === 500) {
+                swal("Произошла непредвиденная ошибка на сервере, сообщите администратору", {
+                    icon: "error",
+                });
+            }
+        }
+    };
+    xhr.send(data)
+}
+
+function archiveEmployee() {
+    let selectList = document.getElementById("employees-archive-admin");
+    let employee = selectList.options[selectList.selectedIndex].text
+    let employeeNames = employees.map(e => e['employeeName'])
+    if (!employeeNames.includes(employee)) {
+        swal("Выберите сотрудника!", {
+            icon: "error",
+        });
+        return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("PATCH", referer + "/time-report-app/admin/employee/archive");
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
+    xhr.withCredentials = true
+    const data = JSON.stringify({"name": employee});
+
+    xhr.onreadystatechange = function (oEvent) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                swal("Сотрудник успешно перемещен в архив из справочника", {
+                    icon: "success",
+                });
+                let select = document.getElementById("employees-archive-admin")
+                select.removeChild(selectList.options[selectList.selectedIndex])
+            } else if (xhr.status === 400) {
+                if (xhr.responseText.includes('NOT_FOUND')) {
+                    swal("Не найден сотрудник. Обратитесь к администратору", {
+                        icon: "error",
+                    });
+                } else {
+                    swal("Вы не выбрали сотрудника!", {
+                        icon: "error",
+                    });
+                }
+            } else if (xhr.status === 500) {
+                swal("Произошла непредвиденная ошибка на сервере, сообщите администратору", {
+                    icon: "error",
+                });
+            }
+        }
+    };
+    xhr.send(data)
+}
+
+function archiveProject() {
+    let selectList = document.getElementById("projects-archive-admin");
+    let project = selectList.options[selectList.selectedIndex].text
+    let projectNames = projects.map(p => p['projectName'])
+    if (!projectNames.includes(project)) {
+        swal("Выберите проект!", {
+            icon: "error",
+        });
+        return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("PATCH", referer + "/time-report-app/admin/project/archive");
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
+    xhr.withCredentials = true
+    const data = JSON.stringify({"projectName": project});
+
+    xhr.onreadystatechange = function (oEvent) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                swal("Проект успешно перемещен в архив из справочника", {
+                    icon: "success",
+                });
+                let select = document.getElementById("projects-archive-admin")
+                select.removeChild(selectList.options[selectList.selectedIndex])
+            } else if (xhr.status === 400) {
+                if (xhr.responseText.includes('IMPOSSIBLE_DELETE')) {
+                    swal("Не найден проект. Обратитесь к администратору", {
                         icon: "error",
                     });
                 } else {

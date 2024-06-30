@@ -1,4 +1,4 @@
-package ru.evsyukov.app.api.dto;
+package ru.evsyukov.app.api.dto.output;
 
 public enum Status {
 
@@ -6,5 +6,6 @@ public enum Status {
     INCORRECT_INPUT,
     ALREADY_CONTAINS,
     IMPOSSIBLE_DELETE,
+    NOT_FOUND,
     UNKNOWN_ERROR
 }

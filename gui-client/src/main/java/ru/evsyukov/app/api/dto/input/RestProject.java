@@ -1,4 +1,4 @@
-package ru.evsyukov.app.api.dto;
+package ru.evsyukov.app.api.dto.input;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

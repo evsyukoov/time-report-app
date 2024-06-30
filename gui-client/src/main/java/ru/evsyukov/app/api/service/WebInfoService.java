@@ -1,24 +1,17 @@
 package ru.evsyukov.app.api.service;
 
-import ru.evsyukov.app.api.dto.Department;
+import ru.evsyukov.app.api.dto.output.Department;
+import ru.evsyukov.app.api.dto.output.Employee;
+import ru.evsyukov.app.api.dto.output.Project;
 
 import java.util.List;
 
 public interface WebInfoService {
 
-    List<String> getEmployeesNames(boolean unused);
-
-    List<String> getEmployeesNamesAutocomplete(String query);
+    List<Employee> getEmployees();
 
     List<Department> getDepartments();
 
-    List<String> getProjects(boolean unused);
+    List<Project> getProjects();
 
-    List<String> getProjectsAutocomplete(String query);
-
-    List<Department> getDepartmentsAutocomplete(String query);
-
-    int dbUpdate();
-
-    void fixDbTestData();
 }

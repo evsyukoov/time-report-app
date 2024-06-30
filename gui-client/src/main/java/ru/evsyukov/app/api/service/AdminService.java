@@ -1,7 +1,7 @@
 package ru.evsyukov.app.api.service;
 
-import ru.evsyukov.app.api.dto.RestEmployee;
-import ru.evsyukov.app.api.dto.RestProject;
+import ru.evsyukov.app.api.dto.input.RestEmployee;
+import ru.evsyukov.app.api.dto.input.RestProject;
 
 public interface AdminService {
 
@@ -12,4 +12,8 @@ public interface AdminService {
     void deleteEmployee(RestEmployee employee);
 
     void deleteProject(RestProject project);
+
+    void archiveEmployee(RestEmployee employee);
+
+    void archiveProject(RestProject project);
 }

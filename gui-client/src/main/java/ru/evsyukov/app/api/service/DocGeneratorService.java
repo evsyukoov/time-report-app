@@ -1,7 +1,7 @@
 package ru.evsyukov.app.api.service;
 
 
-import ru.evsyukov.app.api.dto.FiltersDto;
+import ru.evsyukov.app.api.dto.input.FiltersDto;
 
 import java.io.ByteArrayOutputStream;
 

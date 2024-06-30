@@ -29,49 +29,50 @@ const sendHttpRequest = (method, url) => {
     });
 };
 
-const dep = async () => {
-    let currentDepartments
-    await getDataByInput('get-departments').then((resolve) => {
-        currentDepartments = resolve;
-        console.log(departments)
-        return currentDepartments
-    })
+const dep = () => {
+    let currentDepartments = departments
+    let query = document.getElementById('get-departments').value
+    let depNames = currentDepartments.map(d => d['name']).filter(d => d.toLowerCase().includes(query.toLowerCase()))
     var departmentsDiv = document.getElementById("departments")
-    addElementsToUl(departmentsDiv, "dropdown-block-dep", currentDepartments, true)
+    addElementsToUl(departmentsDiv, "dropdown-block-dep", depNames)
 }
 
-const empl = async () => {
-    let currentEmployees
-        await getDataByInput('get-employees').then((resolve) => {
-            currentEmployees = resolve;
-            return currentEmployees
-        })
-        var employeesDiv = document.getElementById("employees")
-        addElementsToUl(employeesDiv, "dropdown-block-empl", currentEmployees, false)
-        if (isValidInputValue("get-employees", employees)) {
-            document.getElementById("empl-report").disabled = false
-            document.getElementById("empl-report").checked = false
-        } else {
-            document.getElementById("empl-report").disabled = true
-            document.getElementById("empl-report").checked = false
-        }
+const empl = () => {
+    let currentEmployees = employees
+    let query = document.getElementById('get-employees').value
+    let actualEmployeeNames = currentEmployees.filter(e => e["actual"] == true)
+                                            .filter(e => e['archived'] == false)
+                                            .map(e => e["employeeName"])
+                                            .filter(e => e.toLowerCase().includes(query.toLowerCase()))
+
+    var employeesDiv = document.getElementById("employees")
+    addElementsToUl(employeesDiv, "dropdown-block-empl", actualEmployeeNames)
+    if (isValidInputValue("get-employees", actualEmployeeNames)) {
+        document.getElementById("empl-report").disabled = false
+        document.getElementById("empl-report").checked = false
+    } else {
+        document.getElementById("empl-report").disabled = true
+        document.getElementById("empl-report").checked = false
+    }
 }
 
 const project = async () => {
-    let currentProjects
-        await getDataByInput('get-projects').then((resolve) => {
-            currentProjects = resolve;
-            return currentProjects
-        })
-        var projectsDiv = document.getElementById("projects")
-        addElementsToUl(projectsDiv, "dropdown-block-project", currentProjects, false)
-        if (isValidInputValue("get-projects", projects)) {
-            document.getElementById("project-report").disabled = false
-            document.getElementById("project-report").checked = false
-        } else {
-            document.getElementById("project-report").disabled = true
-            document.getElementById("project-report").checked = false
-        }
+    let currentProjects = projects
+    let query = document.getElementById('get-projects').value
+    let actualProjectNames = currentProjects.filter(p => p["used"] == true)
+                                                .filter(e => e['archived'] == false)
+                                                .map(p => p["projectName"])
+                                                .filter(p => p.toLowerCase().includes(query.toLowerCase()))
+
+    var projectsDiv = document.getElementById("projects")
+    addElementsToUl(projectsDiv, "dropdown-block-project", actualProjectNames)
+    if (isValidInputValue("get-projects", actualProjectNames)) {
+        document.getElementById("project-report").disabled = false
+        document.getElementById("project-report").checked = false
+    } else {
+        document.getElementById("project-report").disabled = true
+        document.getElementById("project-report").checked = false
+    }
 }
 
 function isValidInputValue(inputId, checkLst) {
@@ -79,18 +80,14 @@ function isValidInputValue(inputId, checkLst) {
     && checkLst.includes(document.getElementById(inputId).value)
 }
 
-function addElementsToUl(div, classElemName, data, isDepartments) {
+function addElementsToUl(div, classElemName, data) {
     deleteUl(classElemName)
     let ul = createUl(classElemName)
     div.appendChild(ul)
     for (let i = 0; i < data.length; i++) {
         var li = document.createElement('li');
         li.className = classElemName
-        if (isDepartments) {
-            li.innerHTML = data[i]["name"];
-        } else {
-            li.innerHTML = data[i]
-        }
+        li.innerHTML = data[i]
         li.addEventListener('click', function (event) {
             let userChoiceLi = event.target;
             let inputFormClass

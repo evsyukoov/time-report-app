@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.evsyukov.app.api.dto.RestEmployee;
-import ru.evsyukov.app.api.dto.RestProject;
-import ru.evsyukov.app.api.dto.Status;
+import ru.evsyukov.app.api.dto.input.RestEmployee;
+import ru.evsyukov.app.api.dto.input.RestProject;
+import ru.evsyukov.app.api.dto.output.Status;
 import ru.evsyukov.app.api.exception.BusinessException;
 import ru.evsyukov.app.api.mappers.DataMapper;
 import ru.evsyukov.app.api.service.AdminService;
@@ -18,6 +18,7 @@ import ru.evsyukov.app.data.repository.ProjectsRepository;
 import ru.evsyukov.app.data.repository.ReportDayRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -80,5 +81,29 @@ public class AdminServiceImpl implements AdminService {
             throw new BusinessException(Status.IMPOSSIBLE_DELETE);
         }
         projectsRepository.deleteProjectsByProjectName(project.getProjectName());
+    }
+
+    @Override
+    public void archiveEmployee(RestEmployee employee) {
+        Optional<Employee> dbEmployeeOpt = employeeRepository.findByName(employee.getName());
+        dbEmployeeOpt.ifPresentOrElse(e -> {
+            e.setArchived(true);
+            employeeRepository.save(e);
+        }, () ->  {
+            log.warn("Не найден сотрудник которого пытаются перенести в архив");
+            throw new BusinessException(Status.NOT_FOUND);
+        });
+    }
+
+    @Override
+    public void archiveProject(RestProject project) {
+        Optional<Project> dbProjectOpt = projectsRepository.findByProjectName(project.getProjectName());
+        dbProjectOpt.ifPresentOrElse(p -> {
+            p.setArchived(true);
+            projectsRepository.save(p);
+        }, () -> {
+            log.warn("Не найден проект с таким названием");
+            throw new BusinessException(Status.NOT_FOUND);
+        });
     }
 }
