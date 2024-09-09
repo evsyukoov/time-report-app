@@ -185,6 +185,13 @@ body {
     justify-content: center;
 }
 
+.checkbox-all-project {
+        color: #fff;
+        display: flex;
+        margin-top: 3%;
+        justify-content: center;
+}
+
 .label1 {
     color: #3f3e3e;
     font-size: 1.5em;
@@ -196,6 +203,11 @@ body {
 }
 
 .label3 {
+    color: #3f3e3e;
+    font-size: 1.5em;
+}
+
+.label4 {
     color: #3f3e3e;
     font-size: 1.5em;
 }
@@ -237,6 +249,11 @@ body {
     }
 
     .label3 {
+        color: black;
+        font-size: 2em;
+    }
+
+    .label4 {
         color: black;
         font-size: 2em;
     }

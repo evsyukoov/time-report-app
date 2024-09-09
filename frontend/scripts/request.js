@@ -27,6 +27,7 @@ const req = () => {
     let empChBox = document.getElementById("empl-report")
     let depChBox = document.getElementById("department-report")
     let projectChBox = document.getElementById("project-report")
+    let allProjectChBox = document.getElementById("project-all-report")
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", referer + "/time-report-app/report/get-report");
@@ -41,7 +42,8 @@ const req = () => {
         "dateEnd": parseDate(dateEnd),
         "waitForEmployeeReport": empChBox.checked,
         "waitForDepartmentsReport": depChBox.checked,
-        "waitForProjectReport": projectChBox.checked
+        "waitForProjectReport": projectChBox.checked,
+        "waitForAllProjectsReport": allProjectChBox.checked
     });
     xhr.responseType = 'blob'
     xhr.onloadstart = function (e) {

@@ -18,6 +18,12 @@ public class CellStyleHelper {
                 .fillPattern(FillPatternType.SOLID_FOREGROUND)
                 .allBorders(BorderStyle.THIN)
                 .build());
+        map.put(CellStyleType.PERCENT_PROJECT, CellStyleBuilder.builder()
+                .initCellStyle(workbook)
+                .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
+                .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                .allBorders(BorderStyle.THIN)
+                .build());
 
         DataFormat df = workbook.createDataFormat();
         map.put(CellStyleType.DATE, CellStyleBuilder.builder()

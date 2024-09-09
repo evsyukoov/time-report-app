@@ -3,6 +3,7 @@ package ru.evsyukov.app.api.helpers.styles;
 public enum CellStyleType {
 
     SURNAME,
+    PERCENT_PROJECT,
     DEPARTMENT_ROW,
     DATE,
     DEFAULT_COLUMN,
