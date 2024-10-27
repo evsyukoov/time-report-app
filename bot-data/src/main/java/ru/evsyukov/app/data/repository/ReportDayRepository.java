@@ -1,6 +1,7 @@
 package ru.evsyukov.app.data.repository;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.evsyukov.app.data.entity.ReportDay;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -39,5 +40,5 @@ public interface ReportDayRepository extends JpaRepository<ReportDay, Long> {
 
     @Query("SELECT new ReportDay(rd.employee, MAX(rd.date)) FROM ReportDay rd WHERE rd.projects != :project " +
             "GROUP BY rd.employee ORDER BY rd.employee.department, rd.employee.name")
-    List<ReportDay> findLastReportDays(String project);
+    List<ReportDay> findLastReportDays(@Param("project") String project);
 }
