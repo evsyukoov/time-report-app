@@ -39,6 +39,7 @@ public interface ReportDayRepository extends JpaRepository<ReportDay, Long> {
     List<ReportDay> findReportDaysByProjectsContains(String projectName);
 
     @Query("SELECT new ReportDay(rd.employee, MAX(rd.date)) FROM ReportDay rd WHERE rd.projects != :project " +
+            "AND rd.employee.archived != true " +
             "GROUP BY rd.employee ORDER BY rd.employee.department, rd.employee.name")
     List<ReportDay> findLastReportDays(@Param("project") String project);
 }
