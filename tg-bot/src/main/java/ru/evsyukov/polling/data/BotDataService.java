@@ -32,6 +32,8 @@ public interface BotDataService {
 
     void updateClientDateAndState(Client client, State state, LocalDateTime date);
 
+    void saveReport(Date date, Client client, String report);
+
     void updateClientProjects(Client client, State state, List<String> projects);
 
     void clearClientVacation(Client client);

@@ -77,13 +77,28 @@ body {
 
 .report-button {
     color: #fff;
-    margin-top: 10%;
+    margin-top: 5%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.last-report-button {
+    color: #fff;
+    margin-top: 2%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .report-button button {
+    color: #3f3e3e;
+    position: relative;
+    height: 40px;
+    font-size: 2em;
+}
+
+.last-report-button button {
     color: #3f3e3e;
     position: relative;
     height: 40px;
@@ -318,6 +333,13 @@ body {
     }
 
     .report-button button {
+        color: #3f3e3e;
+        position: relative;
+        height: 60px;
+        font-size: 3em;
+    }
+
+    .last-report-button button {
         color: #3f3e3e;
         position: relative;
         height: 60px;

@@ -63,23 +63,26 @@ public class VacationScheduler {
                 if (DateTimeUtils.isBetween(client.getStartVacation(), client.getEndVacation(), current)) {
                     sm = new SendMessage();
                     botDataService.moveClientToVacation(client);
+                    botDataService.saveReport(new Date(), client, Message.VACATION_TO_SAVE);
                     sm.setText(Message.YOU_ARE_IN_VACATION_MODE);
                     sm.setChatId(String.valueOf(client.getUid()));
                     SendHelper.setInlineKeyboard(sm, Collections.emptyList(), Message.CLEAR_VACATION, 1);
                 }
                 //случай для клиентов проставивших отпуск задним числом
                 else if (DateTimeUtils.greaterOrEquals(date, client.getEndVacation())) {
+                    updateReportDaysInfo(client);
                     botDataService.updateClientVacation(client, client.getState(), null, null, false);
                 }
             } else {
                 if (DateTimeUtils.greaterOrEquals(date, client.getEndVacation())) {
                     sm = new SendMessage();
-                    // TODO будем ли забивать все словом ОТПУСК во время отпуска?
                     updateReportDaysInfo(client);
                     botDataService.updateClientVacation(client, State.MENU_CHOICE, null, null, false);
                     sm.setText(Message.YOUR_VACATION_IS_OVER);
                     sm.setChatId(String.valueOf(client.getUid()));
                     SendHelper.setInlineKeyboard(sm, buttonsProperties.getActionsMenu(), null, 3);
+                } else {
+                    botDataService.saveReport(new Date(), client, Message.VACATION_TO_SAVE);
                 }
             }
             if (sm != null) {
@@ -95,8 +98,7 @@ public class VacationScheduler {
     private void updateReportDaysInfo(Client client) {
         Date start = client.getStartVacation();
         while (start.before(client.getEndVacation())) {
-            //client.setProject("-");
-            //TODO проставлять отпуск по выходу
+            botDataService.saveReport(start, client, Message.VACATION_TO_SAVE);
             start = DateTimeUtils.getNextDay(start);
         }
     }

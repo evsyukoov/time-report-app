@@ -30,6 +30,14 @@ public class ReportDay implements Cloneable {
     @Column(name = "uid")
     private long uid;
 
+    public ReportDay(Employee employee, Date date) {
+        this.employee = employee;
+        this.date = date;
+    }
+
+    public ReportDay() {
+    }
+
     private String projects;
 
     public Date getDate() {

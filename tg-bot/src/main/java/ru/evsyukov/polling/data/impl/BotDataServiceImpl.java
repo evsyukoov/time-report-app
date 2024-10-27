@@ -159,6 +159,17 @@ public class BotDataServiceImpl implements BotDataService {
     }
 
     @Override
+    public void saveReport(Date date, Client client, String report) {
+        ReportDay day = new ReportDay();
+        day.setDate(date);
+        day.setProjects(report);
+        day.setUid(client.getUid());
+        //TODO переделывать БД
+        day.setEmployee(employeeRepository.getEmployeeByName(client.getName()));
+        reportDayRepository.save(day);
+    }
+
+    @Override
     public void updateClientProjects(Client client, State state, List<String> projects) {
         client.setState(state);
         client.setDateTime(client.getDateTime() == null ? LocalDateTime.now() : client.getDateTime());

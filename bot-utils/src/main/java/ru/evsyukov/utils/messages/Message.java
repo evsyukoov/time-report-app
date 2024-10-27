@@ -94,7 +94,7 @@ public class Message {
 
     public static final String YOUR_VACATION_IS_OVER = "Ваш отпуск закончился";
 
-    public static final String VACATION_TO_SAVE = "Отпуск";
+    public static final String VACATION_TO_SAVE = "Отпуск/больничный";
 
     public static final String TOO_LONG_INTERVAL = "Выбран период отпуска, превышающий 30 дней";
 

@@ -6,7 +6,7 @@ polling-bot:
   name: ${TIME_REPORT_BOT_NAME}
   buttons:
     days: ["🔳 Текущий день", "🔳 Ввести день"]
-    actions-menu: ["🔳 Отчитаться", "🔳 Установить оповещения", "🔳 Зарегистрировать отпуск"]
+    actions-menu: ["🔳 Отчитаться", "🔳 Установить оповещения", "🔳 Отпуск/больничный"]
 
 projects-cache-scheduler:
   period: 600000

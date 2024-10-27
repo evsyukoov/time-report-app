@@ -33,6 +33,11 @@ public class CellStyleHelper {
                 .dataFormat(df.getFormat("yyyy-MM-dd"))
                 .build());
 
+        map.put(CellStyleType.DATE_NOT_COLOR, CellStyleBuilder.builder()
+                .initCellStyle(workbook)
+                .dataFormat(df.getFormat("yyyy-MM-dd"))
+                .build());
+
         map.put(CellStyleType.DEFAULT_COLUMN, CellStyleBuilder.builder()
                 .initCellStyle(workbook)
                 .allBorders(BorderStyle.THIN)

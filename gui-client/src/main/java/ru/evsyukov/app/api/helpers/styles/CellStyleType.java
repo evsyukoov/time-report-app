@@ -6,6 +6,7 @@ public enum CellStyleType {
     PERCENT_PROJECT,
     DEPARTMENT_ROW,
     DATE,
+    DATE_NOT_COLOR,
     DEFAULT_COLUMN,
     WEEKEND_COLUMN,
     MAIN_PROJECT_ROW,
