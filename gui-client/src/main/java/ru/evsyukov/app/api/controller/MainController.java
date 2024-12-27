@@ -47,7 +47,31 @@ public class MainController {
     public void getByName(@RequestBody FiltersDto requestDto, HttpServletResponse response) {
         try {
             log.info("POST request /report/get-report, body: {}", om.writeValueAsString(requestDto));
-            ByteArrayOutputStream baos = docGenerator.generateXml(requestDto);
+            ByteArrayOutputStream baos = docGenerator.generateReport(requestDto);
+            response.setHeader("Content-disposition", "attachment;filename=report.xls");
+            response.setContentType("application/vnd.ms-excel");
+            if (baos.size() == 0) {
+                response.getOutputStream().write(new byte[0]);
+            } else {
+                response.getOutputStream().write(baos.toByteArray());
+            }
+            response.getOutputStream().flush();
+            response.getOutputStream().close();
+            log.info("Successfully return response to front page");
+        } catch (Exception e) {
+            UUID error = UUID.randomUUID();
+            log.error("{}. Request failed with error: ", error, e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setHeader(CUSTOM_ERROR_UUID_HEADER, error.toString());
+            response.setHeader(ACCESS_CONTROL_HEADER, CUSTOM_ERROR_UUID_HEADER);
+        }
+    }
+
+    @GetMapping(path = "/report/get-last-reports")
+    public void getLastReports(HttpServletResponse response) {
+        try {
+            log.info("GET request /report/get-last-reports");
+            ByteArrayOutputStream baos = docGenerator.generateLastReports();
             response.setHeader("Content-disposition", "attachment;filename=report.xls");
             response.setContentType("application/vnd.ms-excel");
             if (baos.size() == 0) {

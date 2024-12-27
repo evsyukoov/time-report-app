@@ -67,8 +67,17 @@
         <label class="label3" for="empl-report">Процентовка по объекту</label>
     </div>
 
+    <div class="checkbox-all-project">
+        <input type="checkbox" class="custom-checkbox" id="project-all-report" name="empl-report" value="no" content="Сформировать лист с процентовкой по всем объектам">
+        <label class="label4" for="empl-report">Процентовка по всем проектам за период</label>
+    </div>
+
     <div class="report-button">
         <button type="submit" onclick="req()">Получить отчет</button>
+    </div>
+
+    <div class="last-report-button">
+        <button type="submit" onclick="lastReport()">Получить последние даты отчетов</button>
     </div>
 
     <div class="admin-button">

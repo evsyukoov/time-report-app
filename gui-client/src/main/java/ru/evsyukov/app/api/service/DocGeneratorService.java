@@ -8,5 +8,13 @@ import java.io.ByteArrayOutputStream;
 
 public interface DocGeneratorService {
 
-    ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception;
+    /**
+     * Генерация стандартного отчета по сотрудникам (+ процентовки с различными параметрами)
+     */
+    ByteArrayOutputStream generateReport(FiltersDto dto) throws Exception;
+
+    /**
+     * Генерация excel-файла со списком сотрудник-дата его последнего отчета
+     */
+    ByteArrayOutputStream generateLastReports() throws Exception;
 }

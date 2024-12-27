@@ -20,6 +20,8 @@ public class FiltersDto {
 
     private boolean waitForProjectReport;
 
+    private boolean waitForAllProjectsReport;
+
     public String getName() {
         return name;
     }
@@ -82,5 +84,13 @@ public class FiltersDto {
 
     public void setProject(String project) {
         this.project = project;
+    }
+
+    public boolean isWaitForAllProjectsReport() {
+        return waitForAllProjectsReport;
+    }
+
+    public void setWaitForAllProjectsReport(boolean waitForAllProjectsReport) {
+        this.waitForAllProjectsReport = waitForAllProjectsReport;
     }
 }

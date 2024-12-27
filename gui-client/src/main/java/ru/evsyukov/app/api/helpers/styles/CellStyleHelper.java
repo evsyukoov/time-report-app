@@ -18,12 +18,23 @@ public class CellStyleHelper {
                 .fillPattern(FillPatternType.SOLID_FOREGROUND)
                 .allBorders(BorderStyle.THIN)
                 .build());
+        map.put(CellStyleType.PERCENT_PROJECT, CellStyleBuilder.builder()
+                .initCellStyle(workbook)
+                .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
+                .fillPattern(FillPatternType.SOLID_FOREGROUND)
+                .allBorders(BorderStyle.THIN)
+                .build());
 
         DataFormat df = workbook.createDataFormat();
         map.put(CellStyleType.DATE, CellStyleBuilder.builder()
                 .initCellStyle(workbook)
                 .fillPattern(FillPatternType.SOLID_FOREGROUND)
                 .foregroundColor(HSSFColor.HSSFColorPredefined.CORAL.getIndex())
+                .dataFormat(df.getFormat("yyyy-MM-dd"))
+                .build());
+
+        map.put(CellStyleType.DATE_NOT_COLOR, CellStyleBuilder.builder()
+                .initCellStyle(workbook)
                 .dataFormat(df.getFormat("yyyy-MM-dd"))
                 .build());
 

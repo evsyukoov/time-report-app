@@ -33,6 +33,8 @@ import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -75,7 +77,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
     }
 
     @Override
-    public ByteArrayOutputStream generateXml(FiltersDto dto) throws Exception {
+    public ByteArrayOutputStream generateReport(FiltersDto dto) throws Exception {
         List<ReportDay> days;
         numOfRows = 8;
         // если отчет не ограничен по датам, то формирование происходит долго, будем брать за текущий год,
@@ -110,6 +112,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                             reportDay.getEmployee().getDepartment(), dto.getDepartment()))
                     .collect(Collectors.toList());
         }
+        if (dto.isWaitForAllProjectsReport()) {
+            numOfRows = 1;
+            return createEmployeeAllProjectsDoc(excludeVacations(days));
+        }
         //если сотрудник не выбран
         ExtraOptions extraOptions = new ExtraOptions(dto.isWaitForProjectReport(), dto.isWaitForEmployeeReport(), dto.isWaitForDepartmentsReport());
         //разные виды отчетов (ТЗ)
@@ -141,6 +147,41 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         log.info("Successfully get report days from Database {}", days);
         return createDoc(days, originalDays, dto.getName(), extraOptions);
     }
+
+    @Override
+    public ByteArrayOutputStream generateLastReports() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
+        Sheet sheet = workbook.createSheet("Даты последних отчетов");
+        fillHeader(sheet);
+        List<ReportDay> days = daysRepository.findLastReportDays(Message.VACATION_TO_SAVE);
+        Map<String, List<ReportDay>> groupedDays = groupingByDepartment(days);
+        int i = 1;
+        for (var entry : groupedDays.entrySet()) {
+            String department = entry.getKey();
+            List<ReportDay> dates = entry.getValue();
+            Row depRow = sheet.createRow(i++);
+            fillDepartmentRow(depRow, 1, department);
+            for (var date : dates) {
+                Row row = sheet.createRow(i++);
+                Cell nameCell = row.createCell(0, CellType.STRING);
+                nameCell.setCellValue(date.getEmployee().getName());
+
+                Cell dateCell = row.createCell(1, CellType.STRING);
+                dateCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DATE_NOT_COLOR));
+                dateCell.setCellValue(DateTimeUtils.toLocalDate(date.getDate()));
+            }
+
+        }
+        normilizeColumns(sheet);
+        workbook.write(baos);
+        workbook.close();
+        baos.close();
+        return baos;
+    }
+
+
 
     private List<ReportDay> cloneDays(List<ReportDay> days) throws CloneNotSupportedException {
         List<ReportDay> res = new ArrayList<>();
@@ -227,8 +268,10 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 if (entry != null) {
                     for (Map.Entry<String, Double> stringLoEntry : entry.entrySet()) {
                         int rowIndex = findProjectIndex(stringLoEntry.getKey(), projects);
-                        Row row = rows.get(rowIndex);
-                        row.createCell(i, CellType.STRING).setCellValue(stringLoEntry.getValue());
+                        if (rowIndex != -1) {
+                            Row row = rows.get(rowIndex);
+                            row.createCell(i, CellType.STRING).setCellValue(stringLoEntry.getValue());
+                        }
                     }
                 }
                 normalizeColumn(2, projects.size(), i, sheet, lastRow);
@@ -297,6 +340,48 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             });
             normalizeColumn(1, projects.size(), month.getValue(), sheet, lastRow);
         });
+    }
+
+    private void createEmployeeAllProjectsPercentReport(Map<String, List<ReportDay>> departmentDays, Sheet sheet, Month month) throws CloneNotSupportedException {
+        List<String> allMonthsDays = departmentDays.values().stream().flatMap(Collection::stream)
+                .filter(d -> DateTimeUtils.toLocalDate(d.getDate()).getMonth() == month)
+                .map(ReportDay::getProjects).map(proj -> proj.split(Message.DELIMETR))
+                .flatMap(Arrays::stream)
+                .sorted()
+                .distinct()
+                .collect(Collectors.toList());
+        fillHeader(sheet, allMonthsDays);
+        //по отделам
+        int row = 1;
+        for (Map.Entry<String, List<ReportDay>> entry : departmentDays.entrySet()) {
+            String department = entry.getKey();
+            List<ReportDay> days = entry.getValue();
+            Row depRow = sheet.createRow(row++);
+            fillDepartmentRow(depRow, allMonthsDays.size(), department);
+
+            Map<Employee, Set<ReportDay>> reportDaysOfEmployee = days.stream().collect(
+                    Collectors.groupingBy(ReportDay::getEmployee,
+                            Collectors.mapping(reportDay -> reportDay,
+                                    Collectors.toSet())));
+
+            //находим сотрудника который на этом проекте работал
+            for (Map.Entry<Employee, Set<ReportDay>> employeeListEntry : reportDaysOfEmployee.entrySet()) {
+                Employee employee = employeeListEntry.getKey();
+                Row currentRow = sheet.createRow(row);
+                Cell emplCell = currentRow.createCell(0, CellType.STRING);
+                emplCell.setCellValue(employee.getName());
+                emplCell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
+
+                for (String project : allMonthsDays) {
+                    Map<String, Double> map = initPercentMap(employeeListEntry.getValue().stream().sorted(Comparator.comparing(ReportDay::getDate)).collect(Collectors.toList()));
+
+                    Cell cell = currentRow.createCell(1 + allMonthsDays.indexOf(project), CellType.NUMERIC);
+                    cell.setCellValue(map.get(project) == null ? 0 : map.get(project));
+                    cell.setCellStyle(predefinedCellStyles.get(CellStyleType.MAIN_PROJECT_ROW));
+                }
+                row++;
+            }
+        }
     }
 
     //отчет в разрезе сотрудник - процент потраченный сотрудником на этот объект / время потраченное этим сотрудником на все объекты
@@ -391,6 +476,30 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         return rows;
     }
 
+    private ByteArrayOutputStream createEmployeeAllProjectsDoc(List<ReportDay> days) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        predefinedCellStyles = CellStyleHelper.predefineCellStyles(workbook);
+        Map<Integer, List<ReportDay>> datesByYear = new TreeMap<>(groupingByYear(days));
+        for (Map.Entry<Integer, List<ReportDay>> oneYearDaysEntry : datesByYear.entrySet()) {
+            Map<Month, LocalDate> dates = new TreeMap<>(getAllDates(oneYearDaysEntry.getValue()));
+            for (Map.Entry<Month, LocalDate> entry : dates.entrySet()) {
+                Month month = entry.getKey();
+                LocalDate date = entry.getValue();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM yyyy");
+                String listName = formatter.format(date);
+                Sheet sheet = workbook.createSheet(listName);
+                Map<String, List<ReportDay>> reportList = getExcelStructure(oneYearDaysEntry.getValue(), month);
+                createEmployeeAllProjectsPercentReport(reportList, sheet, month);
+                normilizeColumns(sheet);
+            }
+        }
+        workbook.write(baos);
+        workbook.close();
+        baos.close();
+        return baos;
+    }
+
     private ByteArrayOutputStream createDoc(List<ReportDay> days, List<ReportDay> originalDays, String employeeName, ExtraOptions extraOptions) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HSSFWorkbook workbook = new HSSFWorkbook();
@@ -407,27 +516,31 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 Sheet sheet = workbook.createSheet(listName);
                 Map<String, List<ReportDay>> reportList = getExcelStructure(oneYearDaysEntry.getValue(), month);
                 fillList(reportList, sheet);
-                normilizeColumns(sheet, date);
+                normilizeColumns(sheet);
             }
+            //в процентовке не учитываем отпуска/больничные
+            Integer year = oneYearDaysEntry.getKey();
+            List<ReportDay> daysForPercent = excludeVacations(oneYearDaysEntry.getValue());
             if (extraOptions.isWaitForEmployeeReport() && employeeName != null) {
                 log.info("Start generate employee percent report");
-                createEmployeePercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
-                        TextUtil.getShortName(employeeName) + "%, " + oneYearDaysEntry.getKey() + " год"));
+                createEmployeePercentReport(daysForPercent, workbook.createSheet(
+                        TextUtil.getShortName(employeeName) + "%, " + year + " год"));
             }
             if (extraOptions.isWaitForDepartmentsReport()) {
                 log.info("Start generate department percent report");
-                createDepartmentPercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
-                        String.format("По отделам, %%, %s год", oneYearDaysEntry.getKey())));
+                createDepartmentPercentReport(daysForPercent, workbook.createSheet(
+                        String.format("По отделам, %%, %s год", year)));
             }
             if (extraOptions.isWaitForProjectReport()) {
                 log.info("Start generate projects percent report");
-                createProjectsPercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
-                        String.format("По людям, %% проект, %s год", oneYearDaysEntry.getKey())));
-                createCommonProjectsPercentReport(oneYearDaysEntry.getValue(), workbook.createSheet(
-                        String.format("По людям, %% проект(всего), %s год", oneYearDaysEntry.getKey())));
+                createProjectsPercentReport(daysForPercent, workbook.createSheet(
+                        String.format("По людям, %% проект, %s год", year)));
+                createCommonProjectsPercentReport(daysForPercent, workbook.createSheet(
+                        String.format("По людям, %% проект(всего), %s год", year)));
                 //нужно соотношение ко всем объектам сотрудника
-                createEmployeeProjectPercentReport(datesByYearOriginal.get(oneYearDaysEntry.getKey()),
-                        workbook.createSheet(String.format("По людям, %% от всех, %s год", oneYearDaysEntry.getKey())),
+                List<ReportDay> daysForPercentOriginal = excludeVacations(datesByYearOriginal.get(oneYearDaysEntry.getKey()));
+                createEmployeeProjectPercentReport(daysForPercentOriginal,
+                        workbook.createSheet(String.format("По людям, %% от всех, %s год", year)),
                                 extraOptions.remainingProject);
             }
         }
@@ -435,6 +548,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         workbook.close();
         baos.close();
         return baos;
+    }
+
+    private List<ReportDay> excludeVacations(List<ReportDay> days) {
+       return days.stream()
+                .filter(rd -> !rd.getProjects().equals(Message.VACATION_TO_SAVE))
+                .collect(Collectors.toList());
     }
 
     private void fillHeader(Map<String, List<ReportDay>> reportList, Sheet sheet) {
@@ -455,7 +574,32 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
         }
     }
 
-    private void normilizeColumns(Sheet sheet, LocalDate localDate) {
+    private void fillHeader(Sheet sheet) {
+        Row row = sheet.createRow(0);
+        Cell surnameCell = row.createCell(0, CellType.STRING);
+        surnameCell.setCellValue("Фамилия");
+        surnameCell.setCellStyle(predefinedCellStyles.get(CellStyleType.SURNAME));
+
+        Cell dateCell = row.createCell(1, CellType.STRING);
+        dateCell.setCellValue("Дата");
+        dateCell.setCellStyle(predefinedCellStyles.get(CellStyleType.SURNAME));
+    }
+
+    private void fillHeader(Sheet sheet, List<String> uniqueMonthProjects) {
+        Row row = sheet.createRow(0);
+        Cell cell = row.createCell(0, CellType.STRING);
+        cell.setCellValue("Фамилия");
+        cell.setCellStyle(predefinedCellStyles.get(CellStyleType.PERCENT_PROJECT));
+
+        int i = 1;
+        for (String project : uniqueMonthProjects) {
+            Cell projectHeaderCell = row.createCell(i++, CellType.STRING);
+            projectHeaderCell.setCellStyle(predefinedCellStyles.get(CellStyleType.PERCENT_PROJECT));
+            projectHeaderCell.setCellValue(project);
+        }
+    }
+
+    private void normilizeColumns(Sheet sheet) {
         int lastRow = sheet.getLastRowNum();
         int column = -1;
         HashMap<Integer, Integer> columnWidthMap = new HashMap<>();
@@ -507,12 +651,11 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         .getDate());
     }
 
-    private void fillDepartmentRow(Row depRow, LocalDate monthDate, String department) {
+    private void fillDepartmentRow(Row depRow, int rowLen, String department) {
         Cell depCell = depRow.createCell(0);
-        int monthLength = monthDate.lengthOfMonth();
         depCell.setCellValue(String.format("Отдел: %s", department));
         depCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
-        for (int i = 1; i <= monthLength; i++) {
+        for (int i = 1; i <= rowLen; i++) {
             Cell emptyCell = depRow.createCell(i);
             emptyCell.setCellValue("");
             emptyCell.setCellStyle(predefinedCellStyles.get(CellStyleType.DEPARTMENT_ROW));
@@ -528,7 +671,7 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
             List<ReportDay> days = entry.getValue();
             LocalDate monthDate = DateTimeUtils.toLocalDate(days.get(0).getDate());
             Row depRow = sheet.createRow(i++);
-            fillDepartmentRow(depRow, monthDate, department);
+            fillDepartmentRow(depRow, monthDate.lengthOfMonth(), department);
 
             Map<Employee, List<ReportDay>> reportDaysOfEmployee = days.stream().collect(
                     Collectors.groupingBy(ReportDay::getEmployee,
@@ -623,6 +766,12 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                         Collectors.mapping(reportDay -> reportDay, Collectors.toList())));
     }
 
+    private Map<String, List<ReportDay>> groupingByDepartment(List<ReportDay> days) {
+        return days.stream()
+                .collect(Collectors.groupingBy(reportDay -> reportDay.getEmployee().getDepartment(),
+                        Collectors.mapping(reportDay -> reportDay, Collectors.toList())));
+    }
+
     private Set<Month> findAllMonths(List<ReportDay> days) {
         Set<Month> months = new TreeSet<>(Enum::compareTo);
         months.addAll(days.stream().map(day -> DateTimeUtils.toLocalDate(day.getDate()).getMonth()).collect(Collectors.toSet()));
@@ -644,6 +793,13 @@ public class DocGeneratorServiceImpl implements DocGeneratorService {
                 .collect(Collectors
                         .toMap(LocalDate::getMonth, localDate -> localDate,
                                 (k1, k2) -> k1.isBefore(k2) ? k1 : k2));
+    }
+
+    private Set<String> getCurrentMonthProjects(List<ReportDay> days, Month month) {
+        return days.stream().filter(d -> DateTimeUtils.toLocalDate(d.getDate()).getMonth() == month)
+                .map(ReportDay::getProjects).map(proj -> proj.split(Message.DELIMETR))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toSet());
     }
 
     //отдел - отчеты за 1 месяц

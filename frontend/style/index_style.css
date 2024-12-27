@@ -77,13 +77,28 @@ body {
 
 .report-button {
     color: #fff;
-    margin-top: 10%;
+    margin-top: 5%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.last-report-button {
+    color: #fff;
+    margin-top: 2%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .report-button button {
+    color: #3f3e3e;
+    position: relative;
+    height: 40px;
+    font-size: 2em;
+}
+
+.last-report-button button {
     color: #3f3e3e;
     position: relative;
     height: 40px;
@@ -185,6 +200,13 @@ body {
     justify-content: center;
 }
 
+.checkbox-all-project {
+        color: #fff;
+        display: flex;
+        margin-top: 3%;
+        justify-content: center;
+}
+
 .label1 {
     color: #3f3e3e;
     font-size: 1.5em;
@@ -196,6 +218,11 @@ body {
 }
 
 .label3 {
+    color: #3f3e3e;
+    font-size: 1.5em;
+}
+
+.label4 {
     color: #3f3e3e;
     font-size: 1.5em;
 }
@@ -237,6 +264,11 @@ body {
     }
 
     .label3 {
+        color: black;
+        font-size: 2em;
+    }
+
+    .label4 {
         color: black;
         font-size: 2em;
     }
@@ -301,6 +333,13 @@ body {
     }
 
     .report-button button {
+        color: #3f3e3e;
+        position: relative;
+        height: 60px;
+        font-size: 3em;
+    }
+
+    .last-report-button button {
         color: #3f3e3e;
         position: relative;
         height: 60px;
