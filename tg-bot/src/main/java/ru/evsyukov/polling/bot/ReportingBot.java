@@ -93,6 +93,11 @@ public class ReportingBot extends TelegramLongPollingBot {
         return token;
     }
 
+    @Override
+    public void clearWebhook() {
+
+    }
+
     @PostConstruct
     public void startPollingTelegram() throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("Etc/UTC"));
