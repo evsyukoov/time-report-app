@@ -2,6 +2,7 @@ package ru.evsyukov.polling.stateMachine;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.state.State;
 import ru.evsyukov.polling.bot.BotContext;
 import ru.evsyukov.polling.data.BotDataService;
@@ -36,21 +37,26 @@ public class CheckName implements BotState {
             log.warn("Callback expected, client {}", context.getClient());
             return;
         }
-        List<String> expected = botDataService.getFreeEmployeeNamesSorted();
-        String receive = context.getMessage().replace(Message.EMPTY_SYMBOL, "");
-        if (!expected.contains(receive)) {
+        List<Employee> expected = botDataService.getFreeEmployeeNamesSorted();
+        long receive = Long.parseLong(context.getMessage());
+        String employee = expected.stream()
+                .filter(e -> e.getId() == receive)
+                .findFirst()
+                .map(Employee::getName)
+                .orElse(null);
+        if (employee == null) {
             log.warn("No such client, wrong text received by {}", context.getClient());
             return;
         }
         List<String> allRegisteredClientsNames = botDataService.getAllRegisteredClientNames();
 
-        if (allRegisteredClientsNames.contains(receive)) {
-            log.warn("Already has such client at database {}", receive);
+        if (allRegisteredClientsNames.contains(employee)) {
+            log.warn("Already has such client at database {}", employee);
             sm.setText(Message.WRONG_NAME_CHOSEN);
             SendHelper.setInlineKeyboardOneColumn(sm, botDataService.getFreeEmployeeNamesSorted(), null);
         } else {
-            botDataService.updateClientStateAndName(context.getClient(), State.MENU, receive, false);
-            sm.setText(String.format(Message.NAME_CHOSEN, context.getMessage()));
+            botDataService.updateClientStateAndName(context.getClient(), State.MENU, employee, false);
+            sm.setText(String.format(Message.NAME_CHOSEN, employee));
             SendHelper.setInlineKeyboard(sm,
                     List.of(Message.BACK, Message.APPROVE), null, 2);
         }

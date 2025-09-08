@@ -1,6 +1,7 @@
 package ru.evsyukov.polling.data;
 
 import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.entity.ReportDay;
 import ru.evsyukov.app.state.State;
@@ -38,7 +39,7 @@ public interface BotDataService {
 
     void clearClientVacation(Client client);
 
-    List<String> getFreeEmployeeNamesSorted();
+    List<Employee> getFreeEmployeeNamesSorted();
 
     List<Project> getAllProjectsSorted();
 
