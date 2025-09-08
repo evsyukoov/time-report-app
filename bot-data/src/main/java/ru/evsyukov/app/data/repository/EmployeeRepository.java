@@ -21,8 +21,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Cacheable("employees")
     List<Employee> findAllFromCache();
 
-    @Query("SELECT name FROM Employee order by name ASC")
-    List<String> getAllEmployeeNames();
+    @Query("SELECT e FROM Employee e order by name ASC")
+    List<Employee> getAllEmployeesSorted();
 
     @Query("SELECT e FROM Employee e " +
             "WHERE EXISTS " +

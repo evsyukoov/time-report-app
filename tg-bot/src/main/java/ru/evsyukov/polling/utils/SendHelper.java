@@ -1,6 +1,7 @@
 package ru.evsyukov.polling.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.polling.bot.BotContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -53,7 +54,7 @@ public class SendHelper {
     }
 
     private static InlineKeyboardButton newButton(String message, String callbackData) {
-        InlineKeyboardButton button= new InlineKeyboardButton();
+        InlineKeyboardButton button = new InlineKeyboardButton();
         button.setText(message);
         button.setCallbackData(callbackData);
         return button;
@@ -117,15 +118,15 @@ public class SendHelper {
         sm.setText(Message.INLINE_BUTTON_PROMPT);
     }
 
-    public static synchronized void setInlineKeyboardOneColumn(SendMessage sm, List<String> buttons, String message) {
+    public static synchronized void setInlineKeyboardOneColumn(SendMessage sm, List<Employee> buttons, String message) {
         InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         List<InlineKeyboardButton> row = null;
         for (int i = 0; i < buttons.size(); i++) {
             row = new ArrayList<>();
             rows.add(row);
-            String msg = Message.EMPTY_SYMBOL.concat(buttons.get(i));
-            row.add(newButton(msg, buttons.get(i)));
+            String msg = Message.EMPTY_SYMBOL.concat(buttons.get(i).getName());
+            row.add(newButton(msg, String.valueOf(buttons.get(i).getId())));
         }
         if (message != null) {
             row = new ArrayList<>();

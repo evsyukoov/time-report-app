@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.evsyukov.app.data.entity.Client;
+import ru.evsyukov.app.data.entity.Employee;
 import ru.evsyukov.app.data.entity.Notification;
 import ru.evsyukov.app.data.entity.Project;
 import ru.evsyukov.app.data.entity.ReportDay;
@@ -183,14 +184,14 @@ public class BotDataServiceImpl implements BotDataService {
     }
 
     @Override
-    public List<String> getFreeEmployeeNamesSorted() {
+    public List<Employee> getFreeEmployeeNamesSorted() {
         //!!!TODO сделать нормальную связь клиент -> сотрудник
         List<String> registeredClientNames = clientRepository.findAll()
                 .stream()
                 .filter(client -> !StringUtils.isBlank(client.getName()) && client.isRegistered())
                 .map(Client::getName)
                 .collect(Collectors.toList());
-        return employeeRepository.getAllEmployeeNames()
+        return employeeRepository.getAllEmployeesSorted()
                 .stream()
                 .filter(name -> !registeredClientNames.contains(name))
                 .collect(Collectors.toList());
