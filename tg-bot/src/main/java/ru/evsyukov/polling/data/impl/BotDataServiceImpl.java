@@ -193,7 +193,7 @@ public class BotDataServiceImpl implements BotDataService {
                 .collect(Collectors.toList());
         return employeeRepository.getAllEmployeesSorted()
                 .stream()
-                .filter(name -> !registeredClientNames.contains(name))
+                .filter(e -> !registeredClientNames.contains(e.getName()))
                 .collect(Collectors.toList());
     }
 
