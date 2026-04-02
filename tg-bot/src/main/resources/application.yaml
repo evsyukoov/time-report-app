@@ -8,7 +8,7 @@ polling-bot:
     enabled: ${BOT_PROXY_ENABLED:false}
     host: ${BOT_PROXY_HOST:localhost}
     port: ${BOT_PROXY_PORT:0}
-    type: ${BOT_PROXY_TYPE:SOCKS5}  # SOCKS5, SOCKS4, HTTP
+    type: ${BOT_PROXY_TYPE:HTTP}  # SOCKS5, SOCKS4, HTTP
   buttons:
     days: ["🔳 Текущий день", "🔳 Ввести день"]
     actions-menu: ["🔳 Отчитаться", "🔳 Установить оповещения", "🔳 Отпуск/больничный"]
