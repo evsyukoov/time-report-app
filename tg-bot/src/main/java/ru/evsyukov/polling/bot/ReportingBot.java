@@ -2,6 +2,7 @@ package ru.evsyukov.polling.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import ru.evsyukov.app.data.entity.Client;
@@ -37,9 +38,11 @@ public class ReportingBot extends TelegramLongPollingBot {
     private final InlineMessageHandler inlineMessageHandler;
 
     @Autowired
-    public ReportingBot(NewMessageHandler newMessageHandler,
+    public ReportingBot(DefaultBotOptions botOptions,
+                        NewMessageHandler newMessageHandler,
                         ThreadPoolTaskExecutor threadPoolExecutor,
                         InlineMessageHandler inlineMessageHandler) {
+        super(botOptions);
         this.newMessageHandler = newMessageHandler;
         this.threadPoolExecutor = threadPoolExecutor;
         this.inlineMessageHandler = inlineMessageHandler;
